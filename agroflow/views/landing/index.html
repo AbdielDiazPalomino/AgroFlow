@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Plataforma Agrícola</title>
+  
+  <!-- Tipografía moderna (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Global y Local -->
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="landing.css">
+  
+  <!-- Iconos Profesionales (Lucide Icons) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container header__container">
+      <a href="#" class="header__logo">
+        <i data-lucide="leaf" class="header__logo-icon"></i>
+        <span>AGROFLOW</span>
+      </a>
+      
+      <!-- Menú Desktop -->
+      <nav class="header__nav" id="nav-menu">
+        <a href="#" class="header__link">Producto</a>
+        <a href="#" class="header__link">Funciones</a>
+        <a href="#" class="header__link">Precios</a>
+        <a href="#" class="header__link">Empresa</a>
+      </nav>
+
+      <div class="header__actions" id="nav-actions">
+        <!-- Eliminados los botones de Demo, solo queda iniciar sesión -->
+        <a href="../login/index.html" class="btn btn--primary">
+          <i data-lucide="user" style="width:18px;height:18px;"></i> Iniciar sesión
+        </a>
+      </div>
+      
+      <!-- Menú Hamburguesa Mobile -->
+      <button class="header__menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero__overlay"></div>
+      <div class="container hero__container">
+        <div class="hero__badge">
+          <i data-lucide="shield-check" class="hero__badge-icon"></i>
+          Plataforma AgriTech #1 en Latinoamérica
+        </div>
+        
+        <h1 class="hero__title">
+          Gestiona tus cuadrillas.<br>
+          <span class="hero__title--highlight">Optimiza tu campo.</span>
+        </h1>
+        
+        <p class="hero__text">
+          AGROFLOW centraliza la gestión de personal agrícola, sectores y planificación en una sola plataforma inteligente en tiempo real.
+        </p>
+        
+        <div class="hero__cta">
+          <!-- CTA directo para iniciar sesión en vez de solicitar demo -->
+          <a href="../login/index.html" class="btn btn--primary btn--large">
+            Ingresar al sistema <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+          </a>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+      <div class="container stats__grid">
+        <div class="stats__item">
+          <h3 class="stats__number">+2,400</h3>
+          <p class="stats__label">Trabajadores gestionados</p>
+        </div>
+        <div class="stats__item">
+          <h3 class="stats__number">98%</h3>
+          <p class="stats__label">Uptime garantizado</p>
+        </div>
+        <div class="stats__item">
+          <h3 class="stats__number">34%</h3>
+          <p class="stats__label">Reducción de ausentismo</p>
+        </div>
+        <div class="stats__item">
+          <h3 class="stats__number">12+</h3>
+          <p class="stats__label">Fincas activas</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features section">
+      <div class="container">
+        <div class="features__header">
+          <span class="features__badge">
+            <i data-lucide="zap" style="width:14px;height:14px;margin-right:4px;display:inline-block;vertical-align:middle;"></i> Todo lo que necesitas
+          </span>
+          <h2 class="features__title">Una plataforma. Control total.</h2>
+          <p class="features__subtitle">Diseñada para supervisores y administradores de campo exigentes.</p>
+        </div>
+
+        <div class="features__grid">
+          <!-- Card 1 -->
+          <article class="feature-card">
+            <div class="feature-card__icon">
+              <i data-lucide="users"></i>
+            </div>
+            <h3 class="feature-card__title">Gestión de Cuadrillas</h3>
+            <p class="feature-card__text">Asigna, reasigna y supervisa cada cuadrilla en tiempo real desde cualquier dispositivo.</p>
+            <a href="#" class="feature-card__link">Explorar <i data-lucide="chevron-right" style="width:16px;height:16px;"></i></a>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="feature-card">
+            <div class="feature-card__icon">
+              <i data-lucide="map"></i>
+            </div>
+            <h3 class="feature-card__title">Mapa de Sectores</h3>
+            <p class="feature-card__text">Visualiza sectores en vista satelital con capas de datos agronómicos y alertas activas.</p>
+            <a href="#" class="feature-card__link">Explorar <i data-lucide="chevron-right" style="width:16px;height:16px;"></i></a>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="feature-card">
+            <div class="feature-card__icon">
+              <i data-lucide="calendar-clock"></i>
+            </div>
+            <h3 class="feature-card__title">Planificación Inteligente</h3>
+            <p class="feature-card__text">Calendario dinámico con asignación automática basada en disponibilidad y rendimiento.</p>
+            <a href="#" class="feature-card__link">Explorar <i data-lucide="chevron-right" style="width:16px;height:16px;"></i></a>
+          </article>
+
+          <!-- Card 4 -->
+          <article class="feature-card">
+            <div class="feature-card__icon">
+              <i data-lucide="bar-chart-3"></i>
+            </div>
+            <h3 class="feature-card__title">Análisis y Reportes</h3>
+            <p class="feature-card__text">Reportes históricos y algoritmos de recomendación para optimizar la operación.</p>
+            <a href="#" class="feature-card__link">Explorar <i data-lucide="chevron-right" style="width:16px;height:16px;"></i></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA - Diseño mejorado con botones funcionales y activos -->
+    <section class="bottom-cta section">
+      <div class="container">
+        <div class="bottom-cta__card">
+          <div class="bottom-cta__content">
+            <h2 class="bottom-cta__title">¿Listo para transformar tu operación?</h2>
+            <p class="bottom-cta__text">Únete a más de 50 fincas que ya usan AGROFLOW.</p>
+          </div>
+          <div class="bottom-cta__actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+            <a href="../login/index.html" class="btn btn--primary">
+              Empezar ahora
+            </a>
+            <a href="#" class="btn btn--outline" style="background: rgba(30,41,59,0.8); border:none;">
+              Contactar ventas
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__container">
+      <div class="footer__brand">
+        <i data-lucide="leaf" class="footer__logo"></i> AGROFLOW
+      </div>
+      <div class="footer__links">
+        <a href="#">Privacidad</a>
+        <a href="#">Términos</a>
+        <a href="#">Soporte</a>
+      </div>
+      <div class="footer__copy">
+        &copy; 2026 AGROFLOW. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lógica y renderizado de iconos -->
+  <script src="landing.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,39 @@
+/* Variables corporativas de Agroflow */
+:root {
+  /* Colores principales */
+  --color-primary: #1ccb6a; /* Verde brillante */
+  --color-primary-hover: #15a554;
+  --color-secondary: #2b5cff; /* Azul acento */
+  --color-secondary-hover: #1c45cc;
+
+  /* Fondos y superficies */
+  --color-bg-base: #060e15; /* Fondo oscuro principal */
+  --color-surface: #101822; /* Fondo de tarjetas */
+  --color-surface-hover: #16212e;
+  --color-border: #1a2736;
+
+  /* Texto */
+  --color-text-main: #ffffff;
+  --color-text-muted: #8b99ab;
+
+  /* Tipografía */
+  --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Espaciados (Mobile-first) */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem;  /* 8px */
+  --spacing-md: 1rem;    /* 16px */
+  --spacing-lg: 1.5rem;  /* 24px */
+  --spacing-xl: 2rem;    /* 32px */
+  --spacing-xxl: 4rem;   /* 64px */
+
+  /* Bordes */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 9999px;
+  
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}

@@ -1,0 +1,83 @@
+/* agroflow/css/base.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-bg);
+  color: var(--color-text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-title);
+  line-height: 1.2;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+ul {
+  list-style: none;
+}
+
+/* --- Global Buttons BEM --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
+}
+
+.btn--primary {
+  background-color: var(--color-primary);
+  color: #022c22; /* High contrast text on bright green */
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-primary-hover);
+  color: #ffffff; /* White text on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn--outline {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+}
+
+.btn--outline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section {
+  padding: var(--space-xl) 0;
+}
+
