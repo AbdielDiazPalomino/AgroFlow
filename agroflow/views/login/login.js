@@ -31,10 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault(); // Evitamos recarga real de la página
-            
-            // Capturar qué rol seleccionó el usuario
-            const selectedRoleElement = document.querySelector('input[name="role"]:checked');
-            const role = selectedRoleElement ? selectedRoleElement.value : 'desconocido';
             const email = document.getElementById('email').value;
 
             // Simular un request de 1 segundo para efecto de realismo
@@ -47,19 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
             setTimeout(() => {
-                console.log(`Iniciando sesión como: ${role.toUpperCase()} (Email: ${email})`);
+                console.log(`Iniciando sesión con Email: ${email}`);
                 
                 // Aquí iría el enrutamiento real. Por ahora simularemos que nos manda al dashboard.
                 // window.location.href = '../dashboard/index.html';
                 
-                // Retornar botón a su estado normal tras error simulado o éxito
+                // Retornar botón a su estado normal
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.innerHTML = originalText;
                 lucide.createIcons();
                 
-                alert(`¡Login exitoso como ${role}!\nEsto te redirigiría al Dashboard.`);
+                alert(`¡Login exitoso!\nBienvenido al sistema AGROFLOW.`);
             }, 1000);
         });
     }
 });
+

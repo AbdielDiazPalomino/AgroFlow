@@ -14,8 +14,8 @@
   display: none; /* Diseño Mobile-First */
   position: relative;
   width: 50%;
-  /* Imagen agrícola espectacular */
-  background: url('https://images.unsplash.com/photo-1552083974-186346191183?q=80&w=2000') center/cover no-repeat;
+  /* Imagen de un hermoso campo verde (Contexto de agroexportadoras) */
+  background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000') center/cover no-repeat;
   flex-direction: column;
   justify-content: space-between;
   padding: 3rem 4rem;
