@@ -21,8 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. MOCK DATA (Simulación de Base de Datos para el Frontend)
-    // Cuando se conecte a Django, esto vendrá de un fetch('/api/sectores/')
+    // 3. MOCK DATA (Simulación de la API)
+    // Coordenadas base: Fundo Corporación Roots SAC
+    const baseLat = -14.030357850520657;
+    const baseLng = -75.73223536541536;
+
     const mockSectores = [
         {
             id: 1,
@@ -31,7 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
             hectareas: 12.5,
             estado: "optimo", // optimo, riego, alerta
             trabajadores: 24,
-            posicion: { top: '25%', left: '30%' } // Posición visual en el mapa mock
+            bounds: [
+                [baseLat + 0.001, baseLng - 0.003],
+                [baseLat + 0.004, baseLng + 0.001]
+            ]
         },
         {
             id: 2,
@@ -40,7 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
             hectareas: 8.0,
             estado: "riego",
             trabajadores: 0,
-            posicion: { top: '45%', left: '60%' }
+            bounds: [
+                [baseLat + 0.001, baseLng + 0.0015],
+                [baseLat + 0.003, baseLng + 0.004]
+            ]
         },
         {
             id: 3,
@@ -49,73 +58,101 @@ document.addEventListener('DOMContentLoaded', () => {
             hectareas: 22.4,
             estado: "optimo",
             trabajadores: 45,
-            posicion: { top: '70%', left: '40%' }
+            bounds: [
+                [baseLat - 0.003, baseLng - 0.003],
+                [baseLat - 0.0005, baseLng + 0.002]
+            ]
         },
         {
             id: 4,
             nombre: "Invernadero Principal",
             cultivo: "Plantines",
             hectareas: 2.0,
-            estado: "alerta", // ej: humedad baja
+            estado: "alerta",
             trabajadores: 5,
-            posicion: { top: '35%', left: '75%' }
-        },
-        {
-            id: 5,
-            nombre: "Sector Oeste A-2",
-            cultivo: "Arándanos",
-            hectareas: 10.0,
-            estado: "optimo",
-            trabajadores: 12,
-            posicion: { top: '60%', left: '20%' }
+            bounds: [
+                [baseLat - 0.002, baseLng + 0.0025],
+                [baseLat - 0.0005, baseLng + 0.004]
+            ]
         }
     ];
 
-    // 4. Renderizado Dinámico de Datos (Vanilla JS)
-    renderMapPins(mockSectores);
-    renderSectorList(mockSectores);
+    // 4. Inicializar Mapa de Leaflet
+    const map = L.map('sectorMap').setView([baseLat, baseLng], 15);
     
-    // Actualizar un KPI dinámicamente
+    // Usar Esri World Imagery (Satélite) ideal para agricultura
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 18
+    }).addTo(map);
+
+    // 5. Renderizar Polígonos y Lista
+    renderSectorsOnMap(map, mockSectores);
+    renderSectorList(mockSectores);
     document.getElementById('totalSectoresList').textContent = mockSectores.length;
 
+    // 6. Lógica del Modal
+    const modal = document.getElementById('sectorModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    }
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
 });
 
 /**
- * Función para inyectar pines en el mapa visual
+ * Función para abrir el modal con los datos del sector
  */
-function renderMapPins(sectores) {
-    const mapContainer = document.getElementById('mockMap');
-    if (!mapContainer) return;
+function openSectorModal(sector) {
+    document.getElementById('modalTitle').textContent = sector.nombre;
+    document.getElementById('modalCultivo').textContent = sector.cultivo;
+    document.getElementById('modalArea').textContent = `${sector.hectareas} ha`;
+    
+    let estadoTexto = sector.estado.charAt(0).toUpperCase() + sector.estado.slice(1);
+    if(sector.estado === 'optimo') estadoTexto = 'Óptimo';
+    document.getElementById('modalEstado').textContent = estadoTexto;
+    
+    document.getElementById('modalTrabajadores').textContent = sector.trabajadores;
+    
+    document.getElementById('sectorModal').classList.add('active');
+}
 
+/**
+ * Función para inyectar polígonos en Leaflet
+ */
+function renderSectorsOnMap(map, sectores) {
     sectores.forEach(sector => {
-        // Determinar estilo según estado
-        let colorClass = '';
-        let icon = 'leaf';
-        
-        if (sector.estado === 'riego') {
-            colorClass = 'map-pin--riego';
-            icon = 'droplet';
-        } else if (sector.estado === 'alerta') {
-            colorClass = 'map-pin--alerta';
-            icon = 'alert-triangle';
-        }
+        // Colores según el estado
+        let fillColor = '#10B981'; // Óptimo
+        if (sector.estado === 'riego') fillColor = '#3B82F6';
+        if (sector.estado === 'alerta') fillColor = '#F59E0B';
 
-        const pin = document.createElement('div');
-        pin.className = `map-pin ${colorClass}`;
-        pin.style.top = sector.posicion.top;
-        pin.style.left = sector.posicion.left;
-        
-        pin.innerHTML = `
-            <i data-lucide="${icon}"></i>
-            ${sector.nombre}
-        `;
-        
-        // Agregar interactividad de prueba
-        pin.addEventListener('click', () => {
-            alert(`Detalles del ${sector.nombre}:\nCultivo: ${sector.cultivo}\nHectáreas: ${sector.hectareas} ha\nTrabajadores activos: ${sector.trabajadores}`);
+        // Crear polígono (rectángulo por ahora basado en bounds)
+        const rectangle = L.rectangle(sector.bounds, {
+            color: fillColor,
+            weight: 2,
+            fillColor: fillColor,
+            fillOpacity: 0.4
+        }).addTo(map);
+
+        // Añadir Tooltip (hover)
+        rectangle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+
+        // Evento Click para abrir el modal
+        rectangle.on('click', () => {
+            openSectorModal(sector);
+            // Centrar el mapa sutilmente
+            map.flyToBounds(sector.bounds, { padding: [50, 50], duration: 0.5 });
         });
-
-        mapContainer.appendChild(pin);
     });
 }
 
@@ -127,7 +164,6 @@ function renderSectorList(sectores) {
     if (!listContainer) return;
 
     sectores.forEach(sector => {
-        // Badge HTML según estado
         let badgeHtml = '';
         if (sector.estado === 'optimo') {
             badgeHtml = `<span class="status-badge status-badge--ok"><i data-lucide="check-circle"></i> Óptimo</span>`;
@@ -151,7 +187,13 @@ function renderSectorList(sectores) {
                 ${badgeHtml}
             </div>
         `;
+        
+        // Al dar clic en la lista, abrir modal también
+        item.addEventListener('click', () => {
+            openSectorModal(sector);
+        });
 
         listContainer.appendChild(item);
     });
 }
+

@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="../../css/base.css">
   <link rel="stylesheet" href="dashboard.css">
   
+  <!-- Leaflet CSS & JS para Mapas Interactivos -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -182,11 +186,9 @@
                 <button class="icon-btn icon-btn--small"><i data-lucide="layers"></i></button>
               </div>
             </div>
-            <div class="panel__body p-0">
-              <!-- Placeholder interactivo simulando un mapa (Leaflet/Mapbox) -->
-              <div class="mock-map-container" id="mockMap">
-                <!-- Los pines/sectores se inyectarán vía JS -->
-              </div>
+            <div class="panel__body p-0" style="position: relative;">
+              <!-- Contenedor real de Leaflet -->
+              <div id="sectorMap" style="width: 100%; height: 100%; z-index: 1;"></div>
             </div>
           </div>
 
@@ -209,7 +211,45 @@
     </div> <!-- /main-wrapper -->
   </div> <!-- /app-layout -->
 
+  <!-- Modal de Información de Sector -->
+  <div class="modal-overlay" id="sectorModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 id="modalTitle">Nombre del Sector</h3>
+        <button class="icon-btn icon-btn--small" id="closeModal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="modal-info-grid">
+          <div class="modal-info-item">
+            <span class="info-label">Cultivo</span>
+            <span class="info-value" id="modalCultivo">-</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-label">Área</span>
+            <span class="info-value" id="modalArea">-</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-label">Estado</span>
+            <span class="info-value" id="modalEstado">-</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="info-label">Personal Activo</span>
+            <span class="info-value" id="modalTrabajadores">-</span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+          <button class="btn btn--outline btn--full">Ver Historial</button>
+          <button class="btn btn--primary btn--full">Asignar Tarea</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Script para la lógica y datos simulados -->
   <script src="dashboard.js"></script>
 </body>
 </html>
+

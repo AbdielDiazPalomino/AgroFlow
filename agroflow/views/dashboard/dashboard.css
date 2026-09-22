@@ -411,47 +411,88 @@
   gap: 0.5rem;
 }
 
-/* Simulador de Mapa Interactivo */
-.mock-map-container {
-  width: 100%;
-  height: 100%;
-  background: url('https://images.unsplash.com/photo-1590682680695-43b964a3ae17?q=80&w=1000') center/cover;
-  position: relative;
-  overflow: hidden;
-}
-.mock-map-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-color: rgba(11, 17, 33, 0.7); /* Oscurecer para que resalten los pines */
-  z-index: 1;
+/* Personalización Leaflet (Mapbox/OSM) */
+.leaflet-container {
+  font-family: inherit;
+  background-color: var(--color-bg); /* En caso cargue lento */
 }
 
-/* Pines en el mapa */
-.map-pin {
-  position: absolute;
-  z-index: 2;
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-primary);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-md);
-  color: var(--color-text-title);
-  font-size: 0.8125rem;
-  font-weight: 600;
+/* Modal Customizado */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(11, 17, 33, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: var(--shadow-md);
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
 }
-.map-pin:hover {
-  transform: translateY(-2px) scale(1.05);
-  z-index: 10;
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
-.map-pin--riego { border-color: #3B82F6; }
-.map-pin--alerta { border-color: #F59E0B; }
-.map-pin i { width: 14px; height: 14px; }
+
+.modal {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.active .modal {
+  transform: translateY(0);
+}
+
+.modal__header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal__header h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+  margin: 0;
+}
+
+.modal__body {
+  padding: 1.5rem;
+}
+
+.modal-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.modal-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 0.9375rem;
+  color: var(--color-text-title);
+  font-weight: 500;
+}
 
 /* Lista de Sectores */
 .sector-list {
@@ -547,3 +588,4 @@
   .page-actions { width: 100%; }
   .page-actions .btn { flex: 1; justify-content: center; }
 }
+
