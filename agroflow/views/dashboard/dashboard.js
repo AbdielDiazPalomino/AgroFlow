@@ -252,5 +252,9 @@ function renderSectorList(sectores) {
 
         listContainer.appendChild(item);
     });
+
+    // IMPORTANTE: Volver a compilar los iconos de Lucide porque
+    // estos elementos HTML acaban de ser inyectados dinámicamente
+    lucide.createIcons();
 }
 
