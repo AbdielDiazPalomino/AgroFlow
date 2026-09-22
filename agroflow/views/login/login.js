@@ -45,16 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 console.log(`Iniciando sesión con Email: ${email}`);
                 
-                // Aquí iría el enrutamiento real. Por ahora simularemos que nos manda al dashboard.
-                // window.location.href = '../dashboard/index.html';
+                // Redirigir al dashboard
+                window.location.href = '../dashboard/index.html';
                 
-                // Retornar botón a su estado normal
+                // Retornar botón a su estado normal (aunque la página se recargará)
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.innerHTML = originalText;
                 lucide.createIcons();
-                
-                alert(`¡Login exitoso!\nBienvenido al sistema AGROFLOW.`);
             }, 1000);
         });
     }

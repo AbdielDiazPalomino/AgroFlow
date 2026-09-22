@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Mapa de Sectores</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="dashboard.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR LATERAL -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar" aria-label="Cerrar menú">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Principal</span>
+          <a href="#" class="nav-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-link active">
+            <i data-lucide="map"></i>
+            <span>Mapa de Sectores</span>
+          </a>
+          <a href="#" class="nav-link">
+            <i data-lucide="users"></i>
+            <span>Cuadrillas</span>
+          </a>
+        </div>
+        
+        <div class="nav-group">
+          <span class="nav-group__title">Operaciones</span>
+          <a href="#" class="nav-link">
+            <i data-lucide="droplet"></i>
+            <span>Riego y Fertirriego</span>
+          </a>
+          <a href="#" class="nav-link">
+            <i data-lucide="tractor"></i>
+            <span>Maquinaria</span>
+          </a>
+          <a href="#" class="nav-link">
+            <i data-lucide="file-text"></i>
+            <span>Reportes</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar" aria-label="Abrir menú">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="search-bar">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Buscar sector, trabajador o recurso..." class="search-input">
+          </div>
+        </div>
+
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Admin+Root&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Administrador</span>
+              <span class="user-role">Fundo Principal</span>
+            </div>
+            <i data-lucide="chevron-down" class="dropdown-icon"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO (MAPA DE SECTORES) -->
+      <main class="content">
+        
+        <!-- Cabecera de Página -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mapa de Sectores</h1>
+            <p class="page-subtitle">Monitoreo en tiempo real de operaciones agrícolas</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline">
+              <i data-lucide="filter"></i> Filtros
+            </button>
+            <button class="btn btn--primary">
+              <i data-lucide="plus"></i> Nueva Tarea
+            </button>
+          </div>
+        </div>
+
+        <!-- Indicadores Rápidos (KPIs) -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--green">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Sectores Activos</span>
+              <span class="stat-card__value" id="kpi-activos">24</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--blue">
+              <i data-lucide="droplet"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">En Riego</span>
+              <span class="stat-card__value" id="kpi-riego">8</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--orange">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Alertas Fitosanitarias</span>
+              <span class="stat-card__value" id="kpi-alertas">2</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--purple">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Personal en Campo</span>
+              <span class="stat-card__value" id="kpi-personal">142</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenedor del Mapa y Detalles -->
+        <div class="map-layout">
+          
+          <!-- Sección de Simulador de Mapa -->
+          <div class="map-section panel">
+            <div class="panel__header">
+              <h2>Vista Espacial</h2>
+              <div class="map-controls">
+                <button class="icon-btn icon-btn--small"><i data-lucide="zoom-in"></i></button>
+                <button class="icon-btn icon-btn--small"><i data-lucide="zoom-out"></i></button>
+                <button class="icon-btn icon-btn--small"><i data-lucide="layers"></i></button>
+              </div>
+            </div>
+            <div class="panel__body p-0">
+              <!-- Placeholder interactivo simulando un mapa (Leaflet/Mapbox) -->
+              <div class="mock-map-container" id="mockMap">
+                <!-- Los pines/sectores se inyectarán vía JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Lateral de Sectores -->
+          <div class="sectors-section panel">
+            <div class="panel__header">
+              <h2>Estado de Sectores</h2>
+              <span class="badge badge--neutral" id="totalSectoresList">0</span>
+            </div>
+            <div class="panel__body">
+              <div class="sector-list" id="sectorList">
+                <!-- Los items se inyectan vía JS -->
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /map-layout -->
+
+      </main>
+    </div> <!-- /main-wrapper -->
+  </div> <!-- /app-layout -->
+
+  <!-- Script para la lógica y datos simulados -->
+  <script src="dashboard.js"></script>
+</body>
+</html>
