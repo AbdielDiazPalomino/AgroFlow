@@ -1,0 +1,115 @@
+/* agroflow/views/obrero/obrero.css */
+
+.mt-4 { margin-top: 2rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+/* Tarjeta de Asignación */
+.assignment-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-width: 600px;
+}
+.assignment-card__header {
+  background-color: rgba(16, 185, 129, 0.05);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+.assignment-card__icon {
+  width: 64px; height: 64px;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--color-primary);
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+}
+.assignment-card__icon i { width: 32px; height: 32px; }
+
+.assignment-card__body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.info-item {
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.info-label {
+  font-size: 0.8125rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}
+.info-value {
+  font-size: 1.125rem; color: var(--color-text-title); display: flex; align-items: center; font-weight: 500;
+}
+
+/* Panel de Reasignación */
+.transfer-compare {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 800px;
+}
+.transfer-box {
+  flex: 1;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  position: relative;
+}
+.transfer-box h3 { font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-text-title); }
+.transfer-box p { color: var(--color-text-muted); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.transfer-badge {
+  position: absolute;
+  top: -12px; left: 20px;
+  padding: 0.25rem 1rem;
+  border-radius: 99px;
+  font-size: 0.75rem; font-weight: 700; color: white;
+}
+.bg-gray { background-color: #64748B; }
+.bg-green { background-color: var(--color-primary); }
+
+.transfer-box.new {
+  border-color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.02);
+}
+
+.transfer-arrow {
+  width: 48px; height: 48px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.transfer-actions {
+  display: flex; gap: 1rem; max-width: 800px;
+}
+.transfer-actions .btn { flex: 1; padding: 1rem; justify-content: center; font-size: 1rem; }
+
+/* Alertas reutilizadas */
+.alert {
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.alert i { width: 24px; height: 24px; flex-shrink: 0; }
+.alert--warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+@media (max-width: 768px) {
+  .transfer-compare { flex-direction: column; align-items: stretch; }
+  .transfer-arrow { margin: 0 auto; transform: rotate(90deg); }
+  .transfer-actions { flex-direction: column-reverse; }
+}

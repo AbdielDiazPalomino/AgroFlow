@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Portal del Trabajador</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="obrero.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR SIMPLIFICADO PARA OBRERO -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Mi Portal</span>
+          <a href="#" class="nav-link active" id="navInicio">
+            <i data-lucide="home"></i><span>Asignación de Hoy</span>
+          </a>
+          <a href="#" class="nav-link" id="navReasignacion">
+            <i data-lucide="arrow-right-left"></i><span>Reasignación <span class="badge" style="position:static; margin-left:auto;">1</span></span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+          <!-- Sin buscador para el obrero -->
+        </div>
+        <div class="topbar__right">
+          <!-- Notificación campanita -->
+          <button class="icon-btn" id="btnNotificacion" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge">1</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Jose+Mamani&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">José Mamani</span>
+              <span class="user-role">Obrero</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="content">
+        
+        <!-- VISTA: ASIGNACIÓN DE HOY -->
+        <div id="viewInicio">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">¡Hola, José!</h1>
+              <p class="page-subtitle">Esta es tu información de trabajo para el día de hoy.</p>
+            </div>
+          </div>
+
+          <div class="assignment-card mt-4">
+            <div class="assignment-card__header">
+              <div class="assignment-card__icon">
+                <i data-lucide="map-pin"></i>
+              </div>
+              <div>
+                <h2 style="color:var(--color-primary); font-size:1.5rem; margin-bottom:0.25rem;">Cuadrilla Alfa</h2>
+                <p style="color:var(--color-text-title); font-weight:600;">Sector Norte 1 (Sunflower)</p>
+              </div>
+            </div>
+            <div class="assignment-card__body">
+              <div class="info-item">
+                <span class="info-label">Supervisor a cargo:</span>
+                <span class="info-value"><i data-lucide="user-check" style="width:16px; margin-right:5px;"></i> Juan Pérez</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Horario:</span>
+                <span class="info-value"><i data-lucide="clock" style="width:16px; margin-right:5px;"></i> 06:00 AM - 14:00 PM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA: REASIGNACIÓN -->
+        <div id="viewReasignacion" style="display: none;">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Solicitud de Reasignación</h1>
+              <p class="page-subtitle">Tu supervisor ha solicitado cambiarte de cuadrilla.</p>
+            </div>
+          </div>
+
+          <div class="alert alert--warning mb-4">
+            <i data-lucide="alert-circle"></i>
+            <p><strong>Atención:</strong> Para que este cambio tenga validez, debes aceptar y firmar digitalmente usando la seguridad de tu dispositivo (Huella, Rostro o PIN).</p>
+          </div>
+
+          <div class="transfer-compare">
+            <!-- Cuadrilla Actual -->
+            <div class="transfer-box current">
+              <span class="transfer-badge bg-gray">Actual</span>
+              <h3>Cuadrilla Alfa</h3>
+              <p><i data-lucide="map-pin"></i> Sector Norte 1</p>
+              <p><i data-lucide="user"></i> Sup: Juan Pérez</p>
+            </div>
+            
+            <div class="transfer-arrow">
+              <i data-lucide="arrow-right"></i>
+            </div>
+
+            <!-- Cuadrilla Nueva -->
+            <div class="transfer-box new">
+              <span class="transfer-badge bg-green">Destino</span>
+              <h3 style="color: var(--color-primary);">Cuadrilla Beta</h3>
+              <p><i data-lucide="map-pin"></i> Sector Este 1</p>
+              <p><i data-lucide="user"></i> Sup: María López</p>
+            </div>
+          </div>
+
+          <div class="transfer-actions mt-4">
+            <button class="btn btn--outline" id="btnRechazar">Rechazar Cambio</button>
+            <button class="btn btn--primary" id="btnAceptarAuthn"><i data-lucide="fingerprint"></i> Aceptar con Biometría (Firma Digital)</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="obrero.js"></script>
+</body>
+</html>
