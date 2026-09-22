@@ -130,7 +130,7 @@
             </div>
 
             <div class="filters-actions">
-              <button class="btn btn--primary btn--full"><i data-lucide="filter"></i> Generar</button>
+              <button class="btn btn--primary btn--full" id="btnGenerar"><i data-lucide="filter"></i> Generar</button>
             </div>
           </div>
         </div>
@@ -140,8 +140,8 @@
           <div class="table-card__header">
             <h2>Vista Previa del Reporte: Rendimiento de Cosecha</h2>
             <div style="display:flex; gap:0.5rem;">
-                <button class="btn btn--outline"><i data-lucide="file-spreadsheet" style="color:#10B981;"></i> Excel</button>
-                <button class="btn btn--outline"><i data-lucide="file-text" style="color:#ef4444;"></i> PDF</button>
+                <button class="btn btn--outline" id="btnExcel"><i data-lucide="file-spreadsheet" style="color:#10B981;"></i> Excel</button>
+                <button class="btn btn--outline" id="btnPdf"><i data-lucide="file-text" style="color:#ef4444;"></i> PDF</button>
             </div>
           </div>
           <div class="table-responsive">
@@ -193,14 +193,7 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      // Sidebar Mobile
-      const sidebar = document.getElementById('sidebar');
-      document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
-      document.getElementById('closeSidebar')?.addEventListener('click', () => sidebar.classList.remove('active'));
-    });
-  </script>
+  <script src="reportes.js"></script>
 </body>
 </html>
+
