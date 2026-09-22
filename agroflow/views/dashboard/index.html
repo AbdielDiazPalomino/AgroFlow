@@ -181,14 +181,14 @@
             <div class="panel__header">
               <h2>Vista Espacial</h2>
               <div class="map-controls">
-                <button class="icon-btn icon-btn--small"><i data-lucide="zoom-in"></i></button>
-                <button class="icon-btn icon-btn--small"><i data-lucide="zoom-out"></i></button>
-                <button class="icon-btn icon-btn--small"><i data-lucide="layers"></i></button>
+                <button class="icon-btn icon-btn--small" id="btnZoomIn" title="Acercar"><i data-lucide="zoom-in"></i></button>
+                <button class="icon-btn icon-btn--small" id="btnZoomOut" title="Alejar"><i data-lucide="zoom-out"></i></button>
+                <button class="icon-btn icon-btn--small" id="btnToggleLayer" title="Cambiar Capa"><i data-lucide="layers"></i></button>
               </div>
             </div>
-            <div class="panel__body p-0" style="position: relative;">
-              <!-- Contenedor real de Leaflet -->
-              <div id="sectorMap" style="width: 100%; height: 100%; z-index: 1;"></div>
+            <div class="panel__body p-0" style="position: relative; flex: 1; min-height: 400px;">
+              <!-- Contenedor real de Leaflet (Absolute para evitar cortes) -->
+              <div id="sectorMap" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;"></div>
             </div>
           </div>
 

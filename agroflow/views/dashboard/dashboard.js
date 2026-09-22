@@ -102,15 +102,48 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // 4. Inicializar Mapa de Leaflet
-    const map = L.map('sectorMap').setView([baseLat, baseLng], 15);
+    const map = L.map('sectorMap', {
+        zoomControl: false // Ocultar controles por defecto
+    }).setView([baseLat, baseLng], 15);
     
-    // Usar Esri World Imagery (Satélite) ideal para agricultura
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    // Capas base (Tiles)
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri',
         maxZoom: 18
-    }).addTo(map);
+    });
+    
+    const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 18
+    });
 
-    // 5. Renderizar Polígonos y Lista
+    // Por defecto, satélite
+    esriSatellite.addTo(map);
+
+    // Variables de control de capas
+    let isSatellite = true;
+
+    // 5. Controles personalizados del mapa
+    document.getElementById('btnZoomIn')?.addEventListener('click', () => map.zoomIn());
+    document.getElementById('btnZoomOut')?.addEventListener('click', () => map.zoomOut());
+    
+    document.getElementById('btnToggleLayer')?.addEventListener('click', () => {
+        if (isSatellite) {
+            map.removeLayer(esriSatellite);
+            osmStreet.addTo(map);
+        } else {
+            map.removeLayer(osmStreet);
+            esriSatellite.addTo(map);
+        }
+        isSatellite = !isSatellite;
+    });
+
+    // Forzar actualización de tamaño para evitar la zona gris (bug de flexbox)
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 200);
+
+    // 6. Renderizar Polígonos y Lista
     renderSectorsOnMap(map, mockSectores);
     renderSectorList(mockSectores);
     document.getElementById('totalSectoresList').textContent = mockSectores.length;
