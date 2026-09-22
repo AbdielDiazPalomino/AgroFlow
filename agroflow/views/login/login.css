@@ -13,7 +13,7 @@
 .login-visual {
   display: none; /* Diseño Mobile-First */
   position: relative;
-  width: 50%;
+  width: 60%;
   /* Imagen de un hermoso campo verde (Contexto de agroexportadoras) */
   background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000') center/cover no-repeat;
   flex-direction: column;
@@ -71,14 +71,15 @@
 
 /* Contenido textual */
 .login-visual__main {
-  max-width: 500px;
+  max-width: 650px; /* Aumentado para que las píldoras quepan en una línea */
 }
 
 .pills-container {
   display: flex;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Forzar 1 sola línea */
   margin-bottom: 2rem;
+  white-space: nowrap;
 }
 
 .pill {
@@ -152,7 +153,7 @@
 
 @media (min-width: 1024px) {
   .login-form-wrapper {
-    width: 50%;
+    width: 40%;
   }
 }
 
