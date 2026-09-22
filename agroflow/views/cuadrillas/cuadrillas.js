@@ -182,3 +182,4 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('active');
     };
 });
+
