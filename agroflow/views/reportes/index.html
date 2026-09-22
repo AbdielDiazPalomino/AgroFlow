@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Reportes Históricos</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="reportes.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Principal</span>
+          <a href="../dashboard/index.html" class="nav-link">
+            <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link">
+            <i data-lucide="map"></i><span>Mapa de Sectores</span>
+          </a>
+          <a href="../cuadrillas/index.html" class="nav-link">
+            <i data-lucide="users"></i><span>Cuadrillas</span>
+          </a>
+          <a href="#" class="nav-link active">
+            <i data-lucide="file-text"></i><span>Reportes</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+          <div class="search-bar">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Buscar reportes históricos..." class="search-input">
+          </div>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge">4</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Gerente General</span>
+              <span class="user-role">Fundo Principal</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO REPORTES -->
+      <main class="content">
+        
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Reportes y Analítica Histórica</h1>
+            <p class="page-subtitle">Generación de informes de exportación, personal y rendimiento por sectores.</p>
+          </div>
+        </div>
+
+        <!-- Filtros de Reportes -->
+        <div class="filters-panel">
+          <div class="filters-grid">
+            
+            <div class="form-group">
+              <label class="form-label">Tipo de Reporte</label>
+              <select class="form-input">
+                <option>Rendimiento de Cosecha</option>
+                <option>Costos de Personal (Cuadrillas)</option>
+                <option>Uso de Agua y Fertilizantes</option>
+                <option>Alertas Fitosanitarias</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Sector</label>
+              <select class="form-input">
+                <option>Todos los Sectores</option>
+                <option>Sector Norte 1 (Sunflower)</option>
+                <option>Sector Este 1 (Gypsophila)</option>
+                <option>Sector Oeste 1 (Waxflower)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Desde</label>
+              <input type="date" class="form-input" value="2026-01-01">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hasta</label>
+              <input type="date" class="form-input" value="2026-09-22">
+            </div>
+
+            <div class="filters-actions">
+              <button class="btn btn--primary btn--full"><i data-lucide="filter"></i> Generar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista Previa de Tabla de Reportes -->
+        <div class="table-card mt-4">
+          <div class="table-card__header">
+            <h2>Vista Previa del Reporte: Rendimiento de Cosecha</h2>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn--outline"><i data-lucide="file-spreadsheet" style="color:#10B981;"></i> Excel</button>
+                <button class="btn btn--outline"><i data-lucide="file-text" style="color:#ef4444;"></i> PDF</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Sector</th>
+                  <th>Flor</th>
+                  <th>Volumen (Cajas)</th>
+                  <th>Calidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-09-21</td>
+                  <td>Sector Norte 1</td>
+                  <td>Sunflower</td>
+                  <td>450</td>
+                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
+                </tr>
+                <tr>
+                  <td>2026-09-20</td>
+                  <td>Sector Este 1</td>
+                  <td>Gypsophila</td>
+                  <td>320</td>
+                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
+                </tr>
+                <tr>
+                  <td>2026-09-18</td>
+                  <td>Sector Central</td>
+                  <td>Proteas</td>
+                  <td>110</td>
+                  <td><span class="status-badge status-badge--alerta">Mercado Local (B2)</span></td>
+                </tr>
+                <tr>
+                  <td>2026-09-15</td>
+                  <td>Sector Oeste 1</td>
+                  <td>Waxflower</td>
+                  <td>290</td>
+                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      // Sidebar Mobile
+      const sidebar = document.getElementById('sidebar');
+      document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
+      document.getElementById('closeSidebar')?.addEventListener('click', () => sidebar.classList.remove('active'));
+    });
+  </script>
+</body>
+</html>

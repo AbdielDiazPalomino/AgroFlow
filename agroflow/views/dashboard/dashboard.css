@@ -1,5 +1,66 @@
 /* agroflow/views/dashboard/dashboard.css */
 
+/* agroflow/views/dashboard/dashboard.css */
+
+/* Banner de Inteligencia Artificial */
+.ai-banner {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.ai-banner__icon {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ai-banner__icon i { width: 24px; height: 24px; }
+
+.ai-banner__content {
+  flex: 1;
+}
+.ai-banner__content h3 {
+  color: #8B5CF6;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ai-banner__content p {
+  color: var(--color-text-title);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ai-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .ai-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ai-banner__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 /* Reutilizando clases del Layout común (stats-grid, etc.) */
 .stats-grid {
   display: grid;
@@ -149,3 +210,4 @@
 @media (max-width: 768px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
