@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Dashboard Principal</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="dashboard.css">
+  
+  <!-- Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Principal</span>
+          <a href="#" class="nav-link active">
+            <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link">
+            <i data-lucide="map"></i><span>Mapa de Sectores</span>
+          </a>
+          <a href="../cuadrillas/index.html" class="nav-link">
+            <i data-lucide="users"></i><span>Cuadrillas</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+          <div class="search-bar">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Buscar reportes o sectores..." class="search-input">
+          </div>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge">4</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Gerente General</span>
+              <span class="user-role">Fundo Principal</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO DASHBOARD -->
+      <main class="content">
+        
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Resumen de Operaciones</h1>
+            <p class="page-subtitle">Métricas globales y estado actual de exportaciones Roots SAC</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline"><i data-lucide="download"></i> Exportar Reporte</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--green">
+              <i data-lucide="package"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Cajas Exportadas (Mes)</span>
+              <span class="stat-card__value">14,250</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--blue">
+              <i data-lucide="sprout"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Hectáreas Activas</span>
+              <span class="stat-card__value">85.4 ha</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--purple">
+              <i data-lucide="users"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Personal en Campo</span>
+              <span class="stat-card__value">142</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--orange">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="stat-card__data">
+              <span class="stat-card__label">Alertas de Riego/Plagas</span>
+              <span class="stat-card__value">3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+          
+          <!-- Gráfico de Línea -->
+          <div class="chart-card">
+            <div class="chart-card__header">
+              <h2>Proyección de Cosecha (Miles de Cajas)</h2>
+            </div>
+            <div class="chart-card__body">
+              <canvas id="cosechaChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfico de Dona -->
+          <div class="chart-card">
+            <div class="chart-card__header">
+              <h2>Distribución de Cultivos</h2>
+            </div>
+            <div class="chart-card__body chart-card__body--centered">
+              <canvas id="cultivosChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Reciente -->
+        <div class="table-card">
+          <div class="table-card__header">
+            <h2>Operaciones Recientes</h2>
+            <button class="btn btn--outline" style="padding: 0.5rem; font-size: 0.8125rem;">Ver Todas</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Actividad</th>
+                  <th>Sector</th>
+                  <th>Responsable</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Corte y Empaque de Gypsophila</td>
+                  <td>Sector Este 1</td>
+                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=ML" class="avatar-small"> María López</div></td>
+                  <td><span class="status-badge status-badge--ok">Completado</span></td>
+                  <td>Hoy, 09:30 AM</td>
+                </tr>
+                <tr>
+                  <td>Aplicación de Fertilizante</td>
+                  <td>Sector Norte 1 (Sunflower)</td>
+                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=JP" class="avatar-small"> Juan Pérez</div></td>
+                  <td><span class="status-badge status-badge--riego">En Progreso</span></td>
+                  <td>Hoy, 10:15 AM</td>
+                </tr>
+                <tr>
+                  <td>Inspección Fitosanitaria</td>
+                  <td>Sector Oeste 1 (Waxflower)</td>
+                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=CR" class="avatar-small"> Carlos Ruiz</div></td>
+                  <td><span class="status-badge status-badge--alerta">Requiere Acción</span></td>
+                  <td>Ayer, 16:45 PM</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

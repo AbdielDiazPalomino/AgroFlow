@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 console.log(`Iniciando sesión con Email: ${email}`);
                 
-                // Redirigir al mapa de sectores (por ahora será la vista principal)
-                window.location.href = '../mapa/index.html';
+                // Redirigir al dashboard principal
+                window.location.href = '../dashboard/index.html';
                 
                 // Retornar botón a su estado normal (aunque la página se recargará)
                 submitBtn.disabled = false;
