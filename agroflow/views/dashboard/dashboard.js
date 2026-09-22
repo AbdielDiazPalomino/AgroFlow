@@ -29,51 +29,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const mockSectores = [
         {
             id: 1,
-            nombre: "Sector Norte A-1",
-            cultivo: "Arándanos",
-            hectareas: 12.5,
-            estado: "optimo", // optimo, riego, alerta
-            trabajadores: 24,
-            bounds: [
-                [baseLat + 0.001, baseLng - 0.003],
-                [baseLat + 0.004, baseLng + 0.001]
-            ]
+            nombre: "Sector Norte 1",
+            cultivo: "SUNFLOWER",
+            hectareas: 25.5,
+            estado: "optimo",
+            trabajadores: 45,
+            bounds: [[baseLat + 0.001, baseLng - 0.003], [baseLat + 0.005, baseLng + 0.002]]
         },
         {
             id: 2,
-            nombre: "Sector Este B-3",
-            cultivo: "Arándanos",
-            hectareas: 8.0,
+            nombre: "Sector Este 1",
+            cultivo: "GYPSOPHILA TANGO",
+            hectareas: 18.2,
             estado: "riego",
-            trabajadores: 0,
-            bounds: [
-                [baseLat + 0.001, baseLng + 0.0015],
-                [baseLat + 0.003, baseLng + 0.004]
-            ]
+            trabajadores: 12,
+            bounds: [[baseLat - 0.001, baseLng + 0.0025], [baseLat + 0.005, baseLng + 0.0055]]
         },
         {
             id: 3,
-            nombre: "Sector Sur C-2",
-            cultivo: "Paltas",
-            hectareas: 22.4,
+            nombre: "Sector Sur 1",
+            cultivo: "LISIANTHUS MARIACHI",
+            hectareas: 12.0,
             estado: "optimo",
-            trabajadores: 45,
-            bounds: [
-                [baseLat - 0.003, baseLng - 0.003],
-                [baseLat - 0.0005, baseLng + 0.002]
-            ]
+            trabajadores: 30,
+            bounds: [[baseLat - 0.005, baseLng - 0.003], [baseLat - 0.0015, baseLng + 0.002]]
         },
         {
             id: 4,
-            nombre: "Invernadero Principal",
-            cultivo: "Plantines",
-            hectareas: 2.0,
-            estado: "alerta",
+            nombre: "Sector Oeste 1",
+            cultivo: "WAXFLOWER",
+            hectareas: 10.5,
+            estado: "alerta", // ej: plaga o riego fallido
+            trabajadores: 8,
+            bounds: [[baseLat - 0.004, baseLng - 0.006], [baseLat + 0.0008, baseLng - 0.0035]]
+        },
+        {
+            id: 5,
+            nombre: "Sector Central",
+            cultivo: "PROTEAS / PINK ICE",
+            hectareas: 5.4,
+            estado: "optimo",
+            trabajadores: 15,
+            bounds: [[baseLat - 0.001, baseLng - 0.003], [baseLat + 0.0008, baseLng + 0.002]]
+        },
+        {
+            id: 6,
+            nombre: "Sector Noroeste",
+            cultivo: "LIMONIUM HYBRIDS",
+            hectareas: 8.8,
+            estado: "optimo",
+            trabajadores: 20,
+            bounds: [[baseLat + 0.001, baseLng - 0.006], [baseLat + 0.005, baseLng - 0.0035]]
+        },
+        {
+            id: 7,
+            nombre: "Invernadero A",
+            cultivo: "ASTER MATSUMOTO",
+            hectareas: 2.1,
+            estado: "riego",
             trabajadores: 5,
-            bounds: [
-                [baseLat - 0.002, baseLng + 0.0025],
-                [baseLat - 0.0005, baseLng + 0.004]
-            ]
+            bounds: [[baseLat - 0.001, baseLng + 0.006], [baseLat + 0.001, baseLng + 0.007]]
+        },
+        {
+            id: 8,
+            nombre: "Invernadero B",
+            cultivo: "BRASSICA (FLOWERING KALE)",
+            hectareas: 3.0,
+            estado: "optimo",
+            trabajadores: 6,
+            bounds: [[baseLat + 0.0015, baseLng + 0.006], [baseLat + 0.004, baseLng + 0.007]]
         }
     ];
 
