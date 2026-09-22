@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Gestión de Cuadrillas</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="cuadrillas.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Principal</span>
+          <a href="#" class="nav-link">
+            <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link">
+            <i data-lucide="map"></i><span>Mapa de Sectores</span>
+          </a>
+          <a href="#" class="nav-link active">
+            <i data-lucide="users"></i><span>Cuadrillas</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+          <div class="search-bar">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Buscar obrero por DNI o nombre..." class="search-input">
+          </div>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge">1</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Gerente General</span>
+              <span class="user-role">Fundo Principal</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO CUADRILLAS -->
+      <main class="content">
+        
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Personal y Cuadrillas</h1>
+            <p class="page-subtitle">Gestión de recursos humanos, asignaciones y traslados</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline"><i data-lucide="user-plus"></i> Nuevo Obrero</button>
+            <button class="btn btn--primary"><i data-lucide="users"></i> Crear Cuadrilla</button>
+          </div>
+        </div>
+
+        <div class="cuadrillas-layout">
+          
+          <!-- Lista de Cuadrillas -->
+          <div class="panel list-panel">
+            <div class="panel__header">
+              <h2>Cuadrillas Activas</h2>
+            </div>
+            <div class="panel__body p-0">
+              <ul class="crew-list" id="crewList">
+                <!-- Se llenan por JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Detalles de la Cuadrilla y Trabajadores -->
+          <div class="panel details-panel">
+            <div class="panel__header">
+              <h2 id="selectedCrewTitle">Selecciona una cuadrilla</h2>
+              <span class="badge badge--neutral" id="selectedCrewSector">--</span>
+            </div>
+            
+            <div class="panel__body bg-subtle">
+              <!-- Grid de Trabajadores -->
+              <div class="workers-grid" id="workersGrid">
+                <!-- Se llenan por JS. Diseño tipo tarjetas de obrero -->
+                <div class="empty-state">
+                  <i data-lucide="users"></i>
+                  <p>Selecciona una cuadrilla en la lista izquierda para ver a su personal.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /cuadrillas-layout -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal de Traslado (Iniciado por Gerente/Supervisor) -->
+  <div class="modal-overlay" id="transferModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3>Trasladar Personal</h3>
+        <button class="icon-btn icon-btn--small" id="closeTransferModal"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal__body">
+        <p class="text-muted mb-4">Estás iniciando un proceso de traslado para <strong id="transferWorkerName">Obrero</strong>.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Cuadrilla de Destino</label>
+          <select class="form-input" id="transferTargetCrew">
+            <!-- Options via JS -->
+          </select>
+        </div>
+
+        <div class="alert alert--warning mt-4">
+          <i data-lucide="info"></i>
+          <p><strong>Cumplimiento Legal:</strong> Este traslado quedará en estado <em>Pendiente</em>. El trabajador recibirá una notificación en su app móvil y deberá aceptar el traslado mediante validación biométrica (WebAuthn) para que se haga efectivo.</p>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+          <button class="btn btn--outline btn--full" id="cancelTransfer">Cancelar</button>
+          <button class="btn btn--primary btn--full" id="confirmTransfer">Solicitar Traslado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="cuadrillas.js"></script>
+</body>
+</html>
