@@ -127,11 +127,12 @@
                 <!-- Cuadrilla Nueva (Destino) -->
                 <div class="transfer-box box-target">
                   <div class="box-header">
-                    <h3 style="display:flex; align-items:center; gap:0.5rem;">
-                      <select id="targetCrewSelect" class="form-input form-input--small" style="font-weight:bold;">
+                    <div class="custom-select-wrapper">
+                      <select id="targetCrewSelect" class="custom-select">
                         <!-- JS options -->
                       </select>
-                    </h3>
+                      <i data-lucide="chevron-down" class="custom-select-icon"></i>
+                    </div>
                     <span class="badge badge--neutral" id="targetCrewCount">0 personas</span>
                   </div>
                   <div class="box-body" id="targetWorkerList">
@@ -145,7 +146,7 @@
               <div class="transfer-footer" id="transferFooter" style="opacity: 0.5; pointer-events: none;">
                 <div class="form-group mb-4">
                   <label class="form-label" style="color: var(--color-text-muted);">Motivo del Cambio</label>
-                  <input type="text" class="form-input" id="transferReason" placeholder="Escribir motivo de la reasignación...">
+                  <textarea class="form-input form-textarea" id="transferReason" placeholder="Describe brevemente la razón operativa o administrativa de este movimiento de personal..." rows="2"></textarea>
                 </div>
                 <div class="actions-group">
                   <button class="btn btn--outline" id="btnCancelar">Cancelar</button>
