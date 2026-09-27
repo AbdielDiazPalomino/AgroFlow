@@ -34,6 +34,13 @@
 }
 .search-input { width: 100%; }
 
+.workers-sidebar .panel__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .worker-list {
   list-style: none;
   padding: 0; margin: 0;
