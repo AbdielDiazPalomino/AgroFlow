@@ -254,6 +254,11 @@
   border-color: #3B82F6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
+.custom-select option {
+  background-color: #0F172A; /* Fondo oscuro sólido, no transparente */
+  color: #F8FAFC; /* Texto blanco para mejor lectura */
+  padding: 10px;
+}
 .custom-select-icon {
   position: absolute;
   right: 12px;
