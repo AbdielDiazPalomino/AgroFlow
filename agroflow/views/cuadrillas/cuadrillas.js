@@ -3,183 +3,234 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
-    // Sidebar Mobile
-    const sidebar = document.getElementById('sidebar');
-    document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
-    document.getElementById('closeSidebar')?.addEventListener('click', () => sidebar.classList.remove('active'));
-
     // --- MOCK DATA ---
-    // Cuadrillas asignadas a sectores
     const cuadrillas = [
-        { id: 'C1', nombre: 'Cuadrilla Alfa', sector: 'Sector Norte 1', supervisor: 'Juan Pérez' },
-        { id: 'C2', nombre: 'Cuadrilla Beta', sector: 'Sector Este 1', supervisor: 'María López' },
-        { id: 'C3', nombre: 'Cuadrilla Gamma', sector: 'Sector Central', supervisor: 'Carlos Ruiz' }
+        { id: 'C1', nombre: 'Cuadrilla Cosecha Naranja', sector: 'Sector Norte 1' },
+        { id: 'C2', nombre: 'Cuadrilla Podado', sector: 'Sector Este 1' },
+        { id: 'C3', nombre: 'Cuadrilla Riego Norte', sector: 'Sector Central' },
+        { id: 'C4', nombre: 'Cuadrilla Cosecha Norte', sector: 'Sector Oeste 1' }
     ];
 
-    // Personal (Obreros)
-    // estadoTraslado: 'ninguno' | 'pendiente'
-    let trabajadores = [
-        { id: 'T1', nombre: 'José Mamani', dni: '71234567', cuadrillaId: 'C1', estadoTraslado: 'ninguno' },
-        { id: 'T2', nombre: 'Ana Condori', dni: '76543210', cuadrillaId: 'C1', estadoTraslado: 'ninguno' },
-        { id: 'T3', nombre: 'Luis Quispe', dni: '78901234', cuadrillaId: 'C1', estadoTraslado: 'ninguno' },
-        { id: 'T4', nombre: 'Rosa Flores', dni: '70112233', cuadrillaId: 'C2', estadoTraslado: 'ninguno' },
-        { id: 'T5', nombre: 'Miguel Vargas', dni: '75445566', cuadrillaId: 'C2', estadoTraslado: 'ninguno' }
+    const trabajadores = [
+        { id: '10503419', nombre: 'Juan García', img: 'https://i.pravatar.cc/150?u=1', cuadrillaId: 'C1' },
+        { id: '10501203', nombre: 'Rorfin Secharz', img: 'https://i.pravatar.cc/150?u=2', cuadrillaId: 'C1' },
+        { id: '10507014', nombre: 'Jusen Merraez', img: 'https://i.pravatar.cc/150?u=3', cuadrillaId: 'C2' },
+        { id: '10502036', nombre: 'Maria Vinton', img: 'https://i.pravatar.cc/150?u=4', cuadrillaId: 'C1' },
+        { id: '10507523', nombre: 'Reshros Rianaji', img: 'https://i.pravatar.cc/150?u=5', cuadrillaId: 'C1' },
+        { id: '10501703', nombre: 'Jennica Morter', img: 'https://i.pravatar.cc/150?u=6', cuadrillaId: 'C3' },
+        { id: '10504422', nombre: 'Carlos Domínguez', img: 'https://i.pravatar.cc/150?u=7', cuadrillaId: 'C4' },
+        { id: '10508811', nombre: 'Ana Ruiz', img: 'https://i.pravatar.cc/150?u=8', cuadrillaId: 'C2' }
     ];
 
-    let currentCuadrillaId = null;
-    let workerToTransfer = null;
-
-    // --- INICIALIZACIÓN ---
-    renderCrewList();
-    populateTransferSelect();
-
-    // Lógica del Modal de Traslado
-    const modal = document.getElementById('transferModal');
-    document.getElementById('closeTransferModal')?.addEventListener('click', () => modal.classList.remove('active'));
-    document.getElementById('cancelTransfer')?.addEventListener('click', () => modal.classList.remove('active'));
+    // Variables de estado
+    let selectedWorker = null;
+    let selectedSourceCrewId = null;
     
-    // Confirmar Traslado
-    document.getElementById('confirmTransfer')?.addEventListener('click', () => {
-        if(!workerToTransfer) return;
-        
-        const targetCrewId = document.getElementById('transferTargetCrew').value;
-        if(targetCrewId === workerToTransfer.cuadrillaId) {
-            alert("El trabajador ya pertenece a esta cuadrilla.");
-            return;
-        }
+    // Nodos DOM
+    const globalList = document.getElementById('globalWorkerList');
+    const searchInput = document.getElementById('searchInput');
+    const sourceWorkerList = document.getElementById('sourceWorkerList');
+    const targetWorkerList = document.getElementById('targetWorkerList');
+    const sourceCrewName = document.getElementById('sourceCrewName');
+    const sourceCrewCount = document.getElementById('sourceCrewCount');
+    const targetCrewSelect = document.getElementById('targetCrewSelect');
+    const targetCrewCount = document.getElementById('targetCrewCount');
+    const transferFooter = document.getElementById('transferFooter');
+    const legalAlert = document.getElementById('legalAlert');
+    const btnReasignar = document.getElementById('btnReasignar');
+    const btnCancelar = document.getElementById('btnCancelar');
 
-        // SIMULACIÓN DE LÓGICA DE NEGOCIO:
-        // No cambiamos su cuadrillaId directamente. Lo marcamos como "pendiente".
-        // El Obrero en su app móvil tendrá que aceptar con biometría.
-        const workerIndex = trabajadores.findIndex(t => t.id === workerToTransfer.id);
-        if(workerIndex !== -1) {
-            trabajadores[workerIndex].estadoTraslado = 'pendiente';
-            // Refrescar UI
-            renderWorkersGrid(currentCuadrillaId);
-        }
+    // Inicialización
+    renderGlobalWorkerList(trabajadores);
+    populateTargetSelect();
 
-        modal.classList.remove('active');
-        // Usar setTimeout para simular que sale de la pila de eventos
-        setTimeout(() => {
-            alert(`Solicitud de traslado enviada a ${workerToTransfer.nombre}.\nEsperando validación biométrica del trabajador (WebAuthn / Huella) en su dispositivo.`);
-        }, 300);
+    // Buscador interactivo
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = trabajadores.filter(t => t.nombre.toLowerCase().includes(query) || t.id.includes(query));
+        renderGlobalWorkerList(filtered);
     });
 
     /**
-     * Renderiza la lista izquierda de cuadrillas
+     * Dibuja la lista izquierda de todos los obreros
      */
-    function renderCrewList() {
-        const list = document.getElementById('crewList');
-        list.innerHTML = '';
-
-        cuadrillas.forEach(crew => {
-            // Contar obreros
-            const count = trabajadores.filter(t => t.cuadrillaId === crew.id).length;
+    function renderGlobalWorkerList(data) {
+        globalList.innerHTML = '';
+        data.forEach(worker => {
+            const crew = cuadrillas.find(c => c.id === worker.cuadrillaId);
+            const crewName = crew ? crew.nombre : 'Sin Cuadrilla';
 
             const li = document.createElement('li');
-            li.className = 'crew-item';
+            li.className = `worker-item ${selectedWorker?.id === worker.id ? 'active' : ''}`;
             li.innerHTML = `
-                <div class="crew-item__header">
-                    <span class="crew-item__title">${crew.nombre}</span>
-                    <span class="badge badge--neutral">${count} <i data-lucide="users" style="width:10px; height:10px; margin-left:2px;"></i></span>
-                </div>
-                <div class="crew-item__meta">
-                    <i data-lucide="map-pin"></i> ${crew.sector}
-                </div>
-                <div class="crew-item__meta" style="margin-top: 4px;">
-                    <i data-lucide="user-check"></i> Sup: ${crew.supervisor}
+                <img src="${worker.img}" alt="${worker.nombre}">
+                <div class="worker-item-info">
+                    <span class="worker-item-name">${worker.nombre}</span>
+                    <span class="worker-item-crew">${crewName}</span>
                 </div>
             `;
 
             li.addEventListener('click', () => {
-                // Quitar active de todos
-                document.querySelectorAll('.crew-item').forEach(el => el.classList.remove('active'));
+                selectWorkerForTransfer(worker, crew);
+                // Highlight update
+                document.querySelectorAll('.worker-item').forEach(el => el.classList.remove('active'));
                 li.classList.add('active');
-                
-                currentCuadrillaId = crew.id;
-                document.getElementById('selectedCrewTitle').textContent = crew.nombre;
-                document.getElementById('selectedCrewSector').innerHTML = `<i data-lucide="map-pin"></i> ${crew.sector}`;
-                
-                renderWorkersGrid(crew.id);
-                lucide.createIcons();
             });
 
-            list.appendChild(li);
+            globalList.appendChild(li);
+        });
+    }
+
+    /**
+     * Llena el select de Cuadrilla Destino
+     */
+    function populateTargetSelect() {
+        targetCrewSelect.innerHTML = '';
+        cuadrillas.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nombre;
+            targetCrewSelect.appendChild(opt);
+        });
+
+        targetCrewSelect.addEventListener('change', () => {
+            renderTargetCrew(targetCrewSelect.value);
+        });
+    }
+
+    /**
+     * Lógica al seleccionar un trabajador de la lista izquierda
+     */
+    function selectWorkerForTransfer(worker, sourceCrew) {
+        selectedWorker = worker;
+        selectedSourceCrewId = sourceCrew.id;
+
+        // Actualizar UI del panel origen
+        sourceCrewName.textContent = sourceCrew.nombre;
+        
+        // Habilitar controles y alerta
+        transferFooter.style.opacity = '1';
+        transferFooter.style.pointerEvents = 'auto';
+        legalAlert.style.display = 'flex';
+
+        // Auto-seleccionar otra cuadrilla por defecto en el destino
+        const otherCrew = cuadrillas.find(c => c.id !== sourceCrew.id);
+        if(otherCrew) {
+            targetCrewSelect.value = otherCrew.id;
+            renderTargetCrew(otherCrew.id);
+        }
+
+        renderSourceCrew(sourceCrew.id, worker.id);
+    }
+
+    /**
+     * Dibuja la cuadrilla origen, resaltando al trabajador a transferir
+     */
+    function renderSourceCrew(crewId, highlightWorkerId) {
+        const workers = trabajadores.filter(t => t.cuadrillaId === crewId);
+        sourceCrewCount.textContent = `${workers.length} personas`;
+        
+        sourceWorkerList.innerHTML = '';
+        workers.forEach(w => {
+            const isHighlight = w.id === highlightWorkerId;
+            const div = document.createElement('div');
+            div.className = `worker-card-mini ${isHighlight ? 'highlight' : ''}`;
+            div.innerHTML = `
+                <div class="wcm-left">
+                    <img src="${w.img}">
+                    <div class="wcm-info">
+                        <span class="wcm-name">${w.nombre}</span>
+                        <span class="wcm-id">ID ${w.id}</span>
+                    </div>
+                </div>
+                <div class="wcm-right">
+                    ${isHighlight ? '<i data-lucide="grip-vertical"></i>' : ''}
+                </div>
+            `;
+            // Asegurarse de que el seleccionado esté arriba (simulando que lo agarramos)
+            if(isHighlight) {
+                sourceWorkerList.prepend(div);
+            } else {
+                sourceWorkerList.appendChild(div);
+            }
         });
         lucide.createIcons();
     }
 
     /**
-     * Renderiza el grid derecho con los trabajadores de una cuadrilla
+     * Dibuja la cuadrilla destino (solo lectura)
      */
-    function renderWorkersGrid(crewId) {
-        const grid = document.getElementById('workersGrid');
-        grid.innerHTML = '';
+    function renderTargetCrew(crewId) {
+        const workers = trabajadores.filter(t => t.cuadrillaId === crewId);
+        targetCrewCount.textContent = `${workers.length} personas`;
+        
+        targetWorkerList.innerHTML = '';
+        workers.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'worker-card-mini';
+            div.innerHTML = `
+                <div class="wcm-left">
+                    <img src="${w.img}">
+                    <div class="wcm-info">
+                        <span class="wcm-name">${w.nombre}</span>
+                        <span class="wcm-id">ID ${w.id}</span>
+                    </div>
+                </div>
+            `;
+            targetWorkerList.appendChild(div);
+        });
+        lucide.createIcons();
+    }
 
-        const crewWorkers = trabajadores.filter(t => t.cuadrillaId === crewId);
-
-        if(crewWorkers.length === 0) {
-            grid.innerHTML = `
-                <div class="empty-state">
-                  <i data-lucide="inbox"></i>
-                  <p>No hay personal asignado a esta cuadrilla.</p>
-                </div>`;
+    // Acción: Reasignar
+    btnReasignar.addEventListener('click', () => {
+        if(!selectedWorker) return;
+        const targetId = targetCrewSelect.value;
+        const motivo = document.getElementById('transferReason').value;
+        
+        if(targetId === selectedWorker.cuadrillaId) {
+            alert('El trabajador ya está en esta cuadrilla.');
             return;
         }
 
-        crewWorkers.forEach(worker => {
-            const isPending = worker.estadoTraslado === 'pendiente';
-            const card = document.createElement('div');
-            card.className = `worker-card ${isPending ? 'is-pending' : ''}`;
-            
-            card.innerHTML = `
-                <div class="worker-info">
-                    <img src="https://ui-avatars.com/api/?name=${worker.nombre.replace(' ', '+')}&background=random" class="worker-avatar">
-                    <div class="worker-details">
-                        <span class="worker-name">${worker.nombre}</span>
-                        <span class="worker-dni">DNI: ${worker.dni}</span>
-                    </div>
-                </div>
-                <div class="worker-actions">
-                    <button class="btn btn--outline" ${isPending ? 'disabled' : ''} onclick="initiateTransfer('${worker.id}')">
-                        <i data-lucide="arrow-right-left"></i> Trasladar
-                    </button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
+        if(!motivo) {
+            alert('Por favor, ingresa el motivo del cambio para el registro legal.');
+            return;
+        }
 
+        const originalText = btnReasignar.innerHTML;
+        btnReasignar.innerHTML = `<i data-lucide="loader" class="spin"></i> Procesando...`;
+        btnReasignar.disabled = true;
         lucide.createIcons();
-    }
 
-    /**
-     * Llena el select del modal con las cuadrillas disponibles
-     */
-    function populateTransferSelect() {
-        const select = document.getElementById('transferTargetCrew');
-        select.innerHTML = '';
-        cuadrillas.forEach(crew => {
-            const opt = document.createElement('option');
-            opt.value = crew.id;
-            opt.textContent = `${crew.nombre} (${crew.sector})`;
-            select.appendChild(opt);
-        });
-    }
+        // Simular latencia y "cambio" a estado Pendiente
+        setTimeout(() => {
+            alert(`✅ Solicitud enviada a ${selectedWorker.nombre}.\nEsperando su confirmación biométrica desde el App del Obrero.`);
+            
+            // Restablecer UI
+            btnReasignar.innerHTML = originalText;
+            btnReasignar.disabled = false;
+            document.getElementById('transferReason').value = '';
+            
+            // En un sistema real, el trabajador pasaría a un estado de "Traslado Pendiente"
+            // Por ahora, refrescamos la lista global
+            renderGlobalWorkerList(trabajadores);
+        }, 1200);
+    });
 
-    // Exponer la función al window para poder llamarla desde el onclick del HTML
-    window.initiateTransfer = function(workerId) {
-        workerToTransfer = trabajadores.find(t => t.id === workerId);
-        if(!workerToTransfer) return;
-
-        document.getElementById('transferWorkerName').textContent = workerToTransfer.nombre;
+    btnCancelar.addEventListener('click', () => {
+        selectedWorker = null;
+        transferFooter.style.opacity = '0.5';
+        transferFooter.style.pointerEvents = 'none';
+        legalAlert.style.display = 'none';
         
-        // Quitar del select la cuadrilla actual
-        const select = document.getElementById('transferTargetCrew');
-        Array.from(select.options).forEach(opt => {
-            opt.disabled = (opt.value === workerToTransfer.cuadrillaId);
-        });
+        sourceWorkerList.innerHTML = '<div class="empty-state-small">Selecciona un obrero de la lista izquierda para iniciar reasignación.</div>';
+        targetWorkerList.innerHTML = '';
+        sourceCrewName.textContent = 'Cuadrilla Origen';
+        sourceCrewCount.textContent = '0 personas';
+        targetCrewCount.textContent = '0 personas';
         
-        modal.classList.add('active');
-    };
+        document.querySelectorAll('.worker-item').forEach(el => el.classList.remove('active'));
+    });
+
 });
-

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AGROFLOW | Gestión de Cuadrillas</title>
+  <title>AGROFLOW | Gestión de Personal</title>
   
   <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
   
@@ -44,7 +44,7 @@
             <i data-lucide="map"></i><span>Mapa de Sectores</span>
           </a>
           <a href="#" class="nav-link active">
-            <i data-lucide="users"></i><span>Cuadrillas</span>
+            <i data-lucide="users"></i><span>Personal</span>
           </a>
           <a href="../reportes/index.html" class="nav-link">
             <i data-lucide="file-text"></i><span>Reportes</span>
@@ -53,82 +53,106 @@
       </nav>
 
       <div class="sidebar__footer">
-        <a href="../login/index.html" class="nav-link nav-link--danger">
-          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
-        </a>
+        <div class="user-profile" style="padding: 0.5rem;">
+          <div style="background-color: #3B82F6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">S</div>
+          <div class="user-info">
+            <span class="user-name">Supervisor</span>
+            <span class="user-role">Admin</span>
+          </div>
+        </div>
       </div>
     </aside>
 
     <!-- ÁREA PRINCIPAL -->
     <div class="main-wrapper">
       
-      <!-- TOPBAR -->
-      <header class="topbar">
-        <div class="topbar__left">
-          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
-          <div class="search-bar">
-            <i data-lucide="search"></i>
-            <input type="text" placeholder="Buscar obrero por DNI o nombre..." class="search-input">
-          </div>
-        </div>
-        <div class="topbar__right">
-          <button class="icon-btn" aria-label="Notificaciones">
-            <i data-lucide="bell"></i><span class="badge">1</span>
-          </button>
-          <div class="user-profile">
-            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar">
-            <div class="user-info">
-              <span class="user-name">Gerente General</span>
-              <span class="user-role">Fundo Principal</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- CONTENIDO CUADRILLAS -->
-      <main class="content">
+      <!-- CONTENIDO CUADRILLAS (Sin Topbar, directamente el Header como en el mockup) -->
+      <main class="content p-0">
         
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Personal y Cuadrillas</h1>
-            <p class="page-subtitle">Gestión de recursos humanos, asignaciones y traslados</p>
-          </div>
-          <div class="page-actions">
-            <button class="btn btn--outline"><i data-lucide="user-plus"></i> Nuevo Obrero</button>
-            <button class="btn btn--primary"><i data-lucide="users"></i> Crear Cuadrilla</button>
-          </div>
+        <div class="page-header px-4 pt-4 mb-0">
+          <h1 class="page-title">Personal y Cuadrillas</h1>
+          <button class="btn btn--primary"><i data-lucide="user-plus"></i> Agregar Trabajador</button>
         </div>
 
         <div class="cuadrillas-layout">
           
-          <!-- Lista de Cuadrillas -->
-          <div class="panel list-panel">
+          <!-- Columna Izquierda: Lista Global de Obreros -->
+          <div class="panel workers-sidebar">
             <div class="panel__header">
-              <h2>Cuadrillas Activas</h2>
+              <div class="search-bar" style="width: 100%;">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar trabajadores..." class="search-input">
+              </div>
             </div>
             <div class="panel__body p-0">
-              <ul class="crew-list" id="crewList">
-                <!-- Se llenan por JS -->
+              <ul class="worker-list" id="globalWorkerList">
+                <!-- Se llena por JS -->
               </ul>
             </div>
           </div>
 
-          <!-- Detalles de la Cuadrilla y Trabajadores -->
-          <div class="panel details-panel">
-            <div class="panel__header">
-              <h2 id="selectedCrewTitle">Selecciona una cuadrilla</h2>
-              <span class="badge badge--neutral" id="selectedCrewSector">--</span>
+          <!-- Columna Derecha: Panel de Reasignación -->
+          <div class="panel reassign-panel">
+            <div class="reassign-header">
+              <h2>Reasignación de Personal</h2>
+              <button class="btn btn--primary" id="btnConfirmarTop" style="background-color: #3B82F6; display:none;"><i data-lucide="check"></i> Confirmar Cambios</button>
             </div>
             
-            <div class="panel__body bg-subtle">
-              <!-- Grid de Trabajadores -->
-              <div class="workers-grid" id="workersGrid">
-                <!-- Se llenan por JS. Diseño tipo tarjetas de obrero -->
-                <div class="empty-state">
-                  <i data-lucide="users"></i>
-                  <p>Selecciona una cuadrilla en la lista izquierda para ver a su personal.</p>
+            <div class="reassign-body">
+              
+              <!-- Alerta legal -->
+              <div class="alert alert--warning mb-4" id="legalAlert" style="display: none;">
+                <i data-lucide="info"></i>
+                <p><strong>Cumplimiento Legal:</strong> Este traslado requiere validación biométrica. Se enviará una solicitud al obrero seleccionado.</p>
+              </div>
+
+              <!-- Cajas de Comparación -->
+              <div class="transfer-compare">
+                
+                <!-- Cuadrilla Actual (Origen) -->
+                <div class="transfer-box box-source">
+                  <div class="box-header">
+                    <h3 id="sourceCrewName">Cuadrilla Origen</h3>
+                    <span class="badge badge--neutral" id="sourceCrewCount">0 personas</span>
+                  </div>
+                  <div class="box-body" id="sourceWorkerList">
+                    <div class="empty-state-small">Selecciona un obrero de la lista izquierda para iniciar reasignación.</div>
+                  </div>
+                </div>
+                
+                <div class="transfer-arrow">
+                  <i data-lucide="arrow-right"></i>
+                </div>
+
+                <!-- Cuadrilla Nueva (Destino) -->
+                <div class="transfer-box box-target">
+                  <div class="box-header">
+                    <h3 style="display:flex; align-items:center; gap:0.5rem;">
+                      <select id="targetCrewSelect" class="form-input form-input--small" style="font-weight:bold;">
+                        <!-- JS options -->
+                      </select>
+                    </h3>
+                    <span class="badge badge--neutral" id="targetCrewCount">0 personas</span>
+                  </div>
+                  <div class="box-body" id="targetWorkerList">
+                    <!-- Trabajadores del destino (solo lectura) -->
+                  </div>
+                </div>
+
+              </div> <!-- /transfer-compare -->
+
+              <!-- Motivo y Acciones -->
+              <div class="transfer-footer" id="transferFooter" style="opacity: 0.5; pointer-events: none;">
+                <div class="form-group mb-4">
+                  <label class="form-label" style="color: var(--color-text-muted);">Motivo del Cambio</label>
+                  <input type="text" class="form-input" id="transferReason" placeholder="Escribir motivo de la reasignación...">
+                </div>
+                <div class="actions-group">
+                  <button class="btn btn--outline" id="btnCancelar">Cancelar</button>
+                  <button class="btn btn--primary" id="btnReasignar" style="background-color: #10B981; border:none;">Reasignar</button>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -137,37 +161,6 @@
     </div>
   </div>
 
-  <!-- Modal de Traslado (Iniciado por Gerente/Supervisor) -->
-  <div class="modal-overlay" id="transferModal">
-    <div class="modal">
-      <div class="modal__header">
-        <h3>Trasladar Personal</h3>
-        <button class="icon-btn icon-btn--small" id="closeTransferModal"><i data-lucide="x"></i></button>
-      </div>
-      <div class="modal__body">
-        <p class="text-muted mb-4">Estás iniciando un proceso de traslado para <strong id="transferWorkerName">Obrero</strong>.</p>
-        
-        <div class="form-group">
-          <label class="form-label">Cuadrilla de Destino</label>
-          <select class="form-input" id="transferTargetCrew">
-            <!-- Options via JS -->
-          </select>
-        </div>
-
-        <div class="alert alert--warning mt-4">
-          <i data-lucide="info"></i>
-          <p><strong>Cumplimiento Legal:</strong> Este traslado quedará en estado <em>Pendiente</em>. El trabajador recibirá una notificación en su app móvil y deberá aceptar el traslado mediante validación biométrica (WebAuthn) para que se haga efectivo.</p>
-        </div>
-
-        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-          <button class="btn btn--outline btn--full" id="cancelTransfer">Cancelar</button>
-          <button class="btn btn--primary btn--full" id="confirmTransfer">Solicitar Traslado</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script src="cuadrillas.js"></script>
 </body>
 </html>
-
