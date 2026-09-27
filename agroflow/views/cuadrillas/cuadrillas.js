@@ -3,6 +3,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
+    // Sidebar Mobile
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
+    document.getElementById('closeSidebar')?.addEventListener('click', () => sidebar.classList.remove('active'));
+
     // --- MOCK DATA ---
     const cuadrillas = [
         { id: 'C1', nombre: 'Cuadrilla Cosecha Naranja', sector: 'Sector Norte 1' },
