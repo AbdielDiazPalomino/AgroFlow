@@ -310,11 +310,16 @@
     height: auto; 
   }
   
-  /* El panel de obreros se vuelve un slider horizontal o toma menos altura */
+  /* El panel de obreros toma una altura fija para poder scrollear verticalmente */
   .workers-sidebar { 
     border-right: none; 
     border-bottom: 1px solid var(--color-border); 
-    max-height: 250px; 
+    height: 300px;
+  }
+  
+  /* El layout general oculta los buscadores en móviles, forzamos mostrar este */
+  .workers-sidebar .search-bar {
+    display: flex !important;
   }
   
   /* Ajuste de espaciados */
