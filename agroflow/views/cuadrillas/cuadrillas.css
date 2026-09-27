@@ -17,7 +17,7 @@
 .cuadrillas-layout {
   display: grid;
   grid-template-columns: 350px 1fr;
-  height: calc(100vh - 85px); /* Restando el padding top y header */
+  height: calc(100vh - 160px); /* Restando el topbar, padding y page-header */
 }
 
 /* Panel Izquierdo: Lista de Obreros */

@@ -53,20 +53,35 @@
       </nav>
 
       <div class="sidebar__footer">
-        <div class="user-profile" style="padding: 0.5rem;">
-          <div style="background-color: #3B82F6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">S</div>
-          <div class="user-info">
-            <span class="user-name">Supervisor</span>
-            <span class="user-role">Admin</span>
-          </div>
-        </div>
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
       </div>
     </aside>
 
     <!-- ÁREA PRINCIPAL -->
     <div class="main-wrapper">
       
-      <!-- CONTENIDO CUADRILLAS (Sin Topbar, directamente el Header como en el mockup) -->
+      <!-- TOPBAR (Restaurada para navegación en móviles) -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge">2</span>
+          </button>
+          <div class="user-profile">
+            <div style="background-color: #3B82F6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">S</div>
+            <div class="user-info">
+              <span class="user-name">Supervisor</span>
+              <span class="user-role">Admin</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO CUADRILLAS -->
       <main class="content p-0">
         
         <div class="page-header px-4 pt-4 mb-0">
