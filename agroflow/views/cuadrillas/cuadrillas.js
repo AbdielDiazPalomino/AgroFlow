@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: '10507523', nombre: 'Reshros Rianaji', img: 'https://i.pravatar.cc/150?u=5', cuadrillaId: 'C1' },
         { id: '10501703', nombre: 'Jennica Morter', img: 'https://i.pravatar.cc/150?u=6', cuadrillaId: 'C3' },
         { id: '10504422', nombre: 'Carlos Domínguez', img: 'https://i.pravatar.cc/150?u=7', cuadrillaId: 'C4' },
-        { id: '10508811', nombre: 'Ana Ruiz', img: 'https://i.pravatar.cc/150?u=8', cuadrillaId: 'C2' }
+        { id: '10508811', nombre: 'Ana Ruiz', img: 'https://i.pravatar.cc/150?u=8', cuadrillaId: 'C2' },
+        // --- TRABAJADORES NUEVOS (Sin asignar) ---
+        { id: '10509999', nombre: 'Luis Quispe', img: 'https://i.pravatar.cc/150?u=9', cuadrillaId: null },
+        { id: '10508888', nombre: 'Marta Sánchez', img: 'https://i.pravatar.cc/150?u=10', cuadrillaId: null }
     ];
 
     // Variables de estado
@@ -103,36 +106,46 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function selectWorkerForTransfer(worker, sourceCrew) {
         selectedWorker = worker;
-        selectedSourceCrewId = sourceCrew.id;
+        selectedSourceCrewId = sourceCrew ? sourceCrew.id : null;
 
         // Actualizar UI del panel origen
-        sourceCrewName.textContent = sourceCrew.nombre;
+        sourceCrewName.textContent = sourceCrew ? sourceCrew.nombre : 'Personal Sin Asignar';
         
         // Habilitar controles y alerta
         transferFooter.style.opacity = '1';
         transferFooter.style.pointerEvents = 'auto';
-        legalAlert.style.display = 'flex';
+        
+        // Si es un traslado (ya tenía cuadrilla), mostramos alerta legal. Si es nuevo, no es necesario.
+        legalAlert.style.display = sourceCrew ? 'flex' : 'none';
+        document.getElementById('btnReasignar').textContent = sourceCrew ? 'Reasignar' : 'Asignar a Cuadrilla';
 
         // Auto-seleccionar otra cuadrilla por defecto en el destino
-        const otherCrew = cuadrillas.find(c => c.id !== sourceCrew.id);
+        const otherCrew = cuadrillas.find(c => c.id !== selectedSourceCrewId);
         if(otherCrew) {
             targetCrewSelect.value = otherCrew.id;
             renderTargetCrew(otherCrew.id);
         }
 
-        renderSourceCrew(sourceCrew.id, worker.id);
+        renderSourceCrew(selectedSourceCrewId, worker);
     }
 
     /**
      * Dibuja la cuadrilla origen, resaltando al trabajador a transferir
      */
-    function renderSourceCrew(crewId, highlightWorkerId) {
-        const workers = trabajadores.filter(t => t.cuadrillaId === crewId);
-        sourceCrewCount.textContent = `${workers.length} personas`;
+    function renderSourceCrew(crewId, highlightWorker) {
+        let workers = [];
+        if (crewId === null) {
+            // Si no tiene cuadrilla, solo mostramos al trabajador seleccionado en la caja origen
+            workers = [highlightWorker];
+            sourceCrewCount.textContent = `1 persona nueva`;
+        } else {
+            workers = trabajadores.filter(t => t.cuadrillaId === crewId);
+            sourceCrewCount.textContent = `${workers.length} personas`;
+        }
         
         sourceWorkerList.innerHTML = '';
         workers.forEach(w => {
-            const isHighlight = w.id === highlightWorkerId;
+            const isHighlight = w.id === highlightWorker.id;
             const div = document.createElement('div');
             div.className = `worker-card-mini ${isHighlight ? 'highlight' : ''}`;
             div.innerHTML = `
@@ -147,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${isHighlight ? '<i data-lucide="grip-vertical"></i>' : ''}
                 </div>
             `;
-            // Asegurarse de que el seleccionado esté arriba (simulando que lo agarramos)
+            // Asegurarse de que el seleccionado esté arriba
             if(isHighlight) {
                 sourceWorkerList.prepend(div);
             } else {
