@@ -1,8 +1,13 @@
 from django.contrib import admin
 from .models import (
-    Cultivo, Sector, Cuadrilla, Trabajador, 
+    PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
     SolicitudTraslado, ActividadCampo, RegistroCosecha
 )
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'rol', 'telefono')
+    list_filter = ('rol',)
 
 @admin.register(Cultivo)
 class CultivoAdmin(admin.ModelAdmin):

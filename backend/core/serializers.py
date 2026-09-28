@@ -1,8 +1,16 @@
 from rest_framework import serializers
 from .models import (
-    Cultivo, Sector, Cuadrilla, Trabajador, 
+    PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
     SolicitudTraslado, ActividadCampo, RegistroCosecha
 )
+
+class PerfilUsuarioSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='usuario.username', read_only=True)
+    email = serializers.CharField(source='usuario.email', read_only=True)
+
+    class Meta:
+        model = PerfilUsuario
+        fields = '__all__'
 
 class CultivoSerializer(serializers.ModelSerializer):
     class Meta:

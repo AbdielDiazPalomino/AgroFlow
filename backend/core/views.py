@@ -1,13 +1,17 @@
 from rest_framework import viewsets
 from .models import (
-    Cultivo, Sector, Cuadrilla, Trabajador, 
+    PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
     SolicitudTraslado, ActividadCampo, RegistroCosecha
 )
 from .serializers import (
-    CultivoSerializer, SectorSerializer, CuadrillaSerializer, 
+    PerfilUsuarioSerializer, CultivoSerializer, SectorSerializer, CuadrillaSerializer, 
     TrabajadorSerializer, SolicitudTrasladoSerializer, 
     ActividadCampoSerializer, RegistroCosechaSerializer
 )
+
+class PerfilUsuarioViewSet(viewsets.ModelViewSet):
+    queryset = PerfilUsuario.objects.all()
+    serializer_class = PerfilUsuarioSerializer
 
 class CultivoViewSet(viewsets.ModelViewSet):
     queryset = Cultivo.objects.all()
