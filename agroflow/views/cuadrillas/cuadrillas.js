@@ -8,10 +8,32 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
     document.getElementById('closeSidebar')?.addEventListener('click', () => sidebar.classList.remove('active'));
 
-    // --- DATOS REALES DESDE EL BACKEND ---
-    let cuadrillas = [];
-    let trabajadores = [];
+    // --- MOCK DATA ---
+    const cuadrillas = [
+        { id: 'C1', nombre: 'Cuadrilla Cosecha Naranja', sector: 'Sector Norte 1' },
+        { id: 'C2', nombre: 'Cuadrilla Podado', sector: 'Sector Este 1' },
+        { id: 'C3', nombre: 'Cuadrilla Riego Norte', sector: 'Sector Central' },
+        { id: 'C4', nombre: 'Cuadrilla Cosecha Norte', sector: 'Sector Oeste 1' }
+    ];
 
+    const trabajadores = [
+        { id: '10503419', nombre: 'Juan García', img: 'https://i.pravatar.cc/150?u=1', cuadrillaId: 'C1' },
+        { id: '10501203', nombre: 'Rorfin Secharz', img: 'https://i.pravatar.cc/150?u=2', cuadrillaId: 'C1' },
+        { id: '10507014', nombre: 'Jusen Merraez', img: 'https://i.pravatar.cc/150?u=3', cuadrillaId: 'C2' },
+        { id: '10502036', nombre: 'Maria Vinton', img: 'https://i.pravatar.cc/150?u=4', cuadrillaId: 'C1' },
+        { id: '10507523', nombre: 'Reshros Rianaji', img: 'https://i.pravatar.cc/150?u=5', cuadrillaId: 'C1' },
+        { id: '10501703', nombre: 'Jennica Morter', img: 'https://i.pravatar.cc/150?u=6', cuadrillaId: 'C3' },
+        { id: '10504422', nombre: 'Carlos Domínguez', img: 'https://i.pravatar.cc/150?u=7', cuadrillaId: 'C4' },
+        { id: '10508811', nombre: 'Ana Ruiz', img: 'https://i.pravatar.cc/150?u=8', cuadrillaId: 'C2' },
+        // --- TRABAJADORES NUEVOS (Sin asignar) ---
+        { id: '10509999', nombre: 'Luis Quispe', img: 'https://i.pravatar.cc/150?u=9', cuadrillaId: null },
+        { id: '10508888', nombre: 'Marta Sánchez', img: 'https://i.pravatar.cc/150?u=10', cuadrillaId: null }
+    ];
+
+    // Variables de estado
+    let selectedWorker = null;
+    let selectedSourceCrewId = null;
+    
     // Nodos DOM
     const globalList = document.getElementById('globalWorkerList');
     const searchInput = document.getElementById('searchInput');
@@ -26,44 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReasignar = document.getElementById('btnReasignar');
     const btnCancelar = document.getElementById('btnCancelar');
 
-    // Variables de estado
-    let selectedWorker = null;
-    let selectedSourceCrewId = null;
-
-    // Inicialización asíncrona
-    async function initApp() {
-        try {
-            const [resC, resT] = await Promise.all([
-                fetch('http://localhost:8000/api/cuadrillas/'),
-                fetch('http://localhost:8000/api/trabajadores/')
-            ]);
-            
-            cuadrillas = await resC.json();
-            const trabajadoresRaw = await resT.json();
-            
-            // Adaptar JSON del backend a la estructura que el UI requiere
-            trabajadores = trabajadoresRaw.map(t => ({
-                id: t.id.toString(),
-                dni: t.dni,
-                nombre: `${t.nombres} ${t.apellidos}`,
-                img: t.foto_url || `https://ui-avatars.com/api/?name=${t.nombres}+${t.apellidos}&background=random`,
-                cuadrillaId: t.cuadrilla // FK integer o null
-            }));
-
-            renderGlobalWorkerList(trabajadores);
-            populateTargetSelect();
-        } catch (error) {
-            console.error("Error conectando con Django:", error);
-            globalList.innerHTML = `<li style="padding:1rem; color:red;">Error de conexión con el Backend. ¿Está encendido el servidor?</li>`;
-        }
-    }
-    
-    initApp();
+    // Inicialización
+    renderGlobalWorkerList(trabajadores);
+    populateTargetSelect();
 
     // Buscador interactivo
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
-        const filtered = trabajadores.filter(t => t.nombre.toLowerCase().includes(query) || t.dni.includes(query));
+        const filtered = trabajadores.filter(t => t.nombre.toLowerCase().includes(query) || t.id.includes(query));
         renderGlobalWorkerList(filtered);
     });
 
@@ -209,12 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Acción: Reasignar
-    btnReasignar.addEventListener('click', async () => {
+    btnReasignar.addEventListener('click', () => {
         if(!selectedWorker) return;
         const targetId = targetCrewSelect.value;
         const motivo = document.getElementById('transferReason').value;
         
-        if(targetId === String(selectedWorker.cuadrillaId)) {
+        if(targetId === selectedWorker.cuadrillaId) {
             alert('El trabajador ya está en esta cuadrilla.');
             return;
         }
@@ -229,41 +221,19 @@ document.addEventListener('DOMContentLoaded', () => {
         btnReasignar.disabled = true;
         lucide.createIcons();
 
-        try {
-            // POST a la API de Django REST Framework
-            const response = await fetch('http://localhost:8000/api/traslados/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    trabajador: parseInt(selectedWorker.id),
-                    cuadrilla_origen: selectedWorker.cuadrillaId ? parseInt(selectedWorker.cuadrillaId) : null,
-                    cuadrilla_destino: parseInt(targetId),
-                    motivo: motivo,
-                    estado: 'PENDIENTE'
-                })
-            });
-
-            if (!response.ok) throw new Error('Error al enviar la solicitud');
-
-            alert(`✅ Solicitud enviada a ${selectedWorker.nombre} de forma oficial en la Base de Datos.\nEsperando su confirmación biométrica desde el App del Obrero.`);
-            
-            // Si estuviéramos conectando websockets, aquí el UI se bloquearía esperando.
-            // Por ahora recargamos los datos para tener la versión fresca del servidor.
-            await initApp();
+        // Simular latencia y "cambio" a estado Pendiente
+        setTimeout(() => {
+            alert(`✅ Solicitud enviada a ${selectedWorker.nombre}.\nEsperando su confirmación biométrica desde el App del Obrero.`);
             
             // Restablecer UI
-            document.getElementById('transferReason').value = '';
-            btnCancelar.click(); // Disparamos cancelar para limpiar la selección visual
-
-        } catch(error) {
-            console.error(error);
-            alert("❌ Ocurrió un error al contactar con el servidor. Verifica que runserver esté activo.");
-        } finally {
             btnReasignar.innerHTML = originalText;
             btnReasignar.disabled = false;
-        }
+            document.getElementById('transferReason').value = '';
+            
+            // En un sistema real, el trabajador pasaría a un estado de "Traslado Pendiente"
+            // Por ahora, refrescamos la lista global
+            renderGlobalWorkerList(trabajadores);
+        }, 1200);
     });
 
     btnCancelar.addEventListener('click', () => {

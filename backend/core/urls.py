@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    PerfilUsuarioViewSet, CultivoViewSet, SectorViewSet, CuadrillaViewSet, 
+    api_login, PerfilUsuarioViewSet, CultivoViewSet, SectorViewSet, CuadrillaViewSet, 
     TrabajadorViewSet, SolicitudTrasladoViewSet, 
     ActividadCampoViewSet, RegistroCosechaViewSet
 )
@@ -17,5 +17,6 @@ router.register(r'actividades', ActividadCampoViewSet)
 router.register(r'cosechas', RegistroCosechaViewSet)
 
 urlpatterns = [
+    path('login/', api_login, name='api_login'),
     path('', include(router.urls)),
 ]

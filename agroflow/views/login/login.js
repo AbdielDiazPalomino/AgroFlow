@@ -29,31 +29,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Evitamos recarga real de la página
-            const email = document.getElementById('email').value;
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password').value;
 
-            // Simular un request de 1 segundo para efecto de realismo
             const submitBtn = loginForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.7';
-            submitBtn.innerHTML = '<i data-lucide="loader" class="spin-icon"></i> Ingresando...';
+            submitBtn.innerHTML = '<i data-lucide="loader" class="spin-icon"></i> Verificando...';
             lucide.createIcons();
 
-            setTimeout(() => {
-                console.log(`Iniciando sesión con Email: ${email}`);
-                
-                // Redirigir al dashboard principal
-                window.location.href = '../dashboard/index.html';
-                
-                // Retornar botón a su estado normal (aunque la página se recargará)
+            try {
+                const response = await fetch('http://localhost:8000/api/login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameInput,
+                        password: passwordInput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Guardar rol (opcional, por si el frontend lo necesita luego)
+                    localStorage.setItem('agroflow_user_role', data.role);
+                    localStorage.setItem('agroflow_username', data.username);
+                    
+                    window.location.href = '../dashboard/index.html';
+                } else {
+                    // Mostrar error del backend (Ej: Credenciales inválidas o Rol Denegado)
+                    alert(data.error || 'Error al iniciar sesión');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerHTML = originalText;
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error("Error conectando con Django:", error);
+                alert("Error de red: Verifica que el backend Django esté corriendo en el puerto 8000.");
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.innerHTML = originalText;
                 lucide.createIcons();
-            }, 1000);
+            }
         });
     }
 });
