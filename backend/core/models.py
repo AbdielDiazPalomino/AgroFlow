@@ -93,3 +93,51 @@ class SolicitudTraslado(models.Model):
 
     def __str__(self):
         return f"Traslado de {self.trabajador} a {self.cuadrilla_destino} ({self.estado})"
+
+# ==========================================
+# 4. OPERACIONES Y PRODUCCIÓN (DASHBOARD & REPORTES)
+# ==========================================
+
+class ActividadCampo(models.Model):
+    TIPO_ACTIVIDAD = [
+        ('RIEGO', 'Riego'),
+        ('FERTIRRIEGO', 'Fertirriego'),
+        ('PODA', 'Poda'),
+        ('FUMIGACION', 'Fumigación / Control de Plagas'),
+        ('COSECHA', 'Cosecha'),
+    ]
+    ESTADO_ACTIVIDAD = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_CURSO', 'En Curso'),
+        ('COMPLETADO', 'Completado'),
+        ('CANCELADO', 'Cancelado'),
+    ]
+
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, related_name='actividades')
+    cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.SET_NULL, null=True, blank=True, related_name='actividades')
+    tipo_actividad = models.CharField(max_length=50, choices=TIPO_ACTIVIDAD)
+    estado = models.CharField(max_length=20, choices=ESTADO_ACTIVIDAD, default='PENDIENTE')
+    fecha_programada = models.DateField()
+    fecha_ejecucion = models.DateTimeField(null=True, blank=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.tipo_actividad} en {self.sector} ({self.estado})"
+
+class RegistroCosecha(models.Model):
+    CALIDAD_CHOICES = [
+        ('A1', 'Exportación (A1)'),
+        ('A2', 'Exportación (A2)'),
+        ('B1', 'Mercado Local (B1)'),
+        ('B2', 'Mercado Local (B2)'),
+        ('RECHAZO', 'Rechazo / Merma'),
+    ]
+
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, related_name='cosechas')
+    fecha = models.DateField()
+    volumen_cajas = models.IntegerField(help_text="Cantidad de cajas cosechadas")
+    calidad = models.CharField(max_length=20, choices=CALIDAD_CHOICES)
+    registrado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.volumen_cajas} cajas de {self.sector.cultivo} ({self.fecha})"
