@@ -128,11 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(btnAgregarSector && modalAgregarSector) {
         btnAgregarSector.addEventListener('click', () => {
-            modalAgregarSector.style.display = 'flex';
+            modalAgregarSector.classList.add('active');
         });
 
         btnCerrarModalSector.addEventListener('click', () => {
-            modalAgregarSector.style.display = 'none';
+            modalAgregarSector.classList.remove('active');
         });
 
         formAgregarSector.addEventListener('submit', async (e) => {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 alert(`✅ Sector '${nombre}' creado correctamente.`);
                 formAgregarSector.reset();
-                modalAgregarSector.style.display = 'none';
+                modalAgregarSector.classList.remove('active');
                 
                 await loadData(); // Recargar datos
 
@@ -298,5 +298,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         lucide.createIcons();
+    }
+
+    if (modalAgregarSector) {
+        modalAgregarSector.addEventListener('click', (e) => {
+            if (e.target === modalAgregarSector) {
+                modalAgregarSector.classList.remove('active');
+            }
+        });
     }
 });
