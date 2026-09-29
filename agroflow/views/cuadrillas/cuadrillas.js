@@ -282,3 +282,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+    // ==========================================
+    // AGREGAR NUEVO TRABAJADOR
+    // ==========================================
+    const modalAdd = document.getElementById('modalAgregarTrabajador');
+    const btnOpenModal = document.getElementById('btnAgregarTrabajador');
+    const btnCloseModal = document.getElementById('btnCerrarModal');
+    const formAdd = document.getElementById('formAgregarTrabajador');
+
+    if(btnOpenModal && modalAdd) {
+        btnOpenModal.addEventListener('click', () => {
+            modalAdd.style.display = 'flex';
+        });
+
+        btnCloseModal.addEventListener('click', () => {
+            modalAdd.style.display = 'none';
+        });
+
+        formAdd.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombres = document.getElementById('addNombres').value;
+            const apellidos = document.getElementById('addApellidos').value;
+            const dni = document.getElementById('addDni').value;
+            
+            const submitBtn = formAdd.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Guardando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombres: nombres,
+                        apellidos: apellidos,
+                        dni: dni,
+                        // Un nuevo trabajador no tiene cuadrilla al inicio
+                        cuadrilla: null 
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(JSON.stringify(err));
+                }
+
+                alert(`✅ ${nombres} registrado correctamente en la Base de Datos.`);
+                
+                // Cerrar modal y limpiar
+                formAdd.reset();
+                modalAdd.style.display = 'none';
+                
+                // Recargar lista global para ver al nuevo trabajador sin cuadrilla
+                await initApp();
+
+            } catch(error) {
+                console.error("Error al guardar:", error);
+                alert("❌ Ocurrió un error al guardar el trabajador. Verifica la consola.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }

@@ -86,7 +86,7 @@
         
         <div class="page-header px-4 pt-4 mb-0">
           <h1 class="page-title">Personal y Cuadrillas</h1>
-          <button class="btn btn--primary"><i data-lucide="user-plus"></i> Agregar Trabajador</button>
+          <button class="btn btn--primary" id="btnAgregarTrabajador"><i data-lucide="user-plus"></i> Agregar Trabajador</button>
         </div>
 
         <div class="cuadrillas-layout">
@@ -174,6 +174,31 @@
 
         </div> <!-- /cuadrillas-layout -->
       </main>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Trabajador -->
+  <div class="modal" id="modalAgregarTrabajador" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 400px; max-width: 90%;">
+      <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Nuevo Trabajador</h2>
+      <form id="formAgregarTrabajador">
+        <div class="form-group mb-4">
+          <label class="form-label">Nombres</label>
+          <input type="text" id="addNombres" class="form-input" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Apellidos</label>
+          <input type="text" id="addApellidos" class="form-input" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">DNI</label>
+          <input type="text" id="addDni" class="form-input" required maxlength="8">
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+          <button type="button" class="btn btn--outline" id="btnCerrarModal">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar Trabajador</button>
+        </div>
+      </form>
     </div>
   </div>
 
