@@ -126,8 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCerrarModalSector = document.getElementById('btnCerrarModalSector');
     const formAgregarSector = document.getElementById('formAgregarSector');
 
+    let currentOpenedSectorId = null; // Guardará el ID del sector abierto en el modal de detalle
+
     if(btnAgregarSector && modalAgregarSector) {
         btnAgregarSector.addEventListener('click', () => {
+            document.getElementById('formSectorTitle').textContent = 'Nuevo Sector Agrícola';
+            formAgregarSector.reset();
+            document.getElementById('addSectorId').value = '';
             modalAgregarSector.classList.add('active');
         });
 
@@ -138,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formAgregarSector.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const sectorId = document.getElementById('addSectorId').value;
             const nombre = document.getElementById('addSectorNombre').value;
             const coordenadas = document.getElementById('addSectorCoords').value;
             const area = document.getElementById('addSectorArea').value;
@@ -148,30 +154,97 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Guardando...';
 
+            const payload = {
+                nombre: nombre,
+                coordenadas_centro: coordenadas,
+                area_hectareas: parseFloat(area),
+                cultivo: cultivoId ? parseInt(cultivoId) : null,
+                estado: 'ACTIVO' // TODO: se podría permitir editar estado también
+            };
+
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/sectores/`, {
-                    method: 'POST',
+                const method = sectorId ? 'PUT' : 'POST';
+                const url = sectorId 
+                    ? `${CONFIG.API_BASE_URL}/sectores/${sectorId}/` 
+                    : `${CONFIG.API_BASE_URL}/sectores/`;
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        coordenadas_centro: coordenadas,
-                        area_hectareas: parseFloat(area),
-                        cultivo: cultivoId ? parseInt(cultivoId) : null,
-                        estado: 'ACTIVO'
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) throw new Error('Error guardando el sector');
 
-                alert(`✅ Sector '${nombre}' creado correctamente.`);
+                alert(`✅ Sector '${nombre}' ${sectorId ? 'actualizado' : 'creado'} correctamente.`);
                 formAgregarSector.reset();
                 modalAgregarSector.classList.remove('active');
                 
-                await loadData(); // Recargar datos
+                await loadData();
 
             } catch (err) {
                 console.error(err);
                 alert("❌ Error al guardar el sector.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // ==========================================
+    // LOGICA EDITAR / ELIMINAR DESDE MODAL DETALLE
+    // ==========================================
+    const btnEditarSector = document.getElementById('btnEditarSector');
+    const btnEliminarSector = document.getElementById('btnEliminarSector');
+
+    if (btnEditarSector) {
+        btnEditarSector.addEventListener('click', () => {
+            if(!currentOpenedSectorId) return;
+            const s = sectores.find(x => x.id === currentOpenedSectorId);
+            if(!s) return;
+            
+            // Cerrar el modal de detalle
+            modal.classList.remove('active');
+            
+            // Rellenar formulario de edición
+            document.getElementById('formSectorTitle').textContent = 'Editar Sector';
+            document.getElementById('addSectorId').value = s.id;
+            document.getElementById('addSectorNombre').value = s.nombre;
+            document.getElementById('addSectorCoords').value = s.coordenadas_centro;
+            document.getElementById('addSectorArea').value = s.area_hectareas;
+            document.getElementById('addSectorCultivo').value = s.cultivo || '';
+            
+            // Abrir formulario
+            modalAgregarSector.classList.add('active');
+        });
+    }
+
+    if (btnEliminarSector) {
+        btnEliminarSector.addEventListener('click', async () => {
+            if(!currentOpenedSectorId) return;
+            
+            const confirmDelete = confirm("⚠️ ¿Estás seguro que deseas ELIMINAR este sector? Esta acción no se puede deshacer.");
+            if(!confirmDelete) return;
+
+            const submitBtn = btnEliminarSector;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Eliminando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/sectores/${currentOpenedSectorId}/`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Error eliminando el sector');
+
+                alert(`🗑️ Sector eliminado correctamente.`);
+                modal.classList.remove('active');
+                await loadData();
+            } catch (err) {
+                console.error(err);
+                alert("❌ Error al eliminar el sector. Asegúrate que no tenga cuadrillas asociadas.");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
@@ -199,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openSectorModal(sector) {
+        currentOpenedSectorId = sector.id;
         document.getElementById('modalTitle').textContent = sector.nombre;
         document.getElementById('modalCultivo').textContent = getCultivoNombre(sector.cultivo);
         document.getElementById('modalArea').textContent = `${sector.area_hectareas} ha`;

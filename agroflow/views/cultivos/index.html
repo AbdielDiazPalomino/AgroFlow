@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Gestión de Cultivos</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Estilos rápidos para la tabla de cultivos */
+    .table-container {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-top: 1.5rem;
+    }
+    
+    .cultivos-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .cultivos-table th, .cultivos-table td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .cultivos-table th {
+        background-color: var(--color-bg);
+        font-weight: 600;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .cultivos-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .cultivos-table tr:hover {
+        background-color: var(--color-bg);
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Principal</span>
+          <a href="../dashboard/index.html" class="nav-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link">
+            <i data-lucide="map"></i>
+            <span>Mapa de Sectores</span>
+          </a>
+          <a href="../cuadrillas/index.html" class="nav-link">
+            <i data-lucide="users"></i>
+            <span>Cuadrillas</span>
+          </a>
+          <a href="../cultivos/index.html" class="nav-link active">
+            <i data-lucide="sprout"></i>
+            <span>Cultivos</span>
+          </a>
+          <a href="../reportes/index.html" class="nav-link">
+            <i data-lucide="file-text"></i><span>Reportes</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger">
+          <i data-lucide="log-out"></i>
+          <span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar">
+            <i data-lucide="menu"></i>
+          </button>
+        </div>
+        <div class="topbar__right">
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Admin+Root&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <div class="user-info">
+              <span class="user-name">Administrador</span>
+              <span class="user-role">Fundo Principal</span>
+            </div>
+            <i data-lucide="chevron-down" class="dropdown-icon"></i>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Catálogo de Cultivos</h1>
+            <p class="page-subtitle">Administra los tipos de cultivos y variedades que se siembran en los sectores.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--primary" id="btnNuevoCultivo">
+              <i data-lucide="plus"></i> Nuevo Cultivo
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="cultivos-table">
+            <thead>
+              <tr>
+                <th>Nombre del Cultivo</th>
+                <th>Variedad</th>
+                <th style="width: 150px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cultivosTableBody">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--color-text-muted);">Cargando cultivos...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal Cultivo -->
+  <div class="modal-overlay" id="modalCultivo" style="z-index: 1000; display: flex; opacity: 0; visibility: hidden; transition: all 0.3s ease; position: fixed; inset: 0; background: rgba(11,17,33,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+    <div class="modal" style="background: var(--color-surface); width: 400px; max-width: 90%; border-radius: var(--radius-lg); border: 1px solid var(--color-border); padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem;">Nuevo Cultivo</h3>
+        <button class="icon-btn icon-btn--small" id="btnCerrarModal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <form id="formCultivo">
+        <input type="hidden" id="cultivoId">
+        <div class="form-group mb-4">
+          <label class="form-label">Nombre del Cultivo</label>
+          <input type="text" id="cultivoNombre" class="form-input" placeholder="Ej: Arándano" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Variedad (Opcional)</label>
+          <input type="text" id="cultivoVariedad" class="form-input" placeholder="Ej: Biloxi">
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+          <button type="submit" class="btn btn--primary" style="width: 100%;">Guardar Cultivo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    /* CSS en linea para que el modal funcione con .active de forma similar a mapa.css */
+    #modalCultivo.active {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  </style>
+
+  <!-- Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="cultivos.js"></script>
+</body>
+</html>
