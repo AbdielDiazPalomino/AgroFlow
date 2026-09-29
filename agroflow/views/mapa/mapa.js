@@ -1,4 +1,4 @@
-/* agroflow/views/dashboard/dashboard.js */
+/* agroflow/views/mapa/mapa.js */
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Iniciar Iconos
@@ -21,85 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. MOCK DATA (Simulación de la API)
-    // Coordenadas base: Fundo Corporación Roots SAC
-    const baseLat = -14.030357850520657;
-    const baseLng = -75.73223536541536;
+    // 3. DATOS DE LA API
+    let sectores = [];
+    let cultivos = [];
 
-    const mockSectores = [
-        {
-            id: 1,
-            nombre: "Sector Norte 1",
-            cultivo: "SUNFLOWER",
-            hectareas: 25.5,
-            estado: "optimo",
-            trabajadores: 45,
-            bounds: [[baseLat + 0.001, baseLng - 0.003], [baseLat + 0.005, baseLng + 0.002]]
-        },
-        {
-            id: 2,
-            nombre: "Sector Este 1",
-            cultivo: "GYPSOPHILA TANGO",
-            hectareas: 18.2,
-            estado: "riego",
-            trabajadores: 12,
-            bounds: [[baseLat - 0.001, baseLng + 0.0025], [baseLat + 0.005, baseLng + 0.0055]]
-        },
-        {
-            id: 3,
-            nombre: "Sector Sur 1",
-            cultivo: "LISIANTHUS MARIACHI",
-            hectareas: 12.0,
-            estado: "optimo",
-            trabajadores: 30,
-            bounds: [[baseLat - 0.005, baseLng - 0.003], [baseLat - 0.0015, baseLng + 0.002]]
-        },
-        {
-            id: 4,
-            nombre: "Sector Oeste 1",
-            cultivo: "WAXFLOWER",
-            hectareas: 10.5,
-            estado: "alerta", // ej: plaga o riego fallido
-            trabajadores: 8,
-            bounds: [[baseLat - 0.004, baseLng - 0.006], [baseLat + 0.0008, baseLng - 0.0035]]
-        },
-        {
-            id: 5,
-            nombre: "Sector Central",
-            cultivo: "PROTEAS / PINK ICE",
-            hectareas: 5.4,
-            estado: "optimo",
-            trabajadores: 15,
-            bounds: [[baseLat - 0.001, baseLng - 0.003], [baseLat + 0.0008, baseLng + 0.002]]
-        },
-        {
-            id: 6,
-            nombre: "Sector Noroeste",
-            cultivo: "LIMONIUM HYBRIDS",
-            hectareas: 8.8,
-            estado: "optimo",
-            trabajadores: 20,
-            bounds: [[baseLat + 0.001, baseLng - 0.006], [baseLat + 0.005, baseLng - 0.0035]]
-        },
-        {
-            id: 7,
-            nombre: "Invernadero A",
-            cultivo: "ASTER MATSUMOTO",
-            hectareas: 2.1,
-            estado: "riego",
-            trabajadores: 5,
-            bounds: [[baseLat - 0.001, baseLng + 0.006], [baseLat + 0.001, baseLng + 0.007]]
-        },
-        {
-            id: 8,
-            nombre: "Invernadero B",
-            cultivo: "BRASSICA (FLOWERING KALE)",
-            hectareas: 3.0,
-            estado: "optimo",
-            trabajadores: 6,
-            bounds: [[baseLat + 0.0015, baseLng + 0.006], [baseLat + 0.004, baseLng + 0.007]]
-        }
-    ];
+    // Coordenadas base: Fundo Corporación Roots SAC
+    const baseLat = -14.030357;
+    const baseLng = -75.732235;
 
     // 4. Inicializar Mapa de Leaflet
     const map = L.map('sectorMap', {
@@ -117,13 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
         maxZoom: 18
     });
 
-    // Por defecto, satélite
     esriSatellite.addTo(map);
-
-    // Variables de control de capas
     let isSatellite = true;
 
-    // 5. Controles personalizados del mapa
+    // Controles personalizados del mapa
     document.getElementById('btnZoomIn')?.addEventListener('click', () => map.zoomIn());
     document.getElementById('btnZoomOut')?.addEventListener('click', () => map.zoomOut());
     
@@ -138,17 +63,46 @@ document.addEventListener('DOMContentLoaded', () => {
         isSatellite = !isSatellite;
     });
 
-    // Forzar actualización de tamaño para evitar la zona gris (bug de flexbox)
     setTimeout(() => {
         map.invalidateSize();
     }, 200);
 
-    // 6. Renderizar Polígonos y Lista
-    renderSectorsOnMap(map, mockSectores);
-    renderSectorList(mockSectores);
-    document.getElementById('totalSectoresList').textContent = mockSectores.length;
+    // ==========================================
+    // CARGAR DATOS DESDE EL BACKEND
+    // ==========================================
+    async function loadData() {
+        try {
+            const [resS, resC] = await Promise.all([
+                fetch(`${CONFIG.API_BASE_URL}/sectores/`),
+                fetch(`${CONFIG.API_BASE_URL}/cultivos/`)
+            ]);
+            sectores = await resS.json();
+            cultivos = await resC.json();
 
-    // 6. Lógica del Modal
+            // Limpiar Mapa de capas previas (excepto el tileLayer)
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Circle || layer instanceof L.Rectangle) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            renderSectorsOnMap(map, sectores, cultivos);
+            renderSectorList(sectores, cultivos);
+            
+            const totalSectoresEl = document.getElementById('totalSectoresList');
+            if(totalSectoresEl) totalSectoresEl.textContent = sectores.length;
+
+            populateCultivosSelect();
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+        }
+    }
+
+    loadData();
+
+    // ==========================================
+    // MODAL: INFO DE SECTOR EXISTENTE
+    // ==========================================
     const modal = document.getElementById('sectorModal');
     const closeModalBtn = document.getElementById('closeModal');
 
@@ -158,103 +112,191 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Cerrar al hacer clic fuera del modal
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');
         }
     });
+
+    // ==========================================
+    // MODAL: NUEVO SECTOR
+    // ==========================================
+    const modalAgregarSector = document.getElementById('modalAgregarSector');
+    const btnAgregarSector = document.getElementById('btnAgregarSector');
+    const btnCerrarModalSector = document.getElementById('btnCerrarModalSector');
+    const formAgregarSector = document.getElementById('formAgregarSector');
+
+    if(btnAgregarSector && modalAgregarSector) {
+        btnAgregarSector.addEventListener('click', () => {
+            modalAgregarSector.style.display = 'flex';
+        });
+
+        btnCerrarModalSector.addEventListener('click', () => {
+            modalAgregarSector.style.display = 'none';
+        });
+
+        formAgregarSector.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('addSectorNombre').value;
+            const coordenadas = document.getElementById('addSectorCoords').value;
+            const area = document.getElementById('addSectorArea').value;
+            const cultivoId = document.getElementById('addSectorCultivo').value;
+
+            const submitBtn = formAgregarSector.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Guardando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/sectores/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        coordenadas_centro: coordenadas,
+                        area_hectareas: parseFloat(area),
+                        cultivo: cultivoId ? parseInt(cultivoId) : null,
+                        estado: 'ACTIVO'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Error guardando el sector');
+
+                alert(`✅ Sector '${nombre}' creado correctamente.`);
+                formAgregarSector.reset();
+                modalAgregarSector.style.display = 'none';
+                
+                await loadData(); // Recargar datos
+
+            } catch (err) {
+                console.error(err);
+                alert("❌ Error al guardar el sector.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Funciones Auxiliares
+    function getCultivoNombre(cultivoId) {
+        if (!cultivoId) return "Sin cultivo";
+        const c = cultivos.find(x => x.id === cultivoId);
+        return c ? c.nombre : "Desconocido";
+    }
+
+    function populateCultivosSelect() {
+        const select = document.getElementById('addSectorCultivo');
+        if (!select) return;
+        select.innerHTML = '<option value="">Sin Cultivo / Preparación</option>';
+        cultivos.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nombre;
+            select.appendChild(opt);
+        });
+    }
+
+    function openSectorModal(sector) {
+        document.getElementById('modalTitle').textContent = sector.nombre;
+        document.getElementById('modalCultivo').textContent = getCultivoNombre(sector.cultivo);
+        document.getElementById('modalArea').textContent = `${sector.area_hectareas} ha`;
+        
+        let estadoTexto = sector.estado;
+        if(estadoTexto === 'ACTIVO') estadoTexto = 'Óptimo';
+        document.getElementById('modalEstado').textContent = estadoTexto;
+        
+        // Simulado: en el futuro esto puede ser la cantidad de trabajadores en cuadrillas asignadas
+        document.getElementById('modalTrabajadores').textContent = "Consultando..."; 
+        
+        document.getElementById('sectorModal').classList.add('active');
+    }
+
+    function renderSectorsOnMap(map, sectoresList) {
+        sectoresList.forEach(sector => {
+            let fillColor = '#10B981'; // Óptimo (Activo)
+            if (sector.estado === 'RIEGO') fillColor = '#3B82F6';
+            if (sector.estado === 'ALERTA') fillColor = '#F59E0B';
+            if (sector.estado === 'MANTENIMIENTO') fillColor = '#9CA3AF';
+
+            // Parsea coordenadas "lat,lng"
+            let lat = baseLat, lng = baseLng;
+            if (sector.coordenadas_centro) {
+                const parts = sector.coordenadas_centro.split(',');
+                if(parts.length === 2) {
+                    lat = parseFloat(parts[0]);
+                    lng = parseFloat(parts[1]);
+                }
+            }
+
+            // Usamos un círculo cuyo radio es aproximado al área (1 ha = 10,000 m2 = radio ~ 56m)
+            const radioCalculado = Math.sqrt((sector.area_hectareas * 10000) / Math.PI);
+
+            const circle = L.circle([lat, lng], {
+                color: fillColor,
+                weight: 2,
+                fillColor: fillColor,
+                fillOpacity: 0.5,
+                radius: radioCalculado > 10 ? radioCalculado : 50 // minimo 50m
+            }).addTo(map);
+
+            circle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+
+            circle.on('click', () => {
+                openSectorModal(sector);
+                map.flyTo([lat, lng], 16, { duration: 0.5 });
+            });
+        });
+    }
+
+    function renderSectorList(sectoresList) {
+        const listContainer = document.getElementById('sectorList');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+
+        sectoresList.forEach(sector => {
+            let badgeHtml = '';
+            if (sector.estado === 'ACTIVO') {
+                badgeHtml = `<span class="status-badge status-badge--ok"><i data-lucide="check-circle"></i> Óptimo</span>`;
+            } else if (sector.estado === 'RIEGO') {
+                badgeHtml = `<span class="status-badge status-badge--riego"><i data-lucide="droplet"></i> En Riego</span>`;
+            } else if (sector.estado === 'ALERTA') {
+                badgeHtml = `<span class="status-badge status-badge--alerta"><i data-lucide="alert-triangle"></i> Revisar</span>`;
+            } else {
+                badgeHtml = `<span class="status-badge"><i data-lucide="tool"></i> Mantenimiento</span>`;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'sector-item';
+            
+            item.innerHTML = `
+                <div class="sector-item__info">
+                    <span class="sector-item__name">${sector.nombre}</span>
+                    <span class="sector-item__meta">
+                        <i data-lucide="sprout" style="width:12px;height:12px"></i> ${getCultivoNombre(sector.cultivo)} • ${sector.area_hectareas} ha
+                    </span>
+                </div>
+                <div class="sector-item__status">
+                    ${badgeHtml}
+                </div>
+            `;
+            
+            item.addEventListener('click', () => {
+                openSectorModal(sector);
+                
+                // Centrar en el mapa
+                if (sector.coordenadas_centro) {
+                    const parts = sector.coordenadas_centro.split(',');
+                    if(parts.length === 2) {
+                        map.flyTo([parseFloat(parts[0]), parseFloat(parts[1])], 16, { duration: 0.5 });
+                    }
+                }
+            });
+
+            listContainer.appendChild(item);
+        });
+
+        lucide.createIcons();
+    }
 });
-
-/**
- * Función para abrir el modal con los datos del sector
- */
-function openSectorModal(sector) {
-    document.getElementById('modalTitle').textContent = sector.nombre;
-    document.getElementById('modalCultivo').textContent = sector.cultivo;
-    document.getElementById('modalArea').textContent = `${sector.hectareas} ha`;
-    
-    let estadoTexto = sector.estado.charAt(0).toUpperCase() + sector.estado.slice(1);
-    if(sector.estado === 'optimo') estadoTexto = 'Óptimo';
-    document.getElementById('modalEstado').textContent = estadoTexto;
-    
-    document.getElementById('modalTrabajadores').textContent = sector.trabajadores;
-    
-    document.getElementById('sectorModal').classList.add('active');
-}
-
-/**
- * Función para inyectar polígonos en Leaflet
- */
-function renderSectorsOnMap(map, sectores) {
-    sectores.forEach(sector => {
-        // Colores según el estado
-        let fillColor = '#10B981'; // Óptimo
-        if (sector.estado === 'riego') fillColor = '#3B82F6';
-        if (sector.estado === 'alerta') fillColor = '#F59E0B';
-
-        // Crear polígono (rectángulo por ahora basado en bounds)
-        const rectangle = L.rectangle(sector.bounds, {
-            color: fillColor,
-            weight: 2,
-            fillColor: fillColor,
-            fillOpacity: 0.4
-        }).addTo(map);
-
-        // Añadir Tooltip (hover)
-        rectangle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
-
-        // Evento Click para abrir el modal
-        rectangle.on('click', () => {
-            openSectorModal(sector);
-            // Centrar el mapa sutilmente
-            map.flyToBounds(sector.bounds, { padding: [50, 50], duration: 0.5 });
-        });
-    });
-}
-
-/**
- * Función para crear la lista lateral de sectores
- */
-function renderSectorList(sectores) {
-    const listContainer = document.getElementById('sectorList');
-    if (!listContainer) return;
-
-    sectores.forEach(sector => {
-        let badgeHtml = '';
-        if (sector.estado === 'optimo') {
-            badgeHtml = `<span class="status-badge status-badge--ok"><i data-lucide="check-circle"></i> Óptimo</span>`;
-        } else if (sector.estado === 'riego') {
-            badgeHtml = `<span class="status-badge status-badge--riego"><i data-lucide="droplet"></i> En Riego</span>`;
-        } else if (sector.estado === 'alerta') {
-            badgeHtml = `<span class="status-badge status-badge--alerta"><i data-lucide="alert-triangle"></i> Revisar</span>`;
-        }
-
-        const item = document.createElement('div');
-        item.className = 'sector-item';
-        
-        item.innerHTML = `
-            <div class="sector-item__info">
-                <span class="sector-item__name">${sector.nombre}</span>
-                <span class="sector-item__meta">
-                    <i data-lucide="sprout" style="width:12px;height:12px"></i> ${sector.cultivo} • ${sector.hectareas} ha
-                </span>
-            </div>
-            <div class="sector-item__status">
-                ${badgeHtml}
-            </div>
-        `;
-        
-        // Al dar clic en la lista, abrir modal también
-        item.addEventListener('click', () => {
-            openSectorModal(sector);
-        });
-
-        listContainer.appendChild(item);
-    });
-
-    // IMPORTANTE: Volver a compilar los iconos de Lucide porque
-    // estos elementos HTML acaban de ser inyectados dinámicamente
-    lucide.createIcons();
-}
-

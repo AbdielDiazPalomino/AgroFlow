@@ -114,6 +114,9 @@
             <p class="page-subtitle">Monitoreo en tiempo real de operaciones agrícolas</p>
           </div>
           <div class="page-actions">
+            <button class="btn btn--outline" id="btnAgregarSector">
+              <i data-lucide="map-pin"></i> Nuevo Sector
+            </button>
             <button class="btn btn--outline">
               <i data-lucide="filter"></i> Filtros
             </button>
@@ -238,8 +241,47 @@
     </div>
   </div>
 
-  <!-- Script para la lógica y datos simulados -->
-  <script src="mapa.js"></script>
+  <!-- Modal Agregar Sector -->
+  <div class="modal-overlay" id="modalAgregarSector" style="display: none; z-index: 1000;">
+    <div class="modal" style="width: 450px; max-width: 90%;">
+      <div class="modal__header">
+        <h3>Nuevo Sector Agrícola</h3>
+        <button class="icon-btn icon-btn--small" id="btnCerrarModalSector">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="formAgregarSector" style="padding: 1.5rem;">
+        <div class="form-group mb-4">
+          <label class="form-label">Nombre del Sector</label>
+          <input type="text" id="addSectorNombre" class="form-input" placeholder="Ej: Sector Oeste 3" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Coordenadas (Lat,Lng)</label>
+          <input type="text" id="addSectorCoords" class="form-input" placeholder="-12.0463,-77.0427" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Área (Hectáreas)</label>
+          <input type="number" step="0.01" id="addSectorArea" class="form-input" placeholder="10.5" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Cultivo Principal (Opcional)</label>
+          <div class="custom-select-wrapper">
+            <select id="addSectorCultivo" class="custom-select">
+              <option value="">Sin Cultivo / Preparación</option>
+            </select>
+            <i data-lucide="chevron-down" class="custom-select-icon"></i>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn btn--primary" style="width: 100%;">Guardar Sector</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="mapa.js?v=2"></script>
 </body>
 </html>
 
