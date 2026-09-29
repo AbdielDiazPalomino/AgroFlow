@@ -279,10 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         targetCrewCount.textContent = '0 personas';
         
         document.querySelectorAll('.worker-item').forEach(el => el.classList.remove('active'));
-    });
-
-});
-
     // ==========================================
     // AGREGAR NUEVO TRABAJADOR
     // ==========================================
@@ -350,3 +346,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+});
