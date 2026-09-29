@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const usernameInput = document.getElementById('email').value;
+            const usernameInput = document.getElementById('username').value;
             const passwordInput = document.getElementById('password').value;
 
             const submitBtn = loginForm.querySelector('button[type="submit"]');
