@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DATOS REALES DESDE EL BACKEND ---
     let cuadrillas = [];
     let trabajadores = [];
+    let sectores = [];
 
     // Nodos DOM
     const globalList = document.getElementById('globalWorkerList');
@@ -33,13 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicialización asíncrona
     async function initApp() {
         try {
-            const [resC, resT] = await Promise.all([
+            const [resC, resT, resS] = await Promise.all([
                 fetch(`${CONFIG.API_BASE_URL}/cuadrillas/`),
-                fetch(`${CONFIG.API_BASE_URL}/trabajadores/`)
+                fetch(`${CONFIG.API_BASE_URL}/trabajadores/`),
+                fetch(`${CONFIG.API_BASE_URL}/sectores/`)
             ]);
             
             cuadrillas = await resC.json();
             const trabajadoresRaw = await resT.json();
+            sectores = await resS.json();
             
             // Adaptar JSON del backend a la estructura que el UI requiere
             trabajadores = trabajadoresRaw.map(t => ({
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderGlobalWorkerList(trabajadores);
             populateTargetSelect();
+            populateSectoresSelect();
         } catch (error) {
             console.error("Error conectando con Django:", error);
             globalList.innerHTML = `<li style="padding:1rem; color:red;">Error de conexión con el Backend. Verifica tu CONFIG.API_BASE_URL o si runserver está encendido.</li>`;
@@ -59,6 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     initApp();
+
+    function populateSectoresSelect() {
+        const sectorSelect = document.getElementById('addCuadrillaSector');
+        if(sectorSelect) {
+            // Mantener la opción por defecto
+            sectorSelect.innerHTML = '<option value="">Sin Sector Específico</option>';
+            sectores.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nombre;
+                sectorSelect.appendChild(opt);
+            });
+        }
+    }
 
     // Buscador interactivo
     searchInput.addEventListener('input', (e) => {
@@ -342,6 +360,73 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch(error) {
                 console.error("Error al guardar:", error);
                 alert("❌ Ocurrió un error al guardar el trabajador. Verifica la consola.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // ==========================================
+    // AGREGAR NUEVA CUADRILLA
+    // ==========================================
+    const modalAddCuadrilla = document.getElementById('modalAgregarCuadrilla');
+    const btnOpenModalCuadrilla = document.getElementById('btnAgregarCuadrilla');
+    const btnCloseModalCuadrilla = document.getElementById('btnCerrarModalCuadrilla');
+    const formAddCuadrilla = document.getElementById('formAgregarCuadrilla');
+
+    if(btnOpenModalCuadrilla && modalAddCuadrilla) {
+        btnOpenModalCuadrilla.addEventListener('click', () => {
+            modalAddCuadrilla.style.display = 'flex';
+        });
+
+        btnCloseModalCuadrilla.addEventListener('click', () => {
+            modalAddCuadrilla.style.display = 'none';
+        });
+
+        formAddCuadrilla.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('addCuadrillaNombre').value;
+            const tipo = document.getElementById('addCuadrillaTipo').value;
+            const sectorId = document.getElementById('addCuadrillaSector').value;
+            
+            const submitBtn = formAddCuadrilla.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Guardando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/cuadrillas/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        tipo: tipo,
+                        sector_asignado: sectorId ? parseInt(sectorId) : null,
+                        supervisor: null
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(JSON.stringify(err));
+                }
+
+                alert(`✅ Cuadrilla '${nombre}' registrada correctamente en la Base de Datos.`);
+                
+                // Cerrar modal y limpiar
+                formAddCuadrilla.reset();
+                modalAddCuadrilla.style.display = 'none';
+                
+                // Recargar lista global para ver la nueva cuadrilla
+                await initApp();
+
+            } catch(error) {
+                console.error("Error al guardar:", error);
+                alert("❌ Ocurrió un error al guardar la Cuadrilla. Verifica la consola.");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;

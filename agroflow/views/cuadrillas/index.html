@@ -86,7 +86,10 @@
         
         <div class="page-header px-4 pt-4 mb-0">
           <h1 class="page-title">Personal y Cuadrillas</h1>
-          <button class="btn btn--primary" id="btnAgregarTrabajador"><i data-lucide="user-plus"></i> Agregar Trabajador</button>
+          <div style="display:flex; gap: 1rem;">
+            <button class="btn btn--outline" id="btnAgregarCuadrilla"><i data-lucide="users"></i> Nueva Cuadrilla</button>
+            <button class="btn btn--primary" id="btnAgregarTrabajador"><i data-lucide="user-plus"></i> Agregar Trabajador</button>
+          </div>
         </div>
 
         <div class="cuadrillas-layout">
@@ -197,6 +200,44 @@
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
           <button type="button" class="btn btn--outline" id="btnCerrarModal">Cancelar</button>
           <button type="submit" class="btn btn--primary">Guardar Trabajador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Cuadrilla -->
+  <div class="modal" id="modalAgregarCuadrilla" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 400px; max-width: 90%;">
+      <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Nueva Cuadrilla</h2>
+      <form id="formAgregarCuadrilla">
+        <div class="form-group mb-4">
+          <label class="form-label">Nombre de la Cuadrilla</label>
+          <input type="text" id="addCuadrillaNombre" class="form-input" placeholder="Ej: Cuadrilla Cosecha Beta" required>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Tipo de Tarea</label>
+          <div class="custom-select-wrapper">
+            <select id="addCuadrillaTipo" class="custom-select" required>
+              <option value="COSECHA">Cosecha</option>
+              <option value="PODADO">Podado</option>
+              <option value="RIEGO">Riego y Fertirriego</option>
+              <option value="MANTENIMIENTO">Mantenimiento</option>
+            </select>
+            <i data-lucide="chevron-down" class="custom-select-icon"></i>
+          </div>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Sector Asignado (Opcional)</label>
+          <div class="custom-select-wrapper">
+            <select id="addCuadrillaSector" class="custom-select">
+              <option value="">Sin Sector Específico</option>
+            </select>
+            <i data-lucide="chevron-down" class="custom-select-icon"></i>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+          <button type="button" class="btn btn--outline" id="btnCerrarModalCuadrilla">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar Cuadrilla</button>
         </div>
       </form>
     </div>
