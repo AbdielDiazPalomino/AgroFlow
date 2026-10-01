@@ -145,9 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const sectorId = document.getElementById('addSectorId').value;
             const nombre = document.getElementById('addSectorNombre').value;
-            const coordenadas = document.getElementById('addSectorCoords').value;
+            const coordsText = document.getElementById('addSectorCoords').value;
             const area = document.getElementById('addSectorArea').value;
             const cultivoId = document.getElementById('addSectorCultivo').value;
+
+            // Parsear textarea a array de coordenadas
+            let coordenadasArray = [];
+            if(coordsText) {
+                const lines = coordsText.split('\n');
+                lines.forEach(line => {
+                    if(line.trim()) {
+                        const parts = line.split(',');
+                        if(parts.length >= 2) {
+                            coordenadasArray.push([parseFloat(parts[0].trim()), parseFloat(parts[1].trim())]);
+                        }
+                    }
+                });
+            }
 
             const submitBtn = formAgregarSector.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -156,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const payload = {
                 nombre: nombre,
-                coordenadas_centro: coordenadas,
+                coordenadas_poligono: JSON.stringify(coordenadasArray),
                 area_hectareas: parseFloat(area),
                 cultivo: cultivoId ? parseInt(cultivoId) : null,
                 estado: 'ACTIVO' // TODO: se podría permitir editar estado también
@@ -211,7 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('formSectorTitle').textContent = 'Editar Sector';
             document.getElementById('addSectorId').value = s.id;
             document.getElementById('addSectorNombre').value = s.nombre;
-            document.getElementById('addSectorCoords').value = s.coordenadas_centro;
+            
+            let coordsStr = "";
+            if(s.coordenadas_poligono) {
+                try {
+                    const parsed = JSON.parse(s.coordenadas_poligono);
+                    coordsStr = parsed.map(c => `${c[0]}, ${c[1]}`).join('\n');
+                } catch(e) {}
+            }
+            document.getElementById('addSectorCoords').value = coordsStr;
+            
             document.getElementById('addSectorArea').value = s.area_hectareas;
             document.getElementById('addSectorCultivo').value = s.cultivo || '';
             
@@ -294,33 +317,54 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sector.estado === 'ALERTA') fillColor = '#F59E0B';
             if (sector.estado === 'MANTENIMIENTO') fillColor = '#9CA3AF';
 
-            // Parsea coordenadas "lat,lng"
+            // Parsea JSON polygon
             let lat = baseLat, lng = baseLng;
-            if (sector.coordenadas_centro) {
-                const parts = sector.coordenadas_centro.split(',');
-                if(parts.length === 2) {
-                    lat = parseFloat(parts[0]);
-                    lng = parseFloat(parts[1]);
-                }
+            let boundsArray = null;
+
+            if (sector.coordenadas_poligono) {
+                try {
+                    const parsed = JSON.parse(sector.coordenadas_poligono);
+                    if(parsed.length >= 3) {
+                        boundsArray = parsed;
+                    } else if (parsed.length > 0) {
+                        lat = parsed[0][0];
+                        lng = parsed[0][1];
+                    }
+                } catch(e) {}
             }
 
-            // Usamos un círculo cuyo radio es aproximado al área (1 ha = 10,000 m2 = radio ~ 56m)
-            const radioCalculado = Math.sqrt((sector.area_hectareas * 10000) / Math.PI);
+            if(boundsArray) {
+                const polygon = L.polygon(boundsArray, {
+                    color: fillColor,
+                    weight: 2,
+                    fillColor: fillColor,
+                    fillOpacity: 0.5
+                }).addTo(map);
 
-            const circle = L.circle([lat, lng], {
-                color: fillColor,
-                weight: 2,
-                fillColor: fillColor,
-                fillOpacity: 0.5,
-                radius: radioCalculado > 10 ? radioCalculado : 50 // minimo 50m
-            }).addTo(map);
+                polygon.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+                
+                polygon.on('click', () => {
+                    openSectorModal(sector);
+                    map.flyToBounds(polygon.getBounds(), { padding: [50, 50], duration: 0.5, maxZoom: 16 });
+                });
+            } else {
+                // Fallback a círculo si no hay polígono válido
+                const radioCalculado = Math.sqrt((sector.area_hectareas * 10000) / Math.PI);
+                const circle = L.circle([lat, lng], {
+                    color: fillColor,
+                    weight: 2,
+                    fillColor: fillColor,
+                    fillOpacity: 0.5,
+                    radius: radioCalculado > 10 ? radioCalculado : 50
+                }).addTo(map);
 
-            circle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+                circle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
 
-            circle.on('click', () => {
-                openSectorModal(sector);
-                map.flyTo([lat, lng], 16, { duration: 0.5 });
-            });
+                circle.on('click', () => {
+                    openSectorModal(sector);
+                    map.flyTo([lat, lng], 16, { duration: 0.5 });
+                });
+            }
         });
     }
 
@@ -360,11 +404,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 openSectorModal(sector);
                 
                 // Centrar en el mapa
-                if (sector.coordenadas_centro) {
-                    const parts = sector.coordenadas_centro.split(',');
-                    if(parts.length === 2) {
-                        map.flyTo([parseFloat(parts[0]), parseFloat(parts[1])], 16, { duration: 0.5 });
-                    }
+                if (sector.coordenadas_poligono) {
+                    try {
+                        const parsed = JSON.parse(sector.coordenadas_poligono);
+                        if(parsed.length > 0) {
+                            if(parsed.length >= 3) {
+                                const tempPoly = L.polygon(parsed);
+                                map.flyToBounds(tempPoly.getBounds(), { padding: [50, 50], duration: 0.5, maxZoom: 16 });
+                            } else {
+                                map.flyTo([parsed[0][0], parsed[0][1]], 16, { duration: 0.5 });
+                            }
+                        }
+                    } catch(e) {}
                 }
             });
 

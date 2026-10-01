@@ -74,3 +74,4 @@ class ActividadCampoViewSet(viewsets.ModelViewSet):
 class RegistroCosechaViewSet(viewsets.ModelViewSet):
     queryset = RegistroCosecha.objects.all()
     serializer_class = RegistroCosechaSerializer
+

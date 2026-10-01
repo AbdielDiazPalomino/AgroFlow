@@ -38,7 +38,7 @@ class Sector(models.Model):
     ]
 
     nombre = models.CharField(max_length=100, help_text="Ej: Sector Norte 1")
-    coordenadas_centro = models.CharField(max_length=100, help_text="Lat,Lng para centrar el mapa")
+    coordenadas_poligono = models.TextField(help_text="JSON array de coordenadas [[lat,lng], [lat,lng]...]", blank=True, null=True)
     area_hectareas = models.DecimalField(max_digits=6, decimal_places=2)
     cultivo = models.ForeignKey(Cultivo, on_delete=models.SET_NULL, null=True, blank=True, related_name='sectores')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO')
