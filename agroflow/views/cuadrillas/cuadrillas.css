@@ -223,11 +223,99 @@
   width: auto;
 }
 
-/* ================== UI MEJORADA (Textarea y Select) ================== */
+/* ================== ESTILOS DE MODAL Y FORMULARIOS MODERNOS ================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(11, 17, 33, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+  padding: 1rem;
+}
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transform: translateY(16px) scale(0.98);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.modal-overlay.active .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal__header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+.modal__header h2,
+.modal__header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal__body {
+  padding: 1.75rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+.form-input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .form-textarea {
@@ -235,60 +323,69 @@
   resize: vertical;
   min-height: 80px;
   line-height: 1.5;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   font-family: inherit;
-  background-color: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #F8FAFC;
+  font-size: 0.9375rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
   border-radius: var(--radius-md);
   transition: all 0.2s;
   box-sizing: border-box;
+  outline: none;
 }
 .form-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .custom-select-wrapper {
   position: relative;
-  display: inline-block;
   width: 100%;
-  max-width: 250px;
+  max-width: 100%;
 }
 .custom-select {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
-  background-color: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #60A5FA;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 .custom-select:focus {
-  border-color: #3B82F6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 .custom-select option {
-  background-color: #0F172A; /* Fondo oscuro sólido, no transparente */
-  color: #F8FAFC; /* Texto blanco para mejor lectura */
+  background-color: #0F172A;
+  color: #F8FAFC;
   padding: 10px;
 }
 .custom-select-icon {
   position: absolute;
-  right: 12px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
-  color: #60A5FA;
+  color: var(--color-text-muted);
   pointer-events: none;
+  transition: color 0.2s;
 }
-/* ==================================================================== */
+.custom-select:focus + .custom-select-icon {
+  color: var(--color-primary);
+}
 
 /* Alertas reutilizadas */
 .alert {

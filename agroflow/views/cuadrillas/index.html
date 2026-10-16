@@ -184,25 +184,33 @@
   </div>
 
   <!-- Modal Agregar / Editar Trabajador -->
-  <div class="modal" id="modalAgregarTrabajador" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
-    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 420px; max-width: 90%;">
-      <h2 id="modalTrabajadorTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Nuevo Trabajador</h2>
-      <form id="formAgregarTrabajador">
+  <div class="modal-overlay" id="modalAgregarTrabajador">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 id="modalTrabajadorTitle">
+          <i data-lucide="user" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+          <span>Nuevo Trabajador</span>
+        </h2>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModal" aria-label="Cerrar modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="formAgregarTrabajador" class="modal__body">
         <input type="hidden" id="addTrabajadorId" value="">
         <div class="form-group mb-4">
-          <label class="form-label">Nombres</label>
-          <input type="text" id="addNombres" class="form-input" required>
+          <label class="form-label" for="addNombres">Nombres</label>
+          <input type="text" id="addNombres" class="form-input" placeholder="Ej: Juan Carlos" required>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">Apellidos</label>
-          <input type="text" id="addApellidos" class="form-input" required>
+          <label class="form-label" for="addApellidos">Apellidos</label>
+          <input type="text" id="addApellidos" class="form-input" placeholder="Ej: Pérez Quispe" required>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">DNI</label>
-          <input type="text" id="addDni" class="form-input" required maxlength="8">
+          <label class="form-label" for="addDni">DNI</label>
+          <input type="text" id="addDni" class="form-input" placeholder="8 dígitos" required maxlength="8">
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">Rol Operativo</label>
+          <label class="form-label" for="addEsSupervisor">Rol Operativo</label>
           <div class="custom-select-wrapper">
             <select id="addEsSupervisor" class="custom-select">
               <option value="false">Obrero de Campo</option>
@@ -214,27 +222,39 @@
             Los supervisores pueden ser asignados como encargados de cuadrillas.
           </small>
         </div>
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-          <button type="button" class="btn btn--outline" id="btnCerrarModal">Cancelar</button>
-          <button type="button" class="btn" id="btnEliminarTrabajador" style="background-color: #EF4444; color: white; border: none; display: none;">Eliminar</button>
-          <button type="submit" class="btn btn--primary">Guardar Trabajador</button>
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1.25rem;">
+          <button type="button" class="btn btn--outline" id="btnCancelarModalTrabajador">Cancelar</button>
+          <button type="button" class="btn" id="btnEliminarTrabajador" style="background-color: #EF4444; color: white; border: none; display: none;">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Eliminar
+          </button>
+          <button type="submit" class="btn btn--primary">
+            <i data-lucide="check" style="width: 16px; height: 16px;"></i> Guardar Trabajador
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Modal Agregar / Editar Cuadrilla -->
-  <div class="modal" id="modalAgregarCuadrilla" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
-    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 420px; max-width: 90%;">
-      <h2 id="modalCuadrillaTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Nueva Cuadrilla</h2>
-      <form id="formAgregarCuadrilla">
+  <div class="modal-overlay" id="modalAgregarCuadrilla">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 id="modalCuadrillaTitle">
+          <i data-lucide="users" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+          <span>Nueva Cuadrilla</span>
+        </h2>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalCuadrillaX" aria-label="Cerrar modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="formAgregarCuadrilla" class="modal__body">
         <input type="hidden" id="addCuadrillaId" value="">
         <div class="form-group mb-4">
-          <label class="form-label">Nombre de la Cuadrilla</label>
+          <label class="form-label" for="addCuadrillaNombre">Nombre de la Cuadrilla</label>
           <input type="text" id="addCuadrillaNombre" class="form-input" placeholder="Ej: Cuadrilla Cosecha Beta" required>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">Tipo de Tarea</label>
+          <label class="form-label" for="addCuadrillaTipo">Tipo de Tarea</label>
           <div class="custom-select-wrapper">
             <select id="addCuadrillaTipo" class="custom-select" required>
               <option value="COSECHA">Cosecha</option>
@@ -246,7 +266,7 @@
           </div>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">Sector Asignado (Opcional)</label>
+          <label class="form-label" for="addCuadrillaSector">Sector Asignado (Opcional)</label>
           <div class="custom-select-wrapper">
             <select id="addCuadrillaSector" class="custom-select">
               <option value="">Sin Sector Específico</option>
@@ -255,7 +275,7 @@
           </div>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label">Encargado / Supervisor (Opcional)</label>
+          <label class="form-label" for="addCuadrillaSupervisor">Encargado / Supervisor (Opcional)</label>
           <div class="custom-select-wrapper">
             <select id="addCuadrillaSupervisor" class="custom-select">
               <option value="">Sin Encargado Asignado</option>
@@ -263,10 +283,14 @@
             <i data-lucide="chevron-down" class="custom-select-icon"></i>
           </div>
         </div>
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1.25rem;">
           <button type="button" class="btn btn--outline" id="btnCerrarModalCuadrilla">Cancelar</button>
-          <button type="button" class="btn" id="btnEliminarCuadrilla" style="background-color: #EF4444; color: white; border: none; display: none;">Eliminar</button>
-          <button type="submit" class="btn btn--primary">Guardar Cuadrilla</button>
+          <button type="button" class="btn" id="btnEliminarCuadrilla" style="background-color: #EF4444; color: white; border: none; display: none;">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Eliminar
+          </button>
+          <button type="submit" class="btn btn--primary">
+            <i data-lucide="check" style="width: 16px; height: 16px;"></i> Guardar Cuadrilla
+          </button>
         </div>
       </form>
     </div>
@@ -274,6 +298,6 @@
 
   <!-- Scripts -->
   <script src="../../js/config.js"></script>
-  <script src="cuadrillas.js?v=4"></script>
+  <script src="cuadrillas.js?v=5"></script>
 </body>
 </html>

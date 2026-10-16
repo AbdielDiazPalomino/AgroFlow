@@ -383,31 +383,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnEliminarTrabajador = document.getElementById('btnEliminarTrabajador');
     const modalTrabajadorTitle = document.getElementById('modalTrabajadorTitle');
 
+    const btnCancelarModalTrabajador = document.getElementById('btnCancelarModalTrabajador');
+
     function openWorkerModalCreate() {
-        modalTrabajadorTitle.textContent = 'Nuevo Trabajador';
+        modalTrabajadorTitle.innerHTML = `
+            <i data-lucide="user-plus" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+            <span>Nuevo Trabajador</span>
+        `;
         formAdd.reset();
         document.getElementById('addTrabajadorId').value = '';
         document.getElementById('addEsSupervisor').value = 'false';
         btnEliminarTrabajador.style.display = 'none';
-        modalAdd.style.display = 'flex';
+        modalAdd.classList.add('active');
+        lucide.createIcons();
     }
 
     function openWorkerModalEdit(worker) {
-        modalTrabajadorTitle.textContent = 'Editar Trabajador';
+        modalTrabajadorTitle.innerHTML = `
+            <i data-lucide="edit" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+            <span>Editar Trabajador</span>
+        `;
         document.getElementById('addTrabajadorId').value = worker.id;
         document.getElementById('addNombres').value = worker.nombres || '';
         document.getElementById('addApellidos').value = worker.apellidos || '';
         document.getElementById('addDni').value = worker.dni || '';
         document.getElementById('addEsSupervisor').value = worker.esSupervisor ? 'true' : 'false';
         btnEliminarTrabajador.style.display = 'inline-flex';
-        modalAdd.style.display = 'flex';
+        modalAdd.classList.add('active');
+        lucide.createIcons();
+    }
+
+    function closeWorkerModal() {
+        modalAdd.classList.remove('active');
     }
 
     if(btnOpenModal && modalAdd) {
         btnOpenModal.addEventListener('click', openWorkerModalCreate);
+        btnCloseModal?.addEventListener('click', closeWorkerModal);
+        btnCancelarModalTrabajador?.addEventListener('click', closeWorkerModal);
 
-        btnCloseModal.addEventListener('click', () => {
-            modalAdd.style.display = 'none';
+        // Cerrar al dar click fuera (en el backdrop)
+        modalAdd.addEventListener('click', (e) => {
+            if(e.target === modalAdd) closeWorkerModal();
         });
 
         formAdd.addEventListener('submit', async (e) => {
@@ -453,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(`✅ Trabajador ${nombres} ${trabajadorId ? 'actualizado' : 'registrado'} correctamente.`);
                 
                 formAdd.reset();
-                modalAdd.style.display = 'none';
+                closeWorkerModal();
                 
                 await initApp();
 
@@ -484,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Error al eliminar');
 
                 alert('🗑️ Trabajador eliminado correctamente.');
-                modalAdd.style.display = 'none';
+                closeWorkerModal();
                 if(selectedWorker?.id === trabajadorId) {
                     btnCancelar.click();
                 }
@@ -505,36 +522,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalAddCuadrilla = document.getElementById('modalAgregarCuadrilla');
     const btnOpenModalCuadrilla = document.getElementById('btnAgregarCuadrilla');
     const btnCloseModalCuadrilla = document.getElementById('btnCerrarModalCuadrilla');
+    const btnCerrarModalCuadrillaX = document.getElementById('btnCerrarModalCuadrillaX');
     const formAddCuadrilla = document.getElementById('formAgregarCuadrilla');
     const btnEliminarCuadrilla = document.getElementById('btnEliminarCuadrilla');
     const modalCuadrillaTitle = document.getElementById('modalCuadrillaTitle');
 
+    function closeCuadrillaModal() {
+        modalAddCuadrilla.classList.remove('active');
+    }
+
     // Helper: Abrir modal en modo CREAR
     function openCuadrillaModalCreate() {
-        modalCuadrillaTitle.textContent = 'Nueva Cuadrilla';
+        modalCuadrillaTitle.innerHTML = `
+            <i data-lucide="users" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+            <span>Nueva Cuadrilla</span>
+        `;
         formAddCuadrilla.reset();
         document.getElementById('addCuadrillaId').value = '';
         btnEliminarCuadrilla.style.display = 'none';
-        modalAddCuadrilla.style.display = 'flex';
+        modalAddCuadrilla.classList.add('active');
+        lucide.createIcons();
     }
 
     // Helper: Abrir modal en modo EDITAR
     function openCuadrillaModalEdit(cuadrilla) {
-        modalCuadrillaTitle.textContent = 'Editar Cuadrilla';
+        modalCuadrillaTitle.innerHTML = `
+            <i data-lucide="edit" style="color: var(--color-primary); width: 22px; height: 22px;"></i>
+            <span>Editar Cuadrilla</span>
+        `;
         document.getElementById('addCuadrillaId').value = cuadrilla.id;
         document.getElementById('addCuadrillaNombre').value = cuadrilla.nombre;
         document.getElementById('addCuadrillaTipo').value = cuadrilla.tipo;
         document.getElementById('addCuadrillaSector').value = cuadrilla.sector_asignado || '';
         document.getElementById('addCuadrillaSupervisor').value = cuadrilla.encargado || cuadrilla.supervisor || '';
         btnEliminarCuadrilla.style.display = 'inline-flex';
-        modalAddCuadrilla.style.display = 'flex';
+        modalAddCuadrilla.classList.add('active');
+        lucide.createIcons();
     }
 
     if(btnOpenModalCuadrilla && modalAddCuadrilla) {
         btnOpenModalCuadrilla.addEventListener('click', openCuadrillaModalCreate);
+        btnCloseModalCuadrilla?.addEventListener('click', closeCuadrillaModal);
+        btnCerrarModalCuadrillaX?.addEventListener('click', closeCuadrillaModal);
 
-        btnCloseModalCuadrilla.addEventListener('click', () => {
-            modalAddCuadrilla.style.display = 'none';
+        modalAddCuadrilla.addEventListener('click', (e) => {
+            if(e.target === modalAddCuadrilla) closeCuadrillaModal();
         });
 
         // GUARDAR (POST o PUT)
@@ -579,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(`✅ Cuadrilla '${nombre}' ${cuadrillaId ? 'actualizada' : 'registrada'} correctamente.`);
                 
                 formAddCuadrilla.reset();
-                modalAddCuadrilla.style.display = 'none';
+                closeCuadrillaModal();
                 await initApp();
 
             } catch(error) {
@@ -610,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Error eliminando');
 
                 alert('🗑️ Cuadrilla eliminada correctamente.');
-                modalAddCuadrilla.style.display = 'none';
+                closeCuadrillaModal();
                 await initApp();
             } catch(err) {
                 console.error(err);
