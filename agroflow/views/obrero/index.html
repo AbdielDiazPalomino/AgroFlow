@@ -183,22 +183,67 @@
             </div>
           </div>
 
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; max-width: 500px; margin-top: 1.5rem;">
+          <div class="security-card">
+            <div class="security-card__header">
+              <div class="security-card__icon">
+                <i data-lucide="shield-check"></i>
+              </div>
+              <div>
+                <h3 class="security-card__title">Credenciales de Acceso</h3>
+                <p class="security-card__subtitle">Actualiza tu clave para mayor privacidad y control de tu portal</p>
+              </div>
+            </div>
+
+            <div class="form-note">
+              <i data-lucide="info"></i>
+              <span>Por defecto, tu clave inicial es tu número de DNI. Elige una nueva clave fácil de recordar pero segura.</span>
+            </div>
+
             <form id="formCambiarPassword">
-              <div class="form-group mb-4">
-                <label class="form-label">Contraseña Actual (Por defecto tu DNI)</label>
-                <input type="password" id="inputCurrentPass" class="form-input" required placeholder="Ingresa tu contraseña actual">
+              <div class="form-group">
+                <label class="form-label" for="inputCurrentPass">
+                  <span>Contraseña Actual</span>
+                  <span class="form-label-hint">DNI inicial</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="lock" class="input-icon"></i>
+                  <input type="password" id="inputCurrentPass" class="form-input" required placeholder="Ingresa tu contraseña actual">
+                  <button type="button" class="password-toggle" data-target="inputCurrentPass" aria-label="Mostrar contraseña">
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group mb-4">
-                <label class="form-label">Nueva Contraseña</label>
-                <input type="password" id="inputNewPass" class="form-input" required placeholder="Mínimo 4 caracteres">
+
+              <div class="form-group">
+                <label class="form-label" for="inputNewPass">
+                  <span>Nueva Contraseña</span>
+                  <span class="form-label-hint">Mínimo 4 caracteres</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="key" class="input-icon"></i>
+                  <input type="password" id="inputNewPass" class="form-input" required placeholder="Crea tu nueva contraseña">
+                  <button type="button" class="password-toggle" data-target="inputNewPass" aria-label="Mostrar contraseña">
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="form-group mb-4">
-                <label class="form-label">Confirmar Nueva Contraseña</label>
-                <input type="password" id="inputConfirmPass" class="form-input" required placeholder="Repite la nueva contraseña">
+
+              <div class="form-group">
+                <label class="form-label" for="inputConfirmPass">
+                  <span>Confirmar Nueva Contraseña</span>
+                  <span class="form-label-hint">Repetir</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="check-circle" class="input-icon"></i>
+                  <input type="password" id="inputConfirmPass" class="form-input" required placeholder="Repite exactamente tu nueva clave">
+                  <button type="button" class="password-toggle" data-target="inputConfirmPass" aria-label="Mostrar contraseña">
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
               </div>
-              <button type="submit" class="btn btn--primary" style="width: 100%; margin-top: 1rem;">
-                <i data-lucide="save"></i> Actualizar mi Contraseña
+
+              <button type="submit" class="btn btn--primary" style="width: 100%; margin-top: 0.75rem; padding: 0.95rem; font-size: 0.95rem;">
+                <i data-lucide="save"></i> Guardar Nueva Contraseña
               </button>
             </form>
           </div>
@@ -209,7 +254,7 @@
   </div>
 
   <script src="../../js/config.js"></script>
-  <script src="obrero.js?v=2"></script>
+  <script src="obrero.js?v=3"></script>
 </body>
 </html>
 

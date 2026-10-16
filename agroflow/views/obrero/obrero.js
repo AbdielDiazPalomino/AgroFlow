@@ -297,6 +297,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // 6. Toggle Visibilidad de Contraseñas (Ver / Ocultar)
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.innerHTML = isPassword ? `<i data-lucide="eye-off"></i>` : `<i data-lucide="eye"></i>`;
+            lucide.createIcons();
+        });
+    });
+
     // Cargar inicial
     await cargarPerfil();
 });
