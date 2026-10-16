@@ -59,6 +59,34 @@ class CuadrillaViewSet(viewsets.ModelViewSet):
     queryset = Cuadrilla.objects.all()
     serializer_class = CuadrillaSerializer
 
+    def perform_create(self, serializer):
+        cuadrilla = serializer.save()
+        if cuadrilla.encargado:
+            # Asignar automáticamente el trabajador a esta cuadrilla
+            cuadrilla.encargado.cuadrilla = cuadrilla
+            cuadrilla.encargado.save()
+
+    def perform_update(self, serializer):
+        cuadrilla_anterior = self.get_object()
+        encargado_anterior = cuadrilla_anterior.encargado
+        cuadrilla = serializer.save()
+
+        # Si cambió de encargado o se quitó, y el anterior estaba en esta cuadrilla
+        if encargado_anterior and encargado_anterior != cuadrilla.encargado:
+            if encargado_anterior.cuadrilla == cuadrilla:
+                encargado_anterior.cuadrilla = None
+                encargado_anterior.save()
+
+        # Si hay un nuevo encargado asignado, vincularlo a esta cuadrilla
+        if cuadrilla.encargado:
+            cuadrilla.encargado.cuadrilla = cuadrilla
+            cuadrilla.encargado.save()
+
+    def perform_destroy(self, instance):
+        # Desvincular cuadrilla a los trabajadores asignados antes de eliminar
+        Trabajador.objects.filter(cuadrilla=instance).update(cuadrilla=None)
+        instance.delete()
+
 class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.all()
     serializer_class = TrabajadorSerializer
