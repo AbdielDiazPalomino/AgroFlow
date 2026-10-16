@@ -27,10 +27,16 @@ class SectorSerializer(serializers.ModelSerializer):
 class CuadrillaSerializer(serializers.ModelSerializer):
     sector_nombre = serializers.CharField(source='sector_asignado.nombre', read_only=True)
     supervisor_nombre = serializers.CharField(source='supervisor.username', read_only=True)
+    encargado_nombre = serializers.SerializerMethodField()
 
     class Meta:
         model = Cuadrilla
         fields = '__all__'
+
+    def get_encargado_nombre(self, obj):
+        if obj.encargado:
+            return f"{obj.encargado.nombres} {obj.encargado.apellidos}"
+        return None
 
 class TrabajadorSerializer(serializers.ModelSerializer):
     cuadrilla_nombre = serializers.CharField(source='cuadrilla.nombre', read_only=True)

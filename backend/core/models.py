@@ -62,6 +62,7 @@ class Cuadrilla(models.Model):
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     sector_asignado = models.ForeignKey(Sector, on_delete=models.SET_NULL, null=True, blank=True, related_name='cuadrillas')
     supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'is_staff': True})
+    encargado = models.ForeignKey('Trabajador', on_delete=models.SET_NULL, null=True, blank=True, related_name='cuadrillas_a_cargo')
     
     def __str__(self):
         return self.nombre
@@ -78,6 +79,7 @@ class Trabajador(models.Model):
     
     # Si es null, es personal nuevo sin asignar (Tal como lo diseñamos en el frontend)
     cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.SET_NULL, null=True, blank=True, related_name='trabajadores')
+    es_supervisor = models.BooleanField(default=False, help_text="¿Tiene rol de supervisor de campo?")
     
     fecha_contratacion = models.DateField(auto_now_add=True)
 

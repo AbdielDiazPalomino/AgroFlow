@@ -78,17 +78,16 @@ class RegistroCosechaViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_supervisores(request):
-    """Retorna usuarios con is_staff=True para seleccionar como encargados de cuadrilla."""
-    from django.contrib.auth.models import User
-    users = User.objects.filter(is_staff=True).values('id', 'username', 'first_name', 'last_name')
+    """
+    Retorna los trabajadores que tienen rol de supervisor (es_supervisor=True).
+    El encargado de cuadrilla debe ser un trabajador con rol de supervisor, no el admin.
+    """
+    supervisores = Trabajador.objects.filter(es_supervisor=True)
     result = []
-    for u in users:
-        nombre_display = f"{u['first_name']} {u['last_name']}".strip()
-        if not nombre_display:
-            nombre_display = u['username']
+    for s in supervisores:
         result.append({
-            'id': u['id'],
-            'username': u['username'],
-            'nombre_display': nombre_display
+            'id': s.id,
+            'dni': s.dni,
+            'nombre_display': f"{s.nombres} {s.apellidos} (DNI: {s.dni})"
         })
     return Response(result)

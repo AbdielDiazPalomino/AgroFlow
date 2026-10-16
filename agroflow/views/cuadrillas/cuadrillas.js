@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
             trabajadores = trabajadoresRaw.map(t => ({
                 id: t.id.toString(),
                 dni: t.dni,
+                nombres: t.nombres,
+                apellidos: t.apellidos,
                 nombre: `${t.nombres} ${t.apellidos}`,
+                esSupervisor: !!t.es_supervisor,
                 img: t.foto_url || `https://ui-avatars.com/api/?name=${t.nombres}+${t.apellidos}&background=random`,
                 cuadrillaId: t.cuadrilla // FK integer o null
             }));
@@ -115,13 +118,27 @@ document.addEventListener('DOMContentLoaded', () => {
             li.className = `worker-item ${selectedWorker?.id === worker.id ? 'active' : ''}`;
             li.innerHTML = `
                 <img src="${worker.img}" alt="${worker.nombre}">
-                <div class="worker-item-info">
-                    <span class="worker-item-name">${worker.nombre}</span>
-                    <span class="worker-item-crew">${crewName}</span>
+                <div class="worker-item-info" style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                        <span class="worker-item-name">${worker.nombre}</span>
+                        ${worker.esSupervisor ? '<span style="background: rgba(16, 185, 129, 0.2); color: #10B981; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">SUPERVISOR</span>' : ''}
+                    </div>
+                    <span class="worker-item-crew">DNI: ${worker.dni} • ${crewName}</span>
+                </div>
+                <div class="worker-actions" style="display: flex; gap: 0.25rem; align-items: center;">
+                    <button class="icon-btn icon-btn--small btn-edit-worker" data-id="${worker.id}" title="Editar trabajador" style="color: var(--color-primary); width: 28px; height: 28px;">
+                        <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="icon-btn icon-btn--small btn-delete-worker" data-id="${worker.id}" title="Eliminar trabajador" style="color: #EF4444; width: 28px; height: 28px;">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
                 </div>
             `;
 
-            li.addEventListener('click', () => {
+            li.addEventListener('click', (e) => {
+                // Evitar seleccionar para traslado si se hizo click en los botones de acción
+                if(e.target.closest('.worker-actions')) return;
+
                 selectWorkerForTransfer(worker, crew);
                 // Highlight update
                 document.querySelectorAll('.worker-item').forEach(el => el.classList.remove('active'));
@@ -130,6 +147,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
             globalList.appendChild(li);
         });
+
+        // Event listeners para los botones de editar y eliminar trabajadores
+        globalList.querySelectorAll('.btn-edit-worker').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const workerId = btn.getAttribute('data-id');
+                const worker = trabajadores.find(t => t.id === workerId);
+                if(worker) openWorkerModalEdit(worker);
+            });
+        });
+
+        globalList.querySelectorAll('.btn-delete-worker').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const workerId = btn.getAttribute('data-id');
+                const worker = trabajadores.find(t => t.id === workerId);
+                if(!worker) return;
+
+                const confirmDelete = confirm(`⚠️ ¿Estás seguro que deseas ELIMINAR al trabajador "${worker.nombre}" (DNI: ${worker.dni})? Esta acción no se puede deshacer.`);
+                if(!confirmDelete) return;
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/${workerId}/`, {
+                        method: 'DELETE'
+                    });
+                    if(!res.ok) throw new Error('Error al eliminar');
+
+                    alert(`🗑️ Trabajador "${worker.nombre}" eliminado correctamente.`);
+                    if(selectedWorker?.id === workerId) {
+                        btnCancelar.click();
+                    }
+                    await initApp();
+                } catch(err) {
+                    console.error(err);
+                    alert("❌ Error al eliminar el trabajador.");
+                }
+            });
+        });
+
+        lucide.createIcons();
     }
 
     /**
@@ -317,17 +374,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // AGREGAR NUEVO TRABAJADOR
+    // AGREGAR / EDITAR / ELIMINAR TRABAJADOR
     // ==========================================
     const modalAdd = document.getElementById('modalAgregarTrabajador');
     const btnOpenModal = document.getElementById('btnAgregarTrabajador');
     const btnCloseModal = document.getElementById('btnCerrarModal');
     const formAdd = document.getElementById('formAgregarTrabajador');
+    const btnEliminarTrabajador = document.getElementById('btnEliminarTrabajador');
+    const modalTrabajadorTitle = document.getElementById('modalTrabajadorTitle');
+
+    function openWorkerModalCreate() {
+        modalTrabajadorTitle.textContent = 'Nuevo Trabajador';
+        formAdd.reset();
+        document.getElementById('addTrabajadorId').value = '';
+        document.getElementById('addEsSupervisor').value = 'false';
+        btnEliminarTrabajador.style.display = 'none';
+        modalAdd.style.display = 'flex';
+    }
+
+    function openWorkerModalEdit(worker) {
+        modalTrabajadorTitle.textContent = 'Editar Trabajador';
+        document.getElementById('addTrabajadorId').value = worker.id;
+        document.getElementById('addNombres').value = worker.nombres || '';
+        document.getElementById('addApellidos').value = worker.apellidos || '';
+        document.getElementById('addDni').value = worker.dni || '';
+        document.getElementById('addEsSupervisor').value = worker.esSupervisor ? 'true' : 'false';
+        btnEliminarTrabajador.style.display = 'inline-flex';
+        modalAdd.style.display = 'flex';
+    }
 
     if(btnOpenModal && modalAdd) {
-        btnOpenModal.addEventListener('click', () => {
-            modalAdd.style.display = 'flex';
-        });
+        btnOpenModal.addEventListener('click', openWorkerModalCreate);
 
         btnCloseModal.addEventListener('click', () => {
             modalAdd.style.display = 'none';
@@ -336,28 +413,36 @@ document.addEventListener('DOMContentLoaded', () => {
         formAdd.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const nombres = document.getElementById('addNombres').value;
-            const apellidos = document.getElementById('addApellidos').value;
-            const dni = document.getElementById('addDni').value;
+            const trabajadorId = document.getElementById('addTrabajadorId').value;
+            const nombres = document.getElementById('addNombres').value.trim();
+            const apellidos = document.getElementById('addApellidos').value.trim();
+            const dni = document.getElementById('addDni').value.trim();
+            const esSupervisor = document.getElementById('addEsSupervisor').value === 'true';
             
             const submitBtn = formAdd.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Guardando...';
 
+            const payload = {
+                nombres: nombres,
+                apellidos: apellidos,
+                dni: dni,
+                es_supervisor: esSupervisor
+            };
+
+            const method = trabajadorId ? 'PUT' : 'POST';
+            const url = trabajadorId 
+                ? `${CONFIG.API_BASE_URL}/trabajadores/${trabajadorId}/` 
+                : `${CONFIG.API_BASE_URL}/trabajadores/`;
+
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/`, {
-                    method: 'POST',
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        nombres: nombres,
-                        apellidos: apellidos,
-                        dni: dni,
-                        // Un nuevo trabajador no tiene cuadrilla al inicio
-                        cuadrilla: null 
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
@@ -365,13 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(JSON.stringify(err));
                 }
 
-                alert(`✅ ${nombres} registrado correctamente en la Base de Datos.`);
+                alert(`✅ Trabajador ${nombres} ${trabajadorId ? 'actualizado' : 'registrado'} correctamente.`);
                 
-                // Cerrar modal y limpiar
                 formAdd.reset();
                 modalAdd.style.display = 'none';
                 
-                // Recargar lista global para ver al nuevo trabajador sin cuadrilla
                 await initApp();
 
             } catch(error) {
@@ -380,6 +463,38 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
+            }
+        });
+
+        btnEliminarTrabajador.addEventListener('click', async () => {
+            const trabajadorId = document.getElementById('addTrabajadorId').value;
+            if(!trabajadorId) return;
+
+            const confirmDelete = confirm('⚠️ ¿Estás seguro que deseas ELIMINAR este trabajador? Esta acción no se puede deshacer.');
+            if(!confirmDelete) return;
+
+            btnEliminarTrabajador.disabled = true;
+            btnEliminarTrabajador.innerHTML = 'Eliminando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/${trabajadorId}/`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Error al eliminar');
+
+                alert('🗑️ Trabajador eliminado correctamente.');
+                modalAdd.style.display = 'none';
+                if(selectedWorker?.id === trabajadorId) {
+                    btnCancelar.click();
+                }
+                await initApp();
+            } catch(err) {
+                console.error(err);
+                alert('❌ Error al eliminar el trabajador.');
+            } finally {
+                btnEliminarTrabajador.disabled = false;
+                btnEliminarTrabajador.innerHTML = 'Eliminar';
             }
         });
     }
@@ -410,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('addCuadrillaNombre').value = cuadrilla.nombre;
         document.getElementById('addCuadrillaTipo').value = cuadrilla.tipo;
         document.getElementById('addCuadrillaSector').value = cuadrilla.sector_asignado || '';
-        document.getElementById('addCuadrillaSupervisor').value = cuadrilla.supervisor || '';
+        document.getElementById('addCuadrillaSupervisor').value = cuadrilla.encargado || cuadrilla.supervisor || '';
         btnEliminarCuadrilla.style.display = 'inline-flex';
         modalAddCuadrilla.style.display = 'flex';
     }
@@ -430,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombre = document.getElementById('addCuadrillaNombre').value;
             const tipo = document.getElementById('addCuadrillaTipo').value;
             const sectorId = document.getElementById('addCuadrillaSector').value;
-            const supervisorId = document.getElementById('addCuadrillaSupervisor').value;
+            const encargadoId = document.getElementById('addCuadrillaSupervisor').value;
             
             const submitBtn = formAddCuadrilla.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -441,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre: nombre,
                 tipo: tipo,
                 sector_asignado: sectorId ? parseInt(sectorId) : null,
-                supervisor: supervisorId ? parseInt(supervisorId) : null
+                encargado: encargadoId ? parseInt(encargadoId) : null
             };
 
             const method = cuadrillaId ? 'PUT' : 'POST';

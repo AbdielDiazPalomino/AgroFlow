@@ -183,11 +183,12 @@
     </div>
   </div>
 
-  <!-- Modal Agregar Trabajador -->
+  <!-- Modal Agregar / Editar Trabajador -->
   <div class="modal" id="modalAgregarTrabajador" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;">
-    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 400px; max-width: 90%;">
-      <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Nuevo Trabajador</h2>
+    <div class="modal-content" style="background: #1E293B; padding: 2rem; border-radius: 8px; width: 420px; max-width: 90%;">
+      <h2 id="modalTrabajadorTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Nuevo Trabajador</h2>
       <form id="formAgregarTrabajador">
+        <input type="hidden" id="addTrabajadorId" value="">
         <div class="form-group mb-4">
           <label class="form-label">Nombres</label>
           <input type="text" id="addNombres" class="form-input" required>
@@ -200,8 +201,22 @@
           <label class="form-label">DNI</label>
           <input type="text" id="addDni" class="form-input" required maxlength="8">
         </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Rol Operativo</label>
+          <div class="custom-select-wrapper">
+            <select id="addEsSupervisor" class="custom-select">
+              <option value="false">Obrero de Campo</option>
+              <option value="true">Supervisor de Campo (Encargado)</option>
+            </select>
+            <i data-lucide="chevron-down" class="custom-select-icon"></i>
+          </div>
+          <small style="color: var(--color-text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+            Los supervisores pueden ser asignados como encargados de cuadrillas.
+          </small>
+        </div>
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
           <button type="button" class="btn btn--outline" id="btnCerrarModal">Cancelar</button>
+          <button type="button" class="btn" id="btnEliminarTrabajador" style="background-color: #EF4444; color: white; border: none; display: none;">Eliminar</button>
           <button type="submit" class="btn btn--primary">Guardar Trabajador</button>
         </div>
       </form>
@@ -259,6 +274,6 @@
 
   <!-- Scripts -->
   <script src="../../js/config.js"></script>
-  <script src="cuadrillas.js?v=3"></script>
+  <script src="cuadrillas.js?v=4"></script>
 </body>
 </html>
