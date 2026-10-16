@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Arquitectura Empresarial AS-IS - Roots S.A.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        layer: {
+                            platform: '#cbd5e1',   // Gris/Plataforma informal
+                            business: '#fef08a',   // Amarillo claro/Negocio manual
+                            recollection: '#f1f5f9', // Gris claro/Recolección
+                            device: '#e2e8f0',     // Gris/Dispositivos
+                            basic: '#fecaca',      // Rojo claro/Plataforma aislada
+                            redDark: '#ef4444',    // Rojo para cuellos de botella
+                            orangeLight: '#fdba74',// Naranja para procesos manuales
+                            grayBox: '#94a3b8'     // Gris para cajas inertes
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #ffffff; color: #333; }
+        .layer-label { 
+            writing-mode: horizontal-tb; 
+            text-align: left; 
+            font-size: 0.85rem; 
+            color: #475569;
+            font-weight: 600;
+            padding-right: 1rem;
+            width: 140px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .block-grid { display: grid; gap: 0.5rem; }
+        .inner-block {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .bg-manual-process { background-color: #fef08a; color: #713f12; border: 1px dashed #ca8a04; }
+        .bg-bottleneck { background-color: #fee2e2; color: #991b1b; border: 1px solid #ef4444; font-weight: 500;}
+        .bg-isolated { background-color: #e0e7ff; color: #3730a3; border: 1px solid #818cf8; }
+        .bg-b-header-gray { background-color: #64748b; color: white; font-weight: 600; padding: 0.5rem; text-align: center; font-size: 0.85rem;}
+
+        .arrow-down-broken {
+            width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-top: 15px solid #ef4444; margin: 0 auto;
+        }
+        .connector-line-broken {
+            width: 2px; background-color: #ef4444; height: 20px; margin: 0 auto;
+            border-left: 2px dashed #ef4444; background: transparent;
+        }
+        
+        .legend-box { padding: 0.25rem 0.5rem; font-size: 0.7rem; margin-bottom: 0.5rem; text-align: center; border: 1px solid #ccc; }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-sans antialiased">
+
+    <div class="max-w-[1400px] mx-auto bg-white p-6 border border-gray-200 shadow-sm relative overflow-x-auto">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Diagrama de Arquitectura Empresarial (Situación Actual AS-IS)</h1>
+            <p class="text-gray-500 mt-1 text-sm">Corporación Roots S.A. - Ecosistema fragmentado y dependiente de procesos manuales</p>
+        </div>
+
+        <div class="flex flex-col gap-2 relative min-w-[1000px]">
+
+            <!-- ================= CAPA DE PLATAFORMA (Interacción actual) ================= -->
+            <div class="flex w-full">
+                <div class="layer-label">Capa de Plataforma <br><span class="text-xs font-normal text-gray-400">(Interacción Física/Verbal)</span></div>
+                <div class="flex-1 bg-orange-100 border-2 border-dashed border-orange-400 p-4 text-center text-orange-600 font-medium text-sm flex items-center justify-around">
+                    <div class="flex flex-col items-center"><i class="fa-solid fa-file-lines text-2xl mb-1 text-orange-400"></i><span>Órdenes Impresas en Papel</span></div>
+                    <div class="flex flex-col items-center"><i class="fa-solid fa-bullhorn text-2xl mb-1 text-orange-400"></i><span>Comunicación Verbal (Campo)</span></div>
+                    <div class="flex flex-col items-center"><i class="fa-solid fa-book-open text-2xl mb-1 text-orange-400"></i><span>Cuaderno Borrador (Almacén)</span></div>
+                </div>
+                <!-- Espacio para columna derecha -->
+                <div class="w-[220px] ml-4"></div> 
+            </div>
+
+            <div class="flex w-full justify-center">
+                <div class="layer-label"></div>
+                <div class="flex-1 flex flex-col items-center opacity-50">
+                    <div class="connector-line-broken h-[15px]"></div><div class="arrow-down-broken"></div>
+                    <span class="text-[0.6rem] text-red-500 font-bold -mt-1 bg-white px-1">Latencia Alta</span>
+                </div>
+                <div class="w-[220px] ml-4"></div>
+            </div>
+
+            <!-- ================= CAPA DE NEGOCIO + PLATAFORMA AISLADA ================= -->
+            <div class="flex w-full items-stretch">
+                
+                <!-- Columna Izquierda: Leyenda -->
+                <div class="layer-label flex-col items-start justify-center pt-8">
+                    <div class="mb-8 w-full pr-4 space-y-2">
+                        <div class="legend-box bg-manual-process font-medium">Proceso Manual / Papel</div>
+                        <div class="legend-box bg-bottleneck font-medium">Cuello de Botella / Retraso</div>
+                        <div class="legend-box bg-isolated font-medium">Silo de Información (Aislado)</div>
+                    </div>
+                    <div class="mt-auto mb-auto w-full">Capa de Negocio</div>
+                </div>
+
+                <!-- Contenedor Principal (Capa de Negocio Actual) -->
+                <div class="flex-1 bg-blue-50/50 p-4 flex flex-col gap-4 border border-blue-200">
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        
+                        <!-- Módulo 1: Planificación (Manual) -->
+                        <div class="flex flex-col border border-gray-300 bg-white">
+                            <div class="bg-b-header-gray">Planificación (Gerencia)</div>
+                            <div class="p-2 block-grid grid-cols-1">
+                                <div class="inner-block bg-manual-process">Definición de Lotes (Variedades)</div>
+                                <div class="inner-block bg-manual-process">Asignación de Presupuestos (Excel)</div>
+                                <div class="inner-block bg-bottleneck flex flex-col">
+                                    <span>Distribución de Cuadrillas</span>
+                                    <span class="text-[0.65rem] font-normal mt-1">(Basado en datos desfasados)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Módulo 2: Ejecución (Campo) -->
+                        <div class="flex flex-col border border-gray-300 bg-white">
+                            <div class="bg-b-header-gray">Ejecución y Supervisión (Campo)</div>
+                            <div class="p-2 block-grid grid-cols-1">
+                                <div class="inner-block bg-manual-process">Registro Avance (Libretas)</div>
+                                <div class="inner-block bg-manual-process">Registro de Plagas (Anotaciones)</div>
+                                <div class="inner-block bg-bottleneck flex flex-col">
+                                    <span>Reasignación de Personal</span>
+                                    <span class="text-[0.65rem] font-normal mt-1">(Caminatas de 30-50 min para buscar supervisor)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Módulo 3: Logística (Almacén) -->
+                        <div class="flex flex-col border border-gray-300 bg-white">
+                            <div class="bg-b-header-gray">Abastecimiento (Logística)</div>
+                            <div class="p-2 block-grid grid-cols-1">
+                                <div class="inner-block bg-manual-process">Petición Verbal de Insumos</div>
+                                <div class="inner-block bg-manual-process">Verificación Visual de Stock</div>
+                                <div class="inner-block bg-bottleneck flex flex-col">
+                                    <span>Despacho de Insumos</span>
+                                    <span class="text-[0.65rem] font-normal mt-1">(Sin validación formal / Riesgo de pérdida)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Fila 2: Procesamiento Central (El gran problema) -->
+                    <div class="grid grid-cols-1 mt-2">
+                        <div class="flex flex-col border-2 border-red-300 bg-red-50 p-3 relative">
+                            <div class="absolute -top-3 left-4 bg-red-500 text-white text-[0.65rem] font-bold px-2 py-1 rounded">PROCESO CRÍTICO AS-IS</div>
+                            <div class="text-center font-bold text-red-800 mb-2 mt-2 text-sm">Digitación y Consolidación (Desfase de 18+ Horas)</div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="inner-block bg-bottleneck border-red-400 flex flex-col h-16">
+                                    <i class="fa-solid fa-person-walking-arrow-right mb-1"></i>
+                                    <span>Entrega Física de Libretas (Noche)</span>
+                                </div>
+                                <div class="inner-block bg-bottleneck border-red-400 flex flex-col h-16">
+                                    <i class="fa-solid fa-keyboard mb-1"></i>
+                                    <span>Transcripción Manual a Excel (08-10 PM)</span>
+                                </div>
+                                <div class="inner-block bg-bottleneck border-red-400 flex flex-col h-16">
+                                    <i class="fa-solid fa-triangle-exclamation mb-1"></i>
+                                    <span>Aproximación de Datos Ilegibles</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Flecha lateral de desconexión -->
+                <div class="flex flex-col items-center justify-center px-2 opacity-50">
+                    <span class="text-[0.6rem] text-red-500 font-bold -mb-4 z-10 bg-white rotate-90 w-[80px] text-center">Sin Integración</span>
+                    <div class="connector-line-broken h-full w-[2px]"></div>
+                </div>
+
+                <!-- Columna Derecha: Plataforma Básica Aislada -->
+                <div class="w-[220px] bg-green-50 flex flex-col border border-green-200">
+                    <div class="text-center py-3 text-green-800 font-semibold text-sm border-b border-green-200">
+                        Herramientas (Silos Aislados)
+                    </div>
+                    <div class="p-3 flex flex-col gap-3 flex-1 justify-center">
+                        <div class="inner-block bg-isolated flex flex-col py-3">
+                            <i class="fa-solid fa-file-excel text-green-600 text-lg mb-1"></i>
+                            <span>Archivos Excel Locales<br>(Múltiples versiones)</span>
+                        </div>
+                        
+                        <div class="flex justify-center text-red-300"><i class="fa-solid fa-link-slash"></i></div>
+                        
+                        <div class="inner-block bg-isolated flex flex-col py-3">
+                            <i class="fa-solid fa-server text-blue-600 text-lg mb-1"></i>
+                            <span>Sistema ERP / Contable<br>(Heredado)</span>
+                            <span class="text-[0.6rem] text-gray-500 mt-1">Requiere ingreso manual de datos de campo</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= CAPA DE RECOLECCIÓN (Fuentes) ================= -->
+            <div class="flex w-full mt-4">
+                <div class="layer-label">Capa de Recolección <br><span class="text-xs font-normal text-gray-400">(Fuentes de Datos)</span></div>
+                <div class="flex-1 bg-purple-50 p-3 flex justify-around gap-4 border border-gray-200">
+                    <div class="inner-block bg-white text-gray-700 border-gray-300 flex-1 shadow-sm h-12 font-medium">Libretas de Campo Físicas</div>
+                    <div class="inner-block bg-white text-gray-700 border-gray-300 flex-1 shadow-sm h-12 font-medium">Observación Visual (Stock)</div>
+                    <div class="inner-block bg-white text-gray-700 border-gray-300 flex-1 shadow-sm h-12 font-medium">Firmas Manuales en Papel</div>
+                </div>
+                <div class="w-[220px] ml-4"></div>
+            </div>
+
+            <!-- ================= CAPA DE DISPOSITIVOS (Escasa) ================= -->
+            <div class="flex w-full mt-2">
+                <div class="layer-label">Capa de Dispositivos</div>
+                <div class="flex-1 flex justify-between gap-4">
+                    <div class="bg-gray-300 text-gray-600 py-3 px-2 text-xs text-center border border-gray-400 border-dashed flex-1 flex flex-col justify-center items-center h-14">
+                        <i class="fa-solid fa-mobile-screen-button text-2xl mb-2"></i>
+                        <span>Sistema de Tickets mobil para reasignacion de personal</span>
+                    </div>
+                    <div class="bg-slate-700 text-white py-3 px-2 text-xs text-center shadow-sm flex-1 flex items-center justify-center h-14 font-medium">
+                        <i class="fa-solid fa-desktop mr-2"></i> PC de Oficina (Digitador/Gerencia)
+                    </div>
+                </div>
+                <div class="w-[220px] ml-4 text-right text-gray-300 font-bold text-xl tracking-wider self-center">Roots S.A.<br><span class="text-xs font-normal">Pre-AgroFlow</span></div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

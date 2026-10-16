@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura de Aplicaciones AS-IS - Roots S.A.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+        }
+        
+        .layer-container {
+            display: flex;
+            margin-bottom: 0.5rem;
+            align-items: stretch;
+        }
+
+        .layer-label {
+            width: 140px;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #4b5563;
+            padding-right: 1rem;
+        }
+
+        .layer-content {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Color Palette matching the example image */
+        .bg-layer-blue { background-color: #cce0ff; }
+        .bg-layer-pink { background-color: #ffcccc; }
+        .bg-side-green { background-color: #e6ffcc; }
+        .bg-side-red   { background-color: #ff9999; }
+        .bg-box-grey   { background-color: #e2e8f0; color: #475569; border: 1px dashed #94a3b8; }
+
+        .app-box {
+            background-color: white;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .side-panel {
+            width: 120px;
+            min-width: 120px;
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 1rem;
+        }
+
+        .dashed-divider {
+            border-top: 1px dashed #94a3b8;
+            margin: 1.5rem 0 1.5rem 140px;
+        }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-[1200px] mx-auto bg-white p-8 border border-gray-200 shadow-md">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-2xl font-bold text-gray-800">Diagrama de Arquitectura de Aplicaciones (Situación Actual AS-IS)</h1>
+            <p class="text-gray-500 mt-2 text-sm">Corporación Roots S.A. - Ecosistema de software fragmentado y legacy</p>
+        </div>
+
+        <div class="relative">
+            
+            <div class="flex">
+                <div class="flex-1 flex flex-col">
+                    <!-- Capa 1: Frontend -->
+                    <div class="layer-container">
+                        <div class="layer-label">
+                            Interfaz de Usuario<br>Frontend
+                        </div>
+                        <div class="layer-content bg-layer-blue">
+                            <div class="app-box">PC de Escritorio<br>(Gerencia)</div>
+                            <div class="app-box">PC de Escritorio<br>(Digitador)</div>
+                            <div class="app-box bg-box-grey text-xs">Sin interfaz móvil<br>formal de operaciones</div>
+                            <div class="app-box">Sistema de Tickets</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Capa 2: Presentation -->
+                    <div class="layer-container">
+                        <div class="layer-label">
+                            Capa de presentación
+                        </div>
+                        <div class="layer-content bg-layer-pink">
+                            <div class="app-box flex-1 min-w-[200px]">Interfaz de Hojas de Cálculo (Excel)</div>
+                            <div class="app-box bg-box-grey text-xs">Anotaciones Físicas<br>(Por digitalizar)</div>
+                            <div class="app-box">Interfaz Sistema ERP<br>(Contabilidad)</div>
+                            <div class="app-box">Interfaz Web<br>Gestión de Tickets</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side Panel 1 (Spans top 2 layers) -->
+                <div class="side-panel bg-side-green flex-col justify-center">
+                    <span class="font-medium text-gray-700">Operación Manual<br>(Campo / Almacén)</span>
+                </div>
+            </div>
+
+            <div class="flex mt-2">
+                <div class="flex-1 flex flex-col">
+                    <!-- Capa 3: Application Service -->
+                    <div class="layer-container">
+                        <div class="layer-label">
+                            Capa de servicio de<br>aplicación
+                        </div>
+                        <div class="layer-content bg-layer-blue">
+                            <div class="app-box">Macros y Fórmulas<br>(Excel Local)</div>
+                            <div class="app-box">Módulo Contable<br>(Legacy)</div>
+                            <div class="app-box bg-box-grey text-xs flex-1 min-w-[200px]">Procesamiento de datos manual<br>(Sin integración de servicios)</div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Capa 4: Basic Services -->
+                    <div class="layer-container">
+                        <div class="layer-label">
+                            Capa de servicios<br>básicos
+                        </div>
+                        <div class="layer-content bg-layer-pink">
+                            <div class="app-box">Sistema de Archivos<br>Local (SO)</div>
+                            <div class="app-box">Servicio de Correo<br>Electrónico</div>
+                            <div class="app-box">Motor de Base de<br>Datos ERP (Silo)</div>
+                            <div class="app-box">Base de Datos<br>Tickets</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Panel 2 (Spans service layers) -->
+                <div class="side-panel bg-side-red flex-col justify-center text-gray-800">
+                    <span class="font-medium">Digitación Centralizada<br><span class="text-xs font-normal mt-1 block">(El puente integrador manual)</span></span>
+                </div>
+            </div>
+
+            <div class="dashed-divider"></div>
+
+            <!-- Capa 5: Infrastructure -->
+            <div class="layer-container">
+                <div class="layer-label">
+                    Capa de<br>infraestructura
+                </div>
+                <div class="layer-content bg-layer-blue mr-[128px]"> <!-- Margin to align with above content excluding side panel -->
+                    <div class="app-box">Servidor Local<br>(On-Premise)</div>
+                    <div class="app-box">Red LAN<br>(Oficinas Centrales)</div>
+                    <div class="app-box bg-box-grey">Brecha de Red<br>(Invernaderos sin señal)</div>
+                    <div class="app-box">Discos Duros Físicos<br>(Almacenamiento)</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

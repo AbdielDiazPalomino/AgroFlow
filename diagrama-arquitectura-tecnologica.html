@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Tecnológica AS-IS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .layer-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .item-box {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            color: #374151;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8 flex justify-center items-center min-h-screen">
+
+    <div class="w-full max-w-5xl bg-white p-6 shadow-md border border-gray-200">
+        <!-- Título -->
+        <div class="bg-gray-200 py-3 text-center mb-6">
+            <h1 class="text-xl font-bold text-gray-700">Arquitectura Tecnológica (AS-IS) - Roots S.A.</h1>
+            <p class="text-xs text-gray-500 mt-1">Ecosistema actual sin integración tecnológica</p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            
+            <!-- Capa de Presentación -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#cce8d0] layer-box text-green-900 border border-green-200">
+                    Capa de<br>presentación
+                </div>
+                <div class="flex-1 bg-[#cce8d0] p-3 grid grid-cols-4 gap-3 border border-green-200">
+                    <div class="item-box">Hojas de Cálculo (UI Excel)</div>
+                    <div class="item-box">Interfaz ERP Heredado</div>
+                    <div class="item-box">App Móvil (Solo Tickets)</div>
+                    <div class="item-box border-dashed border-2 border-gray-400 bg-gray-50">Soportes Físicos (Papel/Libretas)</div>
+                </div>
+            </div>
+
+            <!-- Capa de Intercambio de Datos -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#a7b5d1] layer-box text-indigo-900 border border-indigo-200">
+                    Capa de<br>intercambio<br>de datos
+                </div>
+                <div class="flex-1 bg-[#a7b5d1] p-3 grid grid-cols-2 gap-3 border border-indigo-200">
+                    <div class="item-box flex flex-col justify-center">
+                        <span>Red LAN Local (Oficina)</span>
+                        <span class="text-xs text-gray-400">Conexión hacia ERP</span>
+                    </div>
+                    <div class="item-box border-dashed border-2 border-gray-400 bg-gray-50 flex flex-col justify-center">
+                        <span>Tránsito Físico (Manual)</span>
+                        <span class="text-xs text-gray-400">Entrega de libretas y USBs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Soporte de Servicio -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#bce3fe] layer-box text-blue-900 border border-blue-200">
+                    Capa de<br>soporte de<br>servicio
+                </div>
+                <div class="flex-1 bg-[#bce3fe] p-3 grid grid-cols-4 gap-3 border border-blue-200">
+                    <div class="item-box">Servicios de Red (Windows)</div>
+                    <div class="item-box">Protocolo HTTP(s) (Tickets)</div>
+                    <div class="item-box">Drivers de Impresión</div>
+                    <div class="item-box border-dashed border-2 border-red-300 bg-red-50 text-red-700">Digitación Humana Central</div>
+                </div>
+            </div>
+
+            <!-- Capa de Implementación de Servicios -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#fde2ba] layer-box text-orange-900 border border-orange-200">
+                    Capa de<br>implementación<br>de servicios
+                </div>
+                <div class="flex-1 bg-[#fde2ba] p-3 grid grid-cols-3 gap-3 border border-orange-200">
+                    <div class="item-box">Macros VBA (Fórmulas Excel)</div>
+                    <div class="item-box">Lógica Contable (Módulos ERP)</div>
+                    <div class="item-box">Lógica Aislada (Gestor de Tickets)</div>
+                </div>
+            </div>
+
+            <!-- Capa de Almacenamiento -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#bce3fe] layer-box text-blue-900 border border-blue-200">
+                    Capa de<br>almacenamiento
+                </div>
+                <div class="flex-1 bg-[#bce3fe] p-3 grid grid-cols-3 gap-3 border border-blue-200">
+                    <div class="item-box">Sistema de Archivos Locales (.xlsx)</div>
+                    <div class="item-box">Base de Datos ERP (Aislada On-Premise)</div>
+                    <div class="item-box border-dashed border-2 border-gray-400 bg-gray-50">Archiveros Físicos (Cuadernos)</div>
+                </div>
+            </div>
+
+            <!-- Capa de Infraestructura -->
+            <div class="flex gap-4">
+                <div class="w-40 bg-[#e4e4e4] layer-box text-gray-700 border border-gray-300">
+                    Capa de<br>infraestructura
+                </div>
+                <div class="flex-1 bg-[#e4e4e4] p-3 grid grid-cols-3 gap-3 border border-gray-300">
+                    <div class="item-box">PCs de Escritorio (Oficina Central)</div>
+                    <div class="item-box">Servidor Local Básico (ERP)</div>
+                    <div class="item-box">Dispositivos Móviles</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

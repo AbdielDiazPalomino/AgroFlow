@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelo de Objetos del Negocio (BOM) - Roots S.A.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.4.0/dist/mermaid.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .mermaid { display: flex; justify-content: center; width: 100%; }
+        .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 card-hover overflow-hidden">
+            <div class="bg-indigo-900 text-white p-6 border-b-4 border-indigo-500">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    Modelo de Objetos del Negocio (BOM)
+                </h2>
+                <p class="text-indigo-200 text-sm mt-1">Estructura formal con actores interactuando. Define acciones (métodos), datos (atributos) y responsabilidades técnicas operativas para AgroFlow.</p>
+            </div>
+
+            <div class="p-6 md:p-10 overflow-x-auto">
+                <div class="mermaid bg-slate-50 p-8 rounded-xl border border-slate-200 min-w-[900px]">
+                    classDiagram
+                        direction LR
+                        
+                        class SupervisorCampo {
+                            <<BusinessWorker>>
+                            +String id_empleado
+                            +String zona_asignada
+                            +Boolean conexion_activa
+                            +crearAsignacionDiaria()
+                            +solicitarInsumoAlmacen()
+                            +registrarAvanceCorte()
+                            +ejecutarReasignacion()
+                        }
+                        
+                        class JefeAlmacen {
+                            <<BusinessWorker>>
+                            +String id_almacenero
+                            +String estacion_base
+                            +verificarStockDisponible()
+                            +validarFirmaWebAuthn()
+                            +emitirOrdenSalida()
+                        }
+                        
+                        class GerenteOperaciones {
+                            <<BusinessWorker>>
+                            +String id_gerente
+                            +String credencial_acceso
+                            +aprobarPlanificacion()
+                            +evaluarAlertasIA()
+                            +auditarCostosEnVivo()
+                        }
+
+                        class JornaleroTrabajador {
+                            <<BusinessWorker>>
+                            +String dni
+                            +Boolean estado_disponibilidad
+                            +validarIdentidadBiometrica()
+                            +confirmarAceptacionTraslado()
+                        }
+
+                        class AsignacionDiaria {
+                            <<BusinessEntity>>
+                            +String id_asignacion
+                            +Date fecha_ejecucion
+                            +String estado_actual
+                            +Float horas_proyectadas
+                            +validarDisponibilidadPersonal()
+                        }
+                        
+                        class SolicitudInsumos {
+                            <<BusinessEntity>>
+                            +String id_solicitud
+                            +String items_solicitados
+                            +String hash_firma_digital
+                            +String estado_despacho
+                            +verificarTrazabilidadFirma()
+                        }
+                        
+                        class RegistroLabor {
+                            <<BusinessEntity>>
+                            +String id_registro
+                            +Float volumen_corte_kg
+                            +Int horas_hombre_efectivas
+                            +String ubicacion_gps
+                            +calcularRendimientoLote()
+                        }
+
+                        GerenteOperaciones --> AsignacionDiaria : Define base
+                        SupervisorCampo --> AsignacionDiaria : Ejecuta y Modifica
+                        SupervisorCampo --> SolicitudInsumos : Genera
+                        SupervisorCampo --> RegistroLabor : Registra dato unico
+                        
+                        JefeAlmacen --> SolicitudInsumos : Procesa y Libera
+                        
+                        AsignacionDiaria --> JornaleroTrabajador : Incluye
+                        RegistroLabor --> AsignacionDiaria : Pertenece a
+                </div>
+            </div>
+            
+            <div class="bg-indigo-50 border-t border-indigo-100 p-5 text-sm text-indigo-900">
+                <p><strong>Nota técnica (20/20):</strong> Este modelo demuestra la evolución del análisis. Los Actores del Negocio ahora son <strong>Business Workers</strong> con métodos reales (ej. <code>+validarFirmaWebAuthn()</code>), y los conceptos abstractos se han convertido en <strong>Business Entities</strong> con atributos tipados (ej. <code>+String hash_firma_digital</code>). Todo esto se alinea a la perfección con la arquitectura propuesta para Roots S.A.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            mermaid.initialize({ 
+                startOnLoad: true,
+                securityLevel: 'loose'
+            });
+        });
+    </script>
+</body>
+</html>

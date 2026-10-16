@@ -75,3 +75,20 @@ class RegistroCosechaViewSet(viewsets.ModelViewSet):
     queryset = RegistroCosecha.objects.all()
     serializer_class = RegistroCosechaSerializer
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_supervisores(request):
+    """Retorna usuarios con is_staff=True para seleccionar como encargados de cuadrilla."""
+    from django.contrib.auth.models import User
+    users = User.objects.filter(is_staff=True).values('id', 'username', 'first_name', 'last_name')
+    result = []
+    for u in users:
+        nombre_display = f"{u['first_name']} {u['last_name']}".strip()
+        if not nombre_display:
+            nombre_display = u['username']
+        result.append({
+            'id': u['id'],
+            'username': u['username'],
+            'nombre_display': nombre_display
+        })
+    return Response(result)

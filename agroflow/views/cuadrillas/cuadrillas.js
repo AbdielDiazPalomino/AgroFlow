@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cuadrillas = [];
     let trabajadores = [];
     let sectores = [];
+    let supervisores = [];
 
     // Nodos DOM
     const globalList = document.getElementById('globalWorkerList');
@@ -34,15 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicialización asíncrona
     async function initApp() {
         try {
-            const [resC, resT, resS] = await Promise.all([
+            const [resC, resT, resS, resSup] = await Promise.all([
                 fetch(`${CONFIG.API_BASE_URL}/cuadrillas/`),
                 fetch(`${CONFIG.API_BASE_URL}/trabajadores/`),
-                fetch(`${CONFIG.API_BASE_URL}/sectores/`)
+                fetch(`${CONFIG.API_BASE_URL}/sectores/`),
+                fetch(`${CONFIG.API_BASE_URL}/supervisores/`)
             ]);
             
             cuadrillas = await resC.json();
             const trabajadoresRaw = await resT.json();
             sectores = await resS.json();
+            supervisores = await resSup.json();
             
             // Adaptar JSON del backend a la estructura que el UI requiere
             trabajadores = trabajadoresRaw.map(t => ({
@@ -56,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderGlobalWorkerList(trabajadores);
             populateTargetSelect();
             populateSectoresSelect();
+            populateSupervisoresSelect();
         } catch (error) {
             console.error("Error conectando con Django:", error);
             globalList.innerHTML = `<li style="padding:1rem; color:red;">Error de conexión con el Backend. Verifica tu CONFIG.API_BASE_URL o si runserver está encendido.</li>`;
@@ -74,6 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.value = s.id;
                 opt.textContent = s.nombre;
                 sectorSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function populateSupervisoresSelect() {
+        const supSelect = document.getElementById('addCuadrillaSupervisor');
+        if(supSelect) {
+            supSelect.innerHTML = '<option value="">Sin Encargado Asignado</option>';
+            supervisores.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.nombre_display;
+                supSelect.appendChild(opt);
             });
         }
     }
@@ -368,46 +385,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // AGREGAR NUEVA CUADRILLA
+    // CREAR / EDITAR / ELIMINAR CUADRILLA
     // ==========================================
     const modalAddCuadrilla = document.getElementById('modalAgregarCuadrilla');
     const btnOpenModalCuadrilla = document.getElementById('btnAgregarCuadrilla');
     const btnCloseModalCuadrilla = document.getElementById('btnCerrarModalCuadrilla');
     const formAddCuadrilla = document.getElementById('formAgregarCuadrilla');
+    const btnEliminarCuadrilla = document.getElementById('btnEliminarCuadrilla');
+    const modalCuadrillaTitle = document.getElementById('modalCuadrillaTitle');
+
+    // Helper: Abrir modal en modo CREAR
+    function openCuadrillaModalCreate() {
+        modalCuadrillaTitle.textContent = 'Nueva Cuadrilla';
+        formAddCuadrilla.reset();
+        document.getElementById('addCuadrillaId').value = '';
+        btnEliminarCuadrilla.style.display = 'none';
+        modalAddCuadrilla.style.display = 'flex';
+    }
+
+    // Helper: Abrir modal en modo EDITAR
+    function openCuadrillaModalEdit(cuadrilla) {
+        modalCuadrillaTitle.textContent = 'Editar Cuadrilla';
+        document.getElementById('addCuadrillaId').value = cuadrilla.id;
+        document.getElementById('addCuadrillaNombre').value = cuadrilla.nombre;
+        document.getElementById('addCuadrillaTipo').value = cuadrilla.tipo;
+        document.getElementById('addCuadrillaSector').value = cuadrilla.sector_asignado || '';
+        document.getElementById('addCuadrillaSupervisor').value = cuadrilla.supervisor || '';
+        btnEliminarCuadrilla.style.display = 'inline-flex';
+        modalAddCuadrilla.style.display = 'flex';
+    }
 
     if(btnOpenModalCuadrilla && modalAddCuadrilla) {
-        btnOpenModalCuadrilla.addEventListener('click', () => {
-            modalAddCuadrilla.style.display = 'flex';
-        });
+        btnOpenModalCuadrilla.addEventListener('click', openCuadrillaModalCreate);
 
         btnCloseModalCuadrilla.addEventListener('click', () => {
             modalAddCuadrilla.style.display = 'none';
         });
 
+        // GUARDAR (POST o PUT)
         formAddCuadrilla.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const cuadrillaId = document.getElementById('addCuadrillaId').value;
             const nombre = document.getElementById('addCuadrillaNombre').value;
             const tipo = document.getElementById('addCuadrillaTipo').value;
             const sectorId = document.getElementById('addCuadrillaSector').value;
+            const supervisorId = document.getElementById('addCuadrillaSupervisor').value;
             
             const submitBtn = formAddCuadrilla.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Guardando...';
 
+            const payload = {
+                nombre: nombre,
+                tipo: tipo,
+                sector_asignado: sectorId ? parseInt(sectorId) : null,
+                supervisor: supervisorId ? parseInt(supervisorId) : null
+            };
+
+            const method = cuadrillaId ? 'PUT' : 'POST';
+            const url = cuadrillaId 
+                ? `${CONFIG.API_BASE_URL}/cuadrillas/${cuadrillaId}/` 
+                : `${CONFIG.API_BASE_URL}/cuadrillas/`;
+
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/cuadrillas/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        tipo: tipo,
-                        sector_asignado: sectorId ? parseInt(sectorId) : null,
-                        supervisor: null
-                    })
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
@@ -415,13 +461,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(JSON.stringify(err));
                 }
 
-                alert(`✅ Cuadrilla '${nombre}' registrada correctamente en la Base de Datos.`);
+                alert(`✅ Cuadrilla '${nombre}' ${cuadrillaId ? 'actualizada' : 'registrada'} correctamente.`);
                 
-                // Cerrar modal y limpiar
                 formAddCuadrilla.reset();
                 modalAddCuadrilla.style.display = 'none';
-                
-                // Recargar lista global para ver la nueva cuadrilla
                 await initApp();
 
             } catch(error) {
@@ -432,6 +475,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerHTML = originalText;
             }
         });
+
+        // ELIMINAR
+        btnEliminarCuadrilla.addEventListener('click', async () => {
+            const cuadrillaId = document.getElementById('addCuadrillaId').value;
+            if(!cuadrillaId) return;
+
+            const confirmDelete = confirm('⚠️ ¿Estás seguro que deseas ELIMINAR esta cuadrilla? Los trabajadores asignados quedarán sin cuadrilla.');
+            if(!confirmDelete) return;
+
+            btnEliminarCuadrilla.disabled = true;
+            btnEliminarCuadrilla.innerHTML = 'Eliminando...';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/cuadrillas/${cuadrillaId}/`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Error eliminando');
+
+                alert('🗑️ Cuadrilla eliminada correctamente.');
+                modalAddCuadrilla.style.display = 'none';
+                await initApp();
+            } catch(err) {
+                console.error(err);
+                alert('❌ Error al eliminar la cuadrilla.');
+            } finally {
+                btnEliminarCuadrilla.disabled = false;
+                btnEliminarCuadrilla.innerHTML = 'Eliminar';
+            }
+        });
     }
+
+    // ==========================================
+    // EDITAR CUADRILLA DESDE LA LISTA DE CUADRILLAS (targetCrewSelect)
+    // Se añade un botón de editar al lado del select de destino
+    // ==========================================
+    const editTargetBtn = document.createElement('button');
+    editTargetBtn.className = 'icon-btn icon-btn--small';
+    editTargetBtn.title = 'Editar esta cuadrilla';
+    editTargetBtn.innerHTML = '<i data-lucide="edit-2"></i>';
+    editTargetBtn.style.cssText = 'color: var(--color-primary); margin-left: 0.5rem;';
+    
+    // Insertar el botón de editar junto al select de cuadrilla destino
+    const targetSelectWrapper = targetCrewSelect?.parentElement;
+    if(targetSelectWrapper) {
+        targetSelectWrapper.parentElement.appendChild(editTargetBtn);
+    }
+
+    editTargetBtn.addEventListener('click', () => {
+        const selectedId = targetCrewSelect.value;
+        if(!selectedId) return;
+        const cuadrilla = cuadrillas.find(c => c.id == selectedId);
+        if(cuadrilla) {
+            openCuadrillaModalEdit(cuadrilla);
+        }
+    });
+
+    lucide.createIcons();
 
 });

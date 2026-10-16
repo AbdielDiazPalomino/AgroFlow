@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Arquitectura Empresarial - Roots S.A.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        layer: {
+                            platform: '#e67e22',   // Naranja para plataforma superior
+                            business: '#3498db',   // Azul claro para negocio
+                            recollection: '#d1f2eb', // Verde muy claro para recolección
+                            device: '#f0f3f4',     // Gris muy claro para dispositivos
+                            basic: '#fad7a1',      // Naranja claro para plataforma básica
+                            greenDark: '#229954',  // Verde oscuro para bloques internos
+                            greenLight: '#7dcea0', // Verde claro para bloques internos
+                            purple: '#af7ac5',     // Morado para bloques IA/Parametrización
+                            orangeLight: '#f5cba7' // Naranja claro para bloques internos
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #ffffff; color: #333; }
+        .layer-label { 
+            writing-mode: horizontal-tb; 
+            text-align: left; 
+            font-size: 0.85rem; 
+            color: #555;
+            padding-right: 1rem;
+            width: 140px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .block-grid { display: grid; gap: 0.5rem; }
+        .inner-block {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            text-align: center;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        /* Colores específicos para bloques internos basados en la imagen 2 */
+        .bg-b-dark-green { background-color: #43a047; }
+        .bg-b-light-green { background-color: #81c784; }
+        .bg-b-light-orange { background-color: #ffb74d; color: #333; }
+        .bg-b-purple { background-color: #9fa8da; color: #333;}
+        .bg-b-blue-header { background-color: #1976d2; color: white; font-weight: 600; padding: 0.5rem; text-align: center; font-size: 0.85rem;}
+        
+        .arrow-up {
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 20px solid #81c784; /* Color verde claro */
+            margin: 0.5rem auto;
+        }
+        .arrow-right {
+            width: 0; 
+            height: 0; 
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 20px solid #81c784;
+            margin: auto 0.5rem;
+        }
+
+        /* Leyenda lateral izquierda */
+        .legend-box {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-sans antialiased">
+
+    <div class="max-w-[1400px] mx-auto bg-white p-6 border border-gray-200 shadow-sm relative overflow-x-auto">
+        
+        <h1 class="text-2xl font-bold text-center mb-8 text-gray-800">Diagrama de arquitectura empresarial - Roots S.A.</h1>
+
+        <div class="flex flex-col gap-2 relative min-w-[1000px]">
+
+            <!-- ================= CAPA DE PLATAFORMA ================= -->
+            <div class="flex w-full">
+                <div class="layer-label">Capa de plataforma</div>
+                <div class="flex-1 bg-[#d35400] text-white p-4 text-center font-semibold text-lg flex items-center justify-center">
+                    Ecosistema Digital AgroFlow (Dashboard & App Web)
+                </div>
+                <!-- Espacio compensatorio para la columna derecha -->
+                <div class="w-[200px] ml-4"></div> 
+            </div>
+
+            <div class="flex w-full"><div class="layer-label"></div><div class="flex-1"><div class="arrow-up"></div></div><div class="w-[200px] ml-4"></div></div>
+
+            <!-- ================= CAPA DE NEGOCIO + PLATAFORMA BÁSICA ================= -->
+            <div class="flex w-full items-stretch">
+                
+                <!-- Columna Izquierda: Leyenda y Label -->
+                <div class="layer-label flex-col items-start justify-center pt-8">
+                    <div class="mb-8 w-full pr-4">
+                        <div class="legend-box bg-[#81c784] text-white">Completado</div>
+                        <div class="legend-box bg-[#ffb74d] text-black">Optimización</div>
+                        <div class="legend-box bg-[#9fa8da] text-black">Planificación</div>
+                    </div>
+                    <div class="mt-auto mb-auto w-full">Capa de negocio</div>
+                </div>
+
+                <!-- Contenedor Principal Azul (Capa de Negocio) -->
+                <div class="flex-1 bg-[#bbdefb] p-4 flex flex-col gap-4 border border-blue-200">
+                    
+                    <!-- Fila 1 de Módulos de Negocio -->
+                    <div class="grid grid-cols-3 gap-4">
+                        
+                        <!-- Módulo 1: Inicio / Planificación Estratégica -->
+                        <div class="flex flex-col bg-blue-50/50">
+                            <div class="bg-b-blue-header">Planificación Estratégica y Costeos</div>
+                            <div class="p-2 block-grid grid-cols-2">
+                                <div class="inner-block bg-b-dark-green">Definición de Lotes (Variedades)</div>
+                                
+                                <div class="inner-block bg-b-dark-green">Metas de Volumen de Corte</div>
+                                
+                                
+                                <div class="inner-block bg-b-light-orange col-span-2">Distribución Base de Cuadrillas</div>
+                            </div>
+                        </div>
+
+                        <!-- Módulo 2: Diagnóstico / Ejecución y Supervisión -->
+                        <div class="flex flex-col bg-blue-50/50">
+                            <div class="bg-b-blue-header">Ejecución y Supervisión Operativa</div>
+                            <div class="p-2 block-grid grid-cols-2">
+                                <div class="inner-block bg-b-dark-green">Registro Avance de Corte</div>
+                                <div class="inner-block bg-b-dark-green">Despliegue de Jornaleros</div>
+                                <div class="inner-block bg-b-dark-green">Registro de Incidencias (Plagas)</div>
+                                <div class="inner-block bg-b-light-green">Validación de Rondas GPS</div>
+                                <div class="inner-block bg-b-light-green">Reasignación de Personal</div>
+                                <div class="inner-block bg-b-dark-green">Validación Identidad (Jornalero)</div>
+                                <div class="inner-block bg-b-light-green col-span-2">Generación Solicitud de Insumos</div>
+                            </div>
+                        </div>
+
+                        <!-- Módulo 3: Configuración / Abastecimiento -->
+                        <div class="flex flex-col bg-blue-50/50">
+                            <div class="bg-b-blue-header">Abastecimiento y Logística</div>
+                            <div class="p-2 block-grid grid-cols-2">
+                                <div class="inner-block bg-b-dark-green">Recepción de Solicitudes</div>
+                                <div class="inner-block bg-b-dark-green">Verificación Stock Físico</div>
+                                <div class="inner-block bg-b-light-green">Aprobación de Despacho</div>
+                                <div class="inner-block bg-b-light-orange">Generación Orden Salida</div>
+                                <div class="inner-block bg-b-light-orange">Validación Entrega WebAuthn</div>
+                                <div class="inner-block bg-b-purple">Trazabilidad de Consumo</div>
+                                <div class="inner-block bg-b-purple col-span-2">Registro Histórico de Insumos</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Fila 2 de Módulos de Negocio -->
+                    <div class="grid grid-cols-3 gap-4 mt-2">
+                        
+                        <!-- Módulo 4: Análisis de Datos / IA -->
+                        <div class="flex flex-col bg-blue-50/50 col-span-2">
+                            <div class="bg-b-blue-header">Inteligencia Artificial y Análisis de Patrones</div>
+                            <div class="p-2 block-grid grid-cols-4">
+                                <div class="inner-block bg-b-dark-green">Recopilación Data Transaccional</div>
+                                <div class="inner-block bg-b-dark-green">Análisis Tiempos de Corte</div>
+                                <div class="inner-block bg-b-dark-green">Detección Patrones Reasignación</div>
+                                <div class="inner-block bg-b-dark-green">Análisis Histórico de Incidencias</div>
+                                <div class="inner-block bg-b-light-orange col-span-2">Identificación Cuellos de Botella</div>
+                                <div class="inner-block bg-b-light-orange col-span-2">Sugerencias Predictivas (Planificación)</div>
+                            </div>
+                        </div>
+
+                        <!-- Módulo 5: Administración del sistema -->
+                        <div class="flex flex-col bg-blue-50/50">
+                            <div class="bg-b-blue-header">Administración Estratégica (Gerencia)</div>
+                            <div class="p-2 block-grid grid-cols-2">
+                                <div class="inner-block bg-b-dark-green">Monitoreo Indicadores (Tiempo Real)</div>
+                                <div class="inner-block bg-b-dark-green">Auditoría Costos Acumulados</div>
+                                <div class="inner-block bg-b-light-green col-span-2">Evaluación Sugerencias IA</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Flecha lateral hacia Plataforma Básica -->
+                <div class="flex items-center justify-center">
+                    <div class="arrow-right"></div>
+                </div>
+
+                <!-- Columna Derecha: Plataforma Básica -->
+                <div class="w-[200px] bg-[#e0f2f1] flex flex-col border border-teal-100">
+                    <div class="text-center py-3 text-teal-800 font-semibold text-sm border-b border-teal-200">
+                        Plataforma básica
+                    </div>
+                    <div class="p-3 flex flex-col gap-2 flex-1 justify-center">
+                        <div class="inner-block bg-[#ffcc80] text-gray-800 border border-orange-300">Gestor de Sincronización<br>(Offline-First)</div>
+                        <div class="inner-block bg-[#ffcc80] text-gray-800 border border-orange-300">Motor de Base de Datos<br>(PostgreSQL)</div>
+                        <div class="inner-block bg-b-dark-green">Servidor WebSockets<br>(Django Channels)</div>
+                        <div class="inner-block bg-b-dark-green">Servicio Criptográfico<br>(API WebAuthn)</div>
+                        <div class="inner-block bg-b-dark-green">Motor Análisis Datos</div>
+                        <div class="inner-block bg-b-dark-green">Gestión Permisos/Roles</div>
+                        
+                        <div class="flex justify-center my-1"><i class="fa-solid fa-arrow-down text-teal-400"></i></div>
+                        
+                        <div class="inner-block bg-[#ffcc80] text-gray-800 border border-orange-300">Algoritmos Predictivos (IA)</div>
+                        <div class="inner-block bg-[#ffcc80] text-gray-800 border border-orange-300">Generador de Alertas</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex w-full"><div class="layer-label"></div><div class="flex-1"><div class="arrow-up"></div></div><div class="w-[200px] ml-4"></div></div>
+
+            <!-- ================= CAPA DE RECOLECCIÓN ================= -->
+            <div class="flex w-full">
+                <div class="layer-label">Capa de recolección</div>
+                <div class="flex-1 bg-[#e8f8f5] p-3 flex justify-around border border-teal-100">
+                    <div class="bg-[#f39c12] text-white px-6 py-2 text-sm text-center shadow-sm w-1/5 font-medium">Caché Local Navegador</div>
+                    <div class="bg-[#f39c12] text-white px-6 py-2 text-sm text-center shadow-sm w-1/5 font-medium">Señal GPS Satelital</div>
+                    <div class="bg-[#f39c12] text-white px-6 py-2 text-sm text-center shadow-sm w-1/5 font-medium">Firmas Criptográficas</div>
+                    <div class="bg-[#f39c12] text-white px-6 py-2 text-sm text-center shadow-sm w-1/5 font-medium">Inputs Digitales (UI)</div>
+                </div>
+                <div class="w-[200px] ml-4"></div>
+            </div>
+
+            <div class="flex w-full"><div class="layer-label"></div><div class="flex-1"><div class="arrow-up"></div></div><div class="w-[200px] ml-4"></div></div>
+
+            <!-- ================= CAPA DE DISPOSITIVOS ================= -->
+            <div class="flex w-full items-center mb-6">
+                <div class="layer-label">Capa de dispositivo</div>
+                <div class="flex-1 flex justify-between gap-2">
+                    <div class="bg-[#2980b9] text-white py-3 px-2 text-xs text-center shadow-sm flex-1 font-medium">Tablets de Campo (Supervisores)</div>
+                    
+                    <div class="bg-[#2980b9] text-white py-3 px-2 text-xs text-center shadow-sm flex-1 font-medium">PC Escritorio (Gerencia)</div>
+                    <div class="bg-[#2980b9] text-white py-3 px-2 text-xs text-center shadow-sm flex-1 font-medium">Terminales Almacén</div>
+                    <div class="bg-[#2980b9] text-white py-3 px-2 text-xs text-center shadow-sm flex-1 font-medium">Servidores Nube (Backend)</div>
+                </div>
+                <div class="w-[200px] ml-4 text-right text-gray-400 font-bold text-xl tracking-wider">AgroFlow</div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

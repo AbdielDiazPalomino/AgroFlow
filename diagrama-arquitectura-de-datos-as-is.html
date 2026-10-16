@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Arquitectura de Datos AS-IS - Roots S.A.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        layer: {
+                            app: '#dcfce7',      // Verde muy claro (Aplicaciones)
+                            process: '#fef08a',  // Amarillo claro (Procesamiento)
+                            exchange: '#e0f2fe', // Azul muy claro (Intercambio)
+                            source: '#f1f5f9',   // Gris muy claro (Fuentes)
+                            box: '#ffffff',      // Blanco para cajas internas
+                            border: '#cbd5e1',   // Gris para bordes
+                            text: '#334155'      // Gris oscuro texto
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #ffffff; color: #334155; }
+        .layer-title {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            padding: 1rem 0;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #e2e8f0;
+            background-color: rgba(255,255,255,0.5);
+        }
+        .box-item {
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+        .arrow-up {
+            width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 15px solid #94a3b8;
+            margin: 0 auto;
+        }
+        .arrow-down {
+            width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-top: 15px solid #94a3b8;
+            margin: 0 auto;
+        }
+        .connector-line {
+            width: 2px;
+            background-color: #94a3b8;
+            height: 20px;
+            margin: 0 auto;
+        }
+        
+        /* Tema AS-IS (Fragmentado/Manual) */
+        .manual-process {
+            border: 2px dashed #f59e0b; /* Naranja para indicar manual */
+            background-color: #fffbeb;
+        }
+        .paper-record {
+            border: 2px solid #94a3b8;
+            background-color: #f8fafc;
+            position: relative;
+        }
+        .paper-record::after {
+            content: ''; position: absolute; top: 0; right: 0;
+            border-width: 0 10px 10px 0; border-style: solid;
+            border-color: #e2e8f0 #ffffff #e2e8f0 #e2e8f0;
+        }
+        .delay-warning {
+            color: #ef4444; font-weight: bold; font-size: 0.65rem; margin-top: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-sans antialiased">
+
+    <div class="max-w-[1200px] mx-auto bg-white p-6 border border-gray-200 shadow-sm relative overflow-x-auto">
+        
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Diagrama de Arquitectura de Datos (Situación Actual AS-IS)</h1>
+            <p class="text-gray-500 text-sm mt-1">Corporación Roots S.A. - Flujo manual y fragmentado previo a AgroFlow</p>
+        </div>
+
+        <div class="flex flex-col gap-3 relative min-w-[900px]">
+
+            <!-- ================= APLICACIÓN DE DATOS (Consumo final) ================= -->
+            <div class="flex border border-green-200 bg-layer-app rounded-sm">
+                <div class="layer-title">Consumo de Datos</div>
+                <div class="flex-1 p-3 flex justify-around gap-4">
+                    <div class="box-item flex-1">Reportes de Rendimiento (Gerencia)</div>
+                    <div class="box-item flex-1">Planilla de Pagos / Bonos (RRHH)</div>
+                    <div class="box-item flex-1">Análisis de Costos por Lote (Contabilidad)</div>
+                    <div class="box-item flex-1">Órdenes del Día (Supervisores)</div>
+                </div>
+            </div>
+
+            <!-- Flechas -->
+            <div class="flex justify-around px-12">
+                <div><div class="connector-line"></div><div class="arrow-up"></div></div>
+                <div><div class="connector-line"></div><div class="arrow-up"></div></div>
+            </div>
+
+            <!-- ================= PROCESAMIENTO DE DATOS (El cuello de botella) ================= -->
+            <div class="flex border border-yellow-300 bg-layer-process rounded-sm relative">
+                <div class="layer-title">Procesamiento y Almacenamiento</div>
+                <div class="flex-1 p-4 grid grid-cols-12 gap-4">
+                    
+                    <!-- Servicios de Procesamiento (Manual) -->
+                    <div class="col-span-3 bg-white/50 border border-yellow-400 p-2 flex flex-col gap-2">
+                        <div class="text-xs font-bold text-center text-yellow-800 mb-1 border-b border-yellow-300 pb-1">Procesamiento Manual</div>
+                        <div class="box-item manual-process flex-col">
+                            <span>Transcripción de Libretas</span>
+                            <span class="delay-warning"><i class="fa-solid fa-clock"></i> Desfase 18+ horas</span>
+                        </div>
+                        <div class="box-item manual-process">Aproximación de Datos Ilegibles</div>
+                        <div class="box-item manual-process">Cruce Manual de Información</div>
+                    </div>
+
+                    <!-- Repositorio Central (Fragmentado) -->
+                    <div class="col-span-6 bg-blue-50 border border-blue-200 rounded p-3 flex flex-col items-center relative">
+                        <div class="text-xs font-bold text-blue-800 mb-3">Repositorios Locales Dispersos</div>
+                        
+                        <div class="grid grid-cols-3 gap-3 w-full">
+                            <div class="box-item flex-col">
+                                <i class="fa-solid fa-file-excel text-green-600 text-lg mb-1"></i>
+                                <span>Excel de Asignaciones</span>
+                            </div>
+                            <div class="box-item flex-col">
+                                <i class="fa-solid fa-file-excel text-green-600 text-lg mb-1"></i>
+                                <span>Excel de Costos</span>
+                            </div>
+                            <div class="box-item flex-col">
+                                <i class="fa-solid fa-file-word text-blue-600 text-lg mb-1"></i>
+                                <span>Reportes de Incidencias</span>
+                            </div>
+                            <div class="box-item flex-col">
+                                <i class="fa-solid fa-book text-gray-500 text-lg mb-1"></i>
+                                <span>Kardex de Almacén</span>
+                            </div>
+                            <div class="box-item flex-col">
+                                <i class="fa-solid fa-file-excel text-green-600 text-lg mb-1"></i>
+                                <span>Excel de Rendimiento</span>
+                            </div>
+                            <div class="box-item text-red-500 font-medium">
+                                <i class="fa-solid fa-ban mr-1"></i> Sin Base de Datos Central
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- "Almacén" de Datos de la empresa -->
+                    <div class="col-span-3 flex flex-col items-center justify-center bg-red-50 border border-red-200 p-2">
+                        <div class="text-xs font-bold text-red-800 text-center mb-2">Sistema ERP (Heredado/Contable)</div>
+                        <div class="w-24 h-24 rounded-full bg-white border-2 border-red-300 flex items-center justify-center text-center text-xs p-2 shadow-inner">
+                            Base de Datos Contabilidad (Aislada)
+                        </div>
+                        <div class="text-[0.65rem] text-red-600 mt-2 text-center">No integrada con operaciones de campo</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Flechas Bidireccionales -->
+            <div class="flex justify-around px-12">
+                <div class="flex flex-col items-center">
+                    <div class="arrow-up"></div><div class="connector-line"></div><div class="arrow-down"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="text-xs text-gray-400 font-bold bg-white px-2 z-10">Entrega Física (Nocturna)</div>
+                    <div class="connector-line h-[40px] -mt-3"></div><div class="arrow-up"></div>
+                </div>
+            </div>
+
+            <!-- ================= INTERCAMBIO DE DATOS (Físico/Verbal) ================= -->
+            <div class="flex border border-blue-200 bg-layer-exchange rounded-sm">
+                <div class="layer-title">Intercambio de Datos</div>
+                <div class="flex-1 p-3 flex justify-around items-center gap-4">
+                    <div class="box-item manual-process flex-1 border-blue-300">
+                        <i class="fa-solid fa-person-walking mr-2 text-blue-500"></i> Entrega física de libretas en oficina
+                    </div>
+                    <div class="box-item manual-process flex-1 border-blue-300">
+                        <i class="fa-solid fa-bullhorn mr-2 text-blue-500"></i> Comunicación verbal en campo
+                    </div>
+                    <div class="box-item manual-process flex-1 border-blue-300">
+                        <i class="fa-solid fa-pen-clip mr-2 text-blue-500"></i> Notas escritas a mano
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flechas -->
+            <div class="flex justify-around px-12">
+                <div><div class="connector-line"></div><div class="arrow-up"></div></div>
+                <div><div class="connector-line"></div><div class="arrow-up"></div></div>
+                <div><div class="connector-line"></div><div class="arrow-up"></div></div>
+            </div>
+
+            <!-- ================= FUENTES DE DATOS (Origen) ================= -->
+            <div class="flex border border-gray-300 bg-layer-source rounded-sm">
+                <div class="layer-title text-gray-600">Fuentes de Datos</div>
+                <div class="flex-1 p-3 flex justify-around gap-4">
+                    <div class="box-item paper-record flex-1 flex-col h-20 justify-center">
+                        <span class="font-bold text-gray-700">Campo</span>
+                        <span class="text-gray-500 mt-1">Libretas de apuntes (Avances e Incidencias)</span>
+                    </div>
+                    <div class="box-item paper-record flex-1 flex-col h-20 justify-center">
+                        <span class="font-bold text-gray-700">Almacén</span>
+                        <span class="text-gray-500 mt-1">Cuaderno borrador de despachos</span>
+                    </div>
+                    <div class="box-item paper-record flex-1 flex-col h-20 justify-center">
+                        <span class="font-bold text-gray-700">Gerencia</span>
+                        <span class="text-gray-500 mt-1">Orden del día impresa en papel</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
