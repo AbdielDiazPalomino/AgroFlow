@@ -79,13 +79,16 @@
           
           <!-- Selección de Rol removida, el acceso es por credenciales -->
 
-          <!-- Usuario -->
+          <!-- Usuario / DNI -->
           <div class="form-group">
-            <label for="username" class="form-label">Usuario</label>
+            <label for="username" class="form-label">Usuario o DNI</label>
             <div class="input-wrapper">
               <i data-lucide="user" class="input-icon"></i>
-              <input type="text" id="username" class="form-input" placeholder="admin" required>
+              <input type="text" id="username" class="form-input" placeholder="admin o tu número de DNI" required>
             </div>
+            <small style="color: var(--color-text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Obreros y Supervisores: tu usuario inicial es tu DNI.
+            </small>
           </div>
 
           <!-- Contraseña -->
@@ -96,7 +99,7 @@
             </div>
             <div class="input-wrapper">
               <i data-lucide="lock" class="input-icon"></i>
-              <input type="password" id="password" class="form-input" placeholder="••••••••••••" required>
+              <input type="password" id="password" class="form-input" placeholder="Contraseña (o tu DNI)" required>
               <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar/Ocultar contraseña">
                 <i data-lucide="eye-off"></i>
               </button>
@@ -132,7 +135,7 @@
 
   <!-- Scripts Globales y de Vista -->
   <script src="../../js/config.js"></script>
-  <script src="login.js?v=3"></script>
+  <script src="login.js?v=4"></script>
 </body>
 </html>
 

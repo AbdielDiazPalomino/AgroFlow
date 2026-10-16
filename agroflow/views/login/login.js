@@ -55,11 +55,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Guardar rol (opcional, por si el frontend lo necesita luego)
+                    // Guardar datos de sesión
                     localStorage.setItem('agroflow_user_role', data.role);
-                    localStorage.setItem('agroflow_username', data.username);
+                    localStorage.setItem('agroflow_username', data.username || data.dni);
+                    localStorage.setItem('agroflow_nombre', data.nombre || data.username);
+                    if (data.id) {
+                        localStorage.setItem('agroflow_trabajador_id', data.id);
+                    } else {
+                        localStorage.removeItem('agroflow_trabajador_id');
+                    }
                     
-                    window.location.href = '../dashboard/index.html';
+                    // Redirección según rol
+                    if (data.role === 'OBRERO') {
+                        window.location.href = '../obrero/index.html';
+                    } else if (data.role === 'SUPERVISOR') {
+                        // El supervisor puede ir al panel de cuadrillas o a su vista
+                        window.location.href = '../cuadrillas/index.html';
+                    } else {
+                        // GERENTE / ADMIN
+                        window.location.href = '../dashboard/index.html';
+                    }
                 } else {
                     // Mostrar error del backend (Ej: Credenciales inválidas o Rol Denegado)
                     alert(data.error || 'Error al iniciar sesión');
