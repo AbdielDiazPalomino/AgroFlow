@@ -212,23 +212,47 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectWorkerForTransfer(worker, sourceCrew) {
         selectedWorker = worker;
         selectedSourceCrewId = sourceCrew ? sourceCrew.id : null;
+        const isReassignment = !!sourceCrew;
 
-        // Actualizar UI del panel origen
+        // Actualizar UI del panel origen y título
         sourceCrewName.textContent = sourceCrew ? sourceCrew.nombre : 'Personal Sin Asignar';
+        const panelTitle = document.getElementById('panelActionTitle');
+        if(panelTitle) {
+            panelTitle.textContent = isReassignment ? 'Reasignación de Personal (Traslado Legal)' : 'Asignación Inicial de Personal';
+        }
         
-        // Habilitar controles y alerta
+        // Habilitar controles
         transferFooter.style.opacity = '1';
         transferFooter.style.pointerEvents = 'auto';
         
-        // Si es un traslado (ya tenía cuadrilla), mostramos alerta legal. Si es nuevo, no es necesario.
-        legalAlert.style.display = sourceCrew ? 'flex' : 'none';
-        document.getElementById('btnReasignar').textContent = sourceCrew ? 'Reasignar' : 'Asignar a Cuadrilla';
+        // Alerta legal: Solo si YA tiene cuadrilla y se trata de un traslado/reasignación
+        legalAlert.style.display = isReassignment ? 'flex' : 'none';
+
+        // Adaptar etiqueta del botón y placeholder del motivo
+        const reasonInput = document.getElementById('transferReason');
+        if(isReassignment) {
+            btnReasignar.innerHTML = `<i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Solicitar Reasignación (Firma WebAuthn)`;
+            btnReasignar.style.backgroundColor = '#3B82F6'; // Azul para trámite legal
+            if(reasonInput) {
+                reasonInput.placeholder = "Describe brevemente la razón operativa o administrativa de este traslado de personal (requerido por ley)...";
+            }
+        } else {
+            btnReasignar.innerHTML = `<i data-lucide="user-check" style="width: 16px; height: 16px;"></i> Asignar Directamente a Cuadrilla`;
+            btnReasignar.style.backgroundColor = '#10B981'; // Verde para asignación directa inmediata
+            if(reasonInput) {
+                reasonInput.placeholder = "Nota interna opcional para esta primera asignación...";
+            }
+        }
+        lucide.createIcons();
 
         // Auto-seleccionar otra cuadrilla por defecto en el destino
         const otherCrew = cuadrillas.find(c => c.id != selectedSourceCrewId);
         if(otherCrew) {
             targetCrewSelect.value = otherCrew.id;
             renderTargetCrew(otherCrew.id);
+        } else if(cuadrillas.length > 0) {
+            targetCrewSelect.value = cuadrillas[0].id;
+            renderTargetCrew(cuadrillas[0].id);
         }
 
         renderSourceCrew(selectedSourceCrewId, worker);
@@ -300,19 +324,28 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    // Acción: Reasignar
+    // Acción: Asignar / Reasignar
     btnReasignar.addEventListener('click', async () => {
         if(!selectedWorker) return;
         const targetId = targetCrewSelect.value;
-        const motivo = document.getElementById('transferReason').value;
+        const motivo = document.getElementById('transferReason').value.trim();
+        const isReassignment = !!selectedWorker.cuadrillaId;
+        const targetCrewObj = cuadrillas.find(c => c.id == targetId);
+        const targetCrewName = targetCrewObj ? targetCrewObj.nombre : 'la cuadrilla seleccionada';
         
-        if(targetId == selectedWorker.cuadrillaId) {
-            alert('El trabajador ya está en esta cuadrilla.');
+        if(!targetId) {
+            alert('Debes seleccionar una cuadrilla de destino.');
             return;
         }
 
-        if(!motivo) {
-            alert('Por favor, ingresa el motivo del cambio para el registro legal.');
+        if(targetId == selectedWorker.cuadrillaId) {
+            alert('El trabajador ya pertenece a esta cuadrilla.');
+            return;
+        }
+
+        // Si es REASIGNACIÓN (ya tenía cuadrilla previa), es obligatorio el motivo legal
+        if(isReassignment && !motivo) {
+            alert('Por favor, ingresa el motivo del cambio para el registro de auditoría legal y biometría.');
             return;
         }
 
@@ -322,32 +355,54 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
 
         try {
-            // POST a la API de Django REST Framework
-            const response = await fetch(`${CONFIG.API_BASE_URL}/traslados/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    trabajador: parseInt(selectedWorker.id),
-                    cuadrilla_origen: selectedWorker.cuadrillaId ? parseInt(selectedWorker.cuadrillaId) : null,
-                    cuadrilla_destino: parseInt(targetId),
-                    motivo: motivo,
-                    estado: 'PENDIENTE'
-                })
-            });
+            if(!isReassignment) {
+                // =========================================================================
+                // CASO 1: ASIGNACIÓN INICIAL DIRECTA (El trabajador no tenía cuadrilla previa)
+                // Se asigna de inmediato sin requerir firma biométrica WebAuthn
+                // =========================================================================
+                const patchResponse = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/${selectedWorker.id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cuadrilla: parseInt(targetId)
+                    })
+                });
 
-            if (!response.ok) throw new Error('Error al enviar la solicitud');
+                if (!patchResponse.ok) throw new Error('Error al asignar cuadrilla al trabajador');
 
-            alert(`✅ Solicitud enviada a ${selectedWorker.nombre} de forma oficial en la Base de Datos.\nEsperando su confirmación biométrica desde el App del Obrero.`);
+                alert(`✅ ¡Asignación directa exitosa!\n${selectedWorker.nombre} fue asignado directamente a ${targetCrewName} sin necesidad de validación biométrica.`);
+            } else {
+                // =========================================================================
+                // CASO 2: REASIGNACIÓN / TRASLADO (Ya tenía cuadrilla previa)
+                // Se genera la solicitud formal que requiere firma biométrica WebAuthn
+                // =========================================================================
+                const response = await fetch(`${CONFIG.API_BASE_URL}/traslados/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        trabajador: parseInt(selectedWorker.id),
+                        cuadrilla_origen: parseInt(selectedWorker.cuadrillaId),
+                        cuadrilla_destino: parseInt(targetId),
+                        motivo: motivo,
+                        estado: 'PENDIENTE'
+                    })
+                });
+
+                if (!response.ok) throw new Error('Error al enviar la solicitud de traslado');
+
+                alert(`📋 Solicitud de traslado registrada correctamente en la Base de Datos.\n\nAl tratarse de una reasignación entre cuadrillas, queda en estado PENDIENTE hasta que ${selectedWorker.nombre} firme digitalmente mediante WebAuthn.`);
+            }
             
-            // Si estuviéramos conectando websockets, aquí el UI se bloquearía esperando.
-            // Por ahora recargamos los datos para tener la versión fresca del servidor.
+            // Recargar datos actualizados
             await initApp();
             
             // Restablecer UI
             document.getElementById('transferReason').value = '';
-            btnCancelar.click(); // Disparamos cancelar para limpiar la selección visual
+            btnCancelar.click();
 
         } catch(error) {
             console.error(error);
@@ -355,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             btnReasignar.innerHTML = originalText;
             btnReasignar.disabled = false;
+            lucide.createIcons();
         }
     });
 
@@ -363,6 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
         transferFooter.style.opacity = '0.5';
         transferFooter.style.pointerEvents = 'none';
         legalAlert.style.display = 'none';
+        
+        const panelTitle = document.getElementById('panelActionTitle');
+        if(panelTitle) panelTitle.textContent = 'Asignación / Reasignación de Personal';
         
         sourceWorkerList.innerHTML = '<div class="empty-state-small">Selecciona un obrero de la lista izquierda para iniciar reasignación.</div>';
         targetWorkerList.innerHTML = '';
