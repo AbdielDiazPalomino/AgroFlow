@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Insumos de Cuadrilla y Almacén</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../../css/variables.css">
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/layout.css">
+  <link rel="stylesheet" href="insumos.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR DEL SUPERVISOR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="../index.html" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar" aria-label="Cerrar menú"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Mi Supervisión</span>
+          <a href="../index.html" class="nav-link" id="navCuadrilla">
+            <i data-lucide="users"></i><span>Mi Cuadrilla</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link" id="navMapa">
+            <i data-lucide="map"></i><span>Mapa</span>
+          </a>
+          <a href="#" class="nav-link active" id="navInsumos">
+            <i data-lucide="package"></i><span>Insumos</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../../login/index.html" class="nav-link nav-link--danger" id="btnLogout">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar" aria-label="Abrir menú"><i data-lucide="menu"></i></button>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge" id="topBadge" style="display:none;">0</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Supervisor&background=3B82F6&color=fff" alt="Supervisor" class="avatar" id="topAvatar">
+            <div class="user-info">
+              <span class="user-name" id="topNombre">Supervisor</span>
+              <span class="user-role">Supervisor de Campo</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="content">
+        
+        <div class="page-header mb-4" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 class="page-title">Pedidos de Insumos a Almacén</h1>
+            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+              Solicita materiales, herramientas y agroquímicos para tu cuadrilla. Almacén responderá con Aprobación (SÍ) o Rechazo (NO).
+            </p>
+          </div>
+          <button class="btn btn--primary" id="btnNuevaSolicitud" style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+            <i data-lucide="plus-circle"></i><span>Pedir Insumo a Almacén</span>
+          </button>
+        </div>
+
+        <!-- Barra informativa de la cuadrilla solicitante -->
+        <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 0.875rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="shield-check" style="color: var(--color-primary); width: 20px; height: 20px;"></i>
+            <span style="font-size: 0.875rem; color: var(--color-text-title);">
+              Cuadrilla Solicitante: <strong id="barCuadrillaNombre">Cargando...</strong>
+            </span>
+          </div>
+          <span style="font-size: 0.8125rem; color: var(--color-text-muted);" id="barSectorNombre">Sector: -</span>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="insumos-stats-grid">
+          
+          <div class="stat-card-insumo">
+            <div class="stat-card-insumo__icon stat-card-insumo__icon--total">
+              <i data-lucide="package"></i>
+            </div>
+            <div>
+              <div class="stat-card-insumo__num" id="statTotal">0</div>
+              <div class="stat-card-insumo__label">Total Solicitudes</div>
+            </div>
+          </div>
+
+          <div class="stat-card-insumo">
+            <div class="stat-card-insumo__icon stat-card-insumo__icon--pending">
+              <i data-lucide="clock"></i>
+            </div>
+            <div>
+              <div class="stat-card-insumo__num" id="statPendientes">0</div>
+              <div class="stat-card-insumo__label">Pendientes de Almacén</div>
+            </div>
+          </div>
+
+          <div class="stat-card-insumo">
+            <div class="stat-card-insumo__icon stat-card-insumo__icon--approved">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <div>
+              <div class="stat-card-insumo__num" id="statAprobados">0</div>
+              <div class="stat-card-insumo__label">Aprobados por Almacén (SÍ)</div>
+            </div>
+          </div>
+
+          <div class="stat-card-insumo">
+            <div class="stat-card-insumo__icon stat-card-insumo__icon--rejected">
+              <i data-lucide="x-circle"></i>
+            </div>
+            <div>
+              <div class="stat-card-insumo__num" id="statRechazados">0</div>
+              <div class="stat-card-insumo__label">Rechazados por Almacén (NO)</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barra de Filtros -->
+        <div class="insumos-filters">
+          <div class="tabs-group">
+            <button class="tab-btn active" data-filter="TODOS">Todos</button>
+            <button class="tab-btn" data-filter="PENDIENTE">Pendientes</button>
+            <button class="tab-btn" data-filter="APROBADO">Aprobados (SÍ)</button>
+            <button class="tab-btn" data-filter="RECHAZADO">Rechazados (NO)</button>
+          </div>
+          <span style="font-size: 0.8125rem; color: var(--color-text-muted);" id="solicitudesCountText">0 pedidos registrados</span>
+        </div>
+
+        <!-- Grid de Solicitudes -->
+        <div class="solicitudes-grid" id="solicitudesGrid">
+          <div style="padding: 3rem; text-align: center; color: var(--color-text-muted); grid-column: 1 / -1;">
+            Cargando solicitudes de insumos...
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal Nueva Solicitud a Almacén -->
+  <div class="modal-overlay" id="modalSolicitud">
+    <div class="modal-content-insumo">
+      <div class="modal-header-insumo">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(16, 185, 129, 0.15); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="package-plus"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Solicitar Insumo a Almacén</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">El pedido será recibido por el encargado de almacén</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModal" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <form id="formSolicitudInsumo" class="modal-body-insumo">
+        
+        <div class="form-group-insumo">
+          <label class="form-label-insumo" for="inputInsumoNombre">
+            <span>Nombre del Insumo / Material</span>
+            <span style="font-size: 0.72rem; font-weight: 400; text-transform: none; color: var(--color-text-muted);">Herramienta o agroquímico</span>
+          </label>
+          <div class="input-wrapper-insumo">
+            <i data-lucide="package" class="input-icon-insumo"></i>
+            <input type="text" id="inputInsumoNombre" list="insumosSugeridos" class="form-input" placeholder="Ej: Cajas cosecheras, Tijeras Felco, Fertilizante..." required>
+          </div>
+          <datalist id="insumosSugeridos">
+            <option value="Cajas plásticas cosecheras">
+            <option value="Tijeras de poda profesional Felco">
+            <option value="Guantes de nitrilo reforzados">
+            <option value="Fertilizante foliar NPK 20-20-20">
+            <option value="Cintas agrícolas para tutorado">
+            <option value="Mascarillas de fumigación con filtro">
+            <option value="Jabón potásico para lavado de plagas">
+            <option value="Mochila aspersora manual 20L">
+            <option value="Malla sombra raschel 50%">
+            <option value="Bolsas de recolección de campo">
+          </datalist>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group-insumo">
+            <label class="form-label-insumo" for="inputCantidad">
+              <span>Cantidad</span>
+            </label>
+            <div class="input-wrapper-insumo">
+              <i data-lucide="hash" class="input-icon-insumo"></i>
+              <input type="number" id="inputCantidad" class="form-input" min="0.5" step="0.5" placeholder="Ej: 50" required>
+            </div>
+          </div>
+          
+          <div class="form-group-insumo">
+            <label class="form-label-insumo" for="inputUnidad">
+              <span>Unidad de Medida</span>
+            </label>
+            <div class="custom-select-wrapper">
+              <select id="inputUnidad" class="custom-select" required>
+                <option value="unidades">Unidades</option>
+                <option value="cajas">Cajas</option>
+                <option value="litros">Litros</option>
+                <option value="kg">Kilos (Kg)</option>
+                <option value="rollos">Rollos</option>
+                <option value="sacos">Sacos / Bolsas</option>
+              </select>
+              <i data-lucide="chevron-down" class="custom-select-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-insumo">
+          <label class="form-label-insumo" for="inputPrioridad">
+            <span>Nivel de Prioridad</span>
+          </label>
+          <div class="custom-select-wrapper">
+            <select id="inputPrioridad" class="custom-select">
+              <option value="NORMAL">🟢 Normal (Para el turno habitual)</option>
+              <option value="URGENTE">🔴 Urgente (Atención inmediata en campo)</option>
+            </select>
+            <i data-lucide="chevron-down" class="custom-select-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group-insumo">
+          <label class="form-label-insumo" for="inputMotivo">
+            <span>Motivo / Justificación de Campo</span>
+          </label>
+          <textarea id="inputMotivo" class="form-textarea" rows="3" placeholder="Explica brevemente para qué labor de la cuadrilla se necesitan estos insumos..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; border-top: 1px solid var(--color-border); padding-top: 1.25rem;">
+          <button type="button" class="btn btn--outline" id="btnCancelarModal">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btnEnviarSolicitud" style="padding: 0.85rem 1.5rem;">
+            <i data-lucide="send"></i><span>Enviar Pedido a Almacén</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../../js/config.js"></script>
+  <script src="insumos.js?v=1"></script>
+</body>
+</html>
+

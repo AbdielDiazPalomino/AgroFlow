@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
-    SolicitudTraslado, ActividadCampo, RegistroCosecha
+    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo
 )
 
 class PerfilUsuarioSerializer(serializers.ModelSerializer):
@@ -68,3 +68,16 @@ class RegistroCosechaSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistroCosecha
         fields = '__all__'
+
+class SolicitudInsumoSerializer(serializers.ModelSerializer):
+    cuadrilla_nombre = serializers.CharField(source='cuadrilla.nombre', read_only=True)
+    solicitado_por_nombre = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SolicitudInsumo
+        fields = '__all__'
+
+    def get_solicitado_por_nombre(self, obj):
+        if obj.solicitado_por:
+            return f"{obj.solicitado_por.nombres} {obj.solicitado_por.apellidos}"
+        return None

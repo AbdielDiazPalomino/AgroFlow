@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Panel del Supervisor</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="supervisor.css">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR DEL SUPERVISOR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Mi Supervisión</span>
+          <a href="#" class="nav-link active" id="navCuadrilla">
+            <i data-lucide="users"></i><span>Mi Cuadrilla</span>
+          </a>
+          <a href="mapa/index.html" class="nav-link" id="navMapa">
+            <i data-lucide="map"></i><span>Mapa</span>
+          </a>
+          <a href="insumos/index.html" class="nav-link" id="navInsumos">
+            <i data-lucide="package"></i><span>Insumos</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger" id="btnLogout">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge" id="topBadge" style="display:none;">0</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Supervisor&background=3B82F6&color=fff" alt="Supervisor" class="avatar" id="topAvatar">
+            <div class="user-info">
+              <span class="user-name" id="topNombre">Supervisor</span>
+              <span class="user-role" id="topRol">Supervisor de Campo</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="content p-0">
+        
+        <!-- Header de la página -->
+        <div class="page-header px-4 pt-4 mb-0">
+          <div>
+            <h1 class="page-title">Mi Cuadrilla y Personal a Cargo</h1>
+            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+              Supervisa y administra el personal de tu cuadrilla. Solo puedes solicitar el traslado de tus propios obreros a otras cuadrillas.
+            </p>
+          </div>
+        </div>
+
+        <!-- Banner de Cuadrilla Asignada -->
+        <div class="crew-summary-bar" id="crewSummaryBar">
+          <div class="crew-summary-info">
+            <div class="crew-summary-icon">
+              <i data-lucide="users-round"></i>
+            </div>
+            <div>
+              <div class="crew-summary-title">
+                <span id="crewName">Consultando tu cuadrilla...</span>
+              </div>
+              <div class="crew-summary-subtitle">
+                <span><i data-lucide="map-pin" style="width: 15px; height: 15px; color: var(--color-primary);"></i> <strong id="crewSector">Sector: -</strong></span>
+                <span>•</span>
+                <span><i data-lucide="briefcase" style="width: 15px; height: 15px; color: #60A5FA;"></i> <strong id="crewTipo">Tarea: -</strong></span>
+              </div>
+            </div>
+          </div>
+          <div class="crew-badges">
+            <span class="badge--supervisor">
+              <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Encargado Oficial
+            </span>
+            <span class="badge badge--neutral" id="crewTotalCount" style="padding: 0.45rem 1rem; font-size: 0.875rem;">0 obreros</span>
+          </div>
+        </div>
+
+        <!-- Banner en caso de no tener cuadrilla asignada -->
+        <div class="no-crew-banner" id="noCrewBanner" style="display: none;">
+          <i data-lucide="alert-octagon"></i>
+          <h3>No tienes una cuadrilla a tu cargo</h3>
+          <p>Actualmente no figuras como supervisor encargado de ninguna cuadrilla. Contacta al Administrador de Operaciones para que te asigne una cuadrilla.</p>
+        </div>
+
+        <!-- Layout de Cuadrilla y Reasignación -->
+        <div class="cuadrillas-layout" id="mainCuadrillasLayout">
+          
+          <!-- Columna Izquierda: Lista de Obreros de SU Cuadrilla -->
+          <div class="panel workers-sidebar">
+            <div class="panel__header">
+              <div class="search-bar" style="width: 100%;">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar en mi cuadrilla (Nombre o DNI)..." class="search-input">
+              </div>
+            </div>
+            <div class="panel__body p-0">
+              <ul class="worker-list" id="supervisorWorkerList">
+                <li style="padding: 2rem; text-align: center; color: var(--color-text-muted);">
+                  Cargando obreros de tu cuadrilla...
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Panel de Reasignación a Otra Cuadrilla -->
+          <div class="panel reassign-panel">
+            <div class="reassign-header">
+              <h2 id="panelActionTitle">Reasignación de Personal (Traslado Legal)</h2>
+            </div>
+            
+            <div class="reassign-body">
+              
+              <!-- Alerta legal -->
+              <div class="alert alert--warning mb-4" id="legalAlert" style="display: none;">
+                <i data-lucide="info"></i>
+                <p><strong>Cumplimiento Legal:</strong> Este traslado requiere validación biométrica. Se enviará una solicitud formal a la aplicación del obrero seleccionado para su firma vía WebAuthn.</p>
+              </div>
+
+              <!-- Cajas de Comparación -->
+              <div class="transfer-compare">
+                
+                <!-- Cuadrilla Actual (Tu Cuadrilla) -->
+                <div class="transfer-box box-source">
+                  <div class="box-header">
+                    <h3 id="sourceCrewName">Mi Cuadrilla</h3>
+                    <span class="badge badge--neutral" id="sourceCrewCount">0 personas</span>
+                  </div>
+                  <div class="box-body" id="sourceWorkerList">
+                    <div class="empty-state-small">Selecciona a un trabajador de tu lista a la izquierda para solicitar su traslado a otra cuadrilla.</div>
+                  </div>
+                </div>
+                
+                <div class="transfer-arrow">
+                  <i data-lucide="arrow-right"></i>
+                </div>
+
+                <!-- Cuadrilla Nueva (Destino) -->
+                <div class="transfer-box box-target">
+                  <div class="box-header">
+                    <div class="custom-select-wrapper">
+                      <select id="targetCrewSelect" class="custom-select">
+                        <option value="">Selecciona cuadrilla destino...</option>
+                      </select>
+                      <i data-lucide="chevron-down" class="custom-select-icon"></i>
+                    </div>
+                    <span class="badge badge--neutral" id="targetCrewCount">0 personas</span>
+                  </div>
+                  <div class="box-body" id="targetWorkerList">
+                    <div class="empty-state-small">Selecciona una cuadrilla de destino para ver a sus integrantes.</div>
+                  </div>
+                </div>
+
+              </div> <!-- /transfer-compare -->
+
+              <!-- Motivo y Acciones -->
+              <div class="transfer-footer" id="transferFooter" style="opacity: 0.5; pointer-events: none;">
+                <div class="form-group mb-4">
+                  <label class="form-label" style="color: var(--color-text-muted); font-size: 0.8125rem;">
+                    Motivo Operativo del Traslado (Requerido para auditoría y firma)
+                  </label>
+                  <textarea class="form-input form-textarea" id="transferReason" placeholder="Describe brevemente la razón operativa del cambio de cuadrilla (ej: Apoyo por pico de cosecha, rotación técnica, balance de carga)..." rows="2"></textarea>
+                </div>
+                <div class="actions-group">
+                  <button class="btn btn--outline" id="btnCancelar">Cancelar</button>
+                  <button class="btn btn--primary" id="btnReasignar">
+                    <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Solicitar Reasignación (Firma WebAuthn)
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div> <!-- /cuadrillas-layout -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="supervisor.js?v=1"></script>
+</body>
+</html>
+

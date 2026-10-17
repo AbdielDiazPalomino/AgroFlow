@@ -3,6 +3,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
+    // Control de rol
+    const currentRole = localStorage.getItem('agroflow_user_role');
+    if (currentRole === 'SUPERVISOR') {
+        window.location.href = '../supervisor/index.html';
+        return;
+    } else if (currentRole === 'OBRERO') {
+        window.location.href = '../obrero/index.html';
+        return;
+    }
+
     // Sidebar Mobile
     const sidebar = document.getElementById('sidebar');
     document.getElementById('openSidebar')?.addEventListener('click', () => sidebar.classList.add('active'));
@@ -232,13 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const reasonInput = document.getElementById('transferReason');
         if(isReassignment) {
             btnReasignar.innerHTML = `<i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Solicitar Reasignación (Firma WebAuthn)`;
-            btnReasignar.style.backgroundColor = '#3B82F6'; // Azul para trámite legal
+            btnReasignar.style.backgroundColor = '#10B981'; // Verde corporativo Agroflow
             if(reasonInput) {
                 reasonInput.placeholder = "Describe brevemente la razón operativa o administrativa de este traslado de personal (requerido por ley)...";
             }
         } else {
             btnReasignar.innerHTML = `<i data-lucide="user-check" style="width: 16px; height: 16px;"></i> Asignar Directamente a Cuadrilla`;
-            btnReasignar.style.backgroundColor = '#10B981'; // Verde para asignación directa inmediata
+            btnReasignar.style.backgroundColor = '#10B981'; // Verde corporativo Agroflow
             if(reasonInput) {
                 reasonInput.placeholder = "Nota interna opcional para esta primera asignación...";
             }

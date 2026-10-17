@@ -69,8 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.role === 'OBRERO') {
                         window.location.href = '../obrero/index.html';
                     } else if (data.role === 'SUPERVISOR') {
-                        // El supervisor puede ir al panel de cuadrillas o a su vista
-                        window.location.href = '../cuadrillas/index.html';
+                        window.location.href = '../supervisor/index.html';
                     } else {
                         // GERENTE / ADMIN
                         window.location.href = '../dashboard/index.html';

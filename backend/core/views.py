@@ -6,12 +6,12 @@ from django.contrib.auth import authenticate
 
 from .models import (
     PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
-    SolicitudTraslado, ActividadCampo, RegistroCosecha
+    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo
 )
 from .serializers import (
     PerfilUsuarioSerializer, CultivoSerializer, SectorSerializer, CuadrillaSerializer, 
     TrabajadorSerializer, SolicitudTrasladoSerializer, 
-    ActividadCampoSerializer, RegistroCosechaSerializer
+    ActividadCampoSerializer, RegistroCosechaSerializer, SolicitudInsumoSerializer
 )
 
 @api_view(['POST'])
@@ -234,3 +234,14 @@ def api_supervisores(request):
             'nombre_display': f"{s.nombres} {s.apellidos} (DNI: {s.dni})"
         })
     return Response(result)
+
+class SolicitudInsumoViewSet(viewsets.ModelViewSet):
+    queryset = SolicitudInsumo.objects.all().order_by('-fecha_solicitud')
+    serializer_class = SolicitudInsumoSerializer
+
+    def perform_update(self, serializer):
+        from django.utils import timezone
+        solicitud = serializer.save()
+        if solicitud.estado in ['APROBADO', 'RECHAZADO'] and not solicitud.fecha_respuesta:
+            solicitud.fecha_respuesta = timezone.now()
+            solicitud.save()

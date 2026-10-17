@@ -1,0 +1,475 @@
+/* agroflow/views/supervisor/insumos/insumos.css */
+
+.insumos-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card-insumo {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card-insumo:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.stat-card-insumo__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-insumo__icon--total { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+.stat-card-insumo__icon--pending { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+.stat-card-insumo__icon--approved { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+.stat-card-insumo__icon--rejected { background: rgba(239, 68, 68, 0.15); color: #F87171; }
+
+.stat-card-insumo__num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text-title);
+  line-height: 1.1;
+}
+
+.stat-card-insumo__label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Filtros por pestaña */
+.insumos-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tabs-group {
+  display: flex;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--color-text-title);
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  color: #022c22;
+}
+
+/* Lista / Grid de Solicitudes */
+.solicitudes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.solicitud-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.solicitud-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.solicitud-card.status-pending { border-left: 4px solid #F59E0B; }
+.solicitud-card.status-approved { border-left: 4px solid #10B981; }
+.solicitud-card.status-rejected { border-left: 4px solid #EF4444; }
+
+.solicitud-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.solicitud-card__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+  margin-bottom: 0.25rem;
+}
+
+.solicitud-card__sub {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solicitud-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.solicitud-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.solicitud-meta-row:last-child { border-bottom: none; }
+
+.solicitud-meta-label { color: var(--color-text-muted); }
+.solicitud-meta-val { color: var(--color-text-title); font-weight: 600; }
+
+.solicitud-motivo {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-body);
+  border-left: 2px solid var(--color-border);
+}
+
+/* Sección de Respuesta de Almacén */
+.almacen-response-box {
+  background: rgba(11, 17, 33, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.almacen-response-box.approved {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.almacen-response-box.rejected {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.almacen-response-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.almacen-sim-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.btn-almacen-si {
+  flex: 1;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10B981;
+  color: #34D399;
+  padding: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-almacen-si:hover {
+  background: #10B981;
+  color: #022c22;
+}
+
+.btn-almacen-no {
+  flex: 1;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #EF4444;
+  color: #F87171;
+  padding: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-almacen-no:hover {
+  background: #EF4444;
+  color: white;
+}
+
+/* Modal Nueva Solicitud */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-content-insumo {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  animation: modal-fade-in 0.25s ease;
+}
+
+.modal-header-insumo {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body-insumo {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* =========================================
+   FORMULARIOS E INPUTS DEL MODAL DE INSUMOS
+   ========================================= */
+.form-group-insumo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label-insumo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-wrapper-insumo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon-insumo {
+  position: absolute;
+  left: 1rem;
+  color: var(--color-text-muted);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.form-input {
+  width: 100%;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  padding: 0.85rem 1rem 0.85rem 2.85rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.65;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.04);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.input-wrapper-insumo:focus-within .input-icon-insumo {
+  color: var(--color-primary);
+}
+
+/* Selectores Personalizados */
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.85rem 2.75rem 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.custom-select:focus {
+  border-color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.04);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.custom-select option {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  padding: 10px;
+}
+
+.custom-select-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.custom-select:focus + .custom-select-icon {
+  color: var(--color-primary);
+}
+
+/* Textarea */
+.form-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 85px;
+  line-height: 1.5;
+  padding: 0.85rem 1rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-title);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.form-textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.65;
+}
+
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.04);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Responsividad */
+@media (max-width: 1024px) {
+  .insumos-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .insumos-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .solicitudes-grid {
+    grid-template-columns: 1fr;
+  }
+  .insumos-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tabs-group {
+    overflow-x: auto;
+    width: 100%;
+  }
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+

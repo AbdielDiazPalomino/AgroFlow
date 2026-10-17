@@ -4,7 +4,7 @@ from .views import (
     api_login, api_supervisores, api_cambiar_password_trabajador, api_mi_perfil_obrero,
     PerfilUsuarioViewSet, CultivoViewSet, SectorViewSet, CuadrillaViewSet, 
     TrabajadorViewSet, SolicitudTrasladoViewSet, 
-    ActividadCampoViewSet, RegistroCosechaViewSet
+    ActividadCampoViewSet, RegistroCosechaViewSet, SolicitudInsumoViewSet
 )
 
 router = DefaultRouter()
@@ -16,6 +16,7 @@ router.register(r'trabajadores', TrabajadorViewSet)
 router.register(r'traslados', SolicitudTrasladoViewSet)
 router.register(r'actividades', ActividadCampoViewSet)
 router.register(r'cosechas', RegistroCosechaViewSet)
+router.register(r'insumos', SolicitudInsumoViewSet)
 
 urlpatterns = [
     path('login/', api_login, name='api_login'),
