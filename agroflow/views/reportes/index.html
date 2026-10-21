@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AGROFLOW | Reportes Históricos</title>
+  <title>AGROFLOW | Reportes e Incidencias</title>
   
   <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
   
@@ -56,7 +56,7 @@
       </nav>
 
       <div class="sidebar__footer">
-        <a href="../login/index.html" class="nav-link nav-link--danger">
+        <a href="../login/index.html" class="nav-link nav-link--danger" id="btnLogout">
           <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
         </a>
       </div>
@@ -71,17 +71,17 @@
           <button class="menu-toggle" id="openSidebar"><i data-lucide="menu"></i></button>
           <div class="search-bar">
             <i data-lucide="search"></i>
-            <input type="text" placeholder="Buscar reportes históricos..." class="search-input">
+            <input type="text" id="searchInput" placeholder="Buscar incidencias por título o detalle..." class="search-input">
           </div>
         </div>
         <div class="topbar__right">
           <button class="icon-btn" aria-label="Notificaciones">
-            <i data-lucide="bell"></i><span class="badge">4</span>
+            <i data-lucide="bell"></i><span class="badge" id="topNotificationBadge">0</span>
           </button>
           <div class="user-profile">
-            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar">
+            <img src="https://ui-avatars.com/api/?name=Gerente+General&background=10B981&color=fff" alt="Perfil" class="avatar" id="topAvatar">
             <div class="user-info">
-              <span class="user-name">Gerente General</span>
+              <span class="user-name" id="topUserName">Gerente General</span>
               <span class="user-role">Fundo Principal</span>
             </div>
           </div>
@@ -93,8 +93,60 @@
         
         <div class="page-header">
           <div>
-            <h1 class="page-title">Reportes y Analítica Histórica</h1>
-            <p class="page-subtitle">Generación de informes de exportación, personal y rendimiento por sectores.</p>
+            <div class="live-status-indicator">
+              <span class="live-pulse"></span>
+              <span class="live-status-text" id="liveSyncText">Centro de Control Gerencial · En Vivo</span>
+            </div>
+            <h1 class="page-title">Reportes e Incidencias de Campo</h1>
+            <p class="page-subtitle">Supervisión en tiempo real de eventos reportados por supervisores y panel de toma de decisiones operativas.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn--outline" id="btnRefreshReportes">
+              <i data-lucide="refresh-cw" id="refreshIcon"></i> Actualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- KPIs de Incidencias y Resoluciones -->
+        <div class="reportes-stats-grid">
+          <div class="stat-card-rep">
+            <div class="stat-card-rep__icon stat-card-rep__icon--total">
+              <i data-lucide="clipboard-list"></i>
+            </div>
+            <div>
+              <div class="stat-card-rep__num" id="statTotalIncidencias">0</div>
+              <div class="stat-card-rep__label">Total Incidencias Reportadas</div>
+            </div>
+          </div>
+
+          <div class="stat-card-rep">
+            <div class="stat-card-rep__icon stat-card-rep__icon--critical">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div>
+              <div class="stat-card-rep__num" id="statCriticas">0</div>
+              <div class="stat-card-rep__label">Críticas / Riesgo Alto</div>
+            </div>
+          </div>
+
+          <div class="stat-card-rep">
+            <div class="stat-card-rep__icon stat-card-rep__icon--progress">
+              <i data-lucide="clock"></i>
+            </div>
+            <div>
+              <div class="stat-card-rep__num" id="statEnProceso">0</div>
+              <div class="stat-card-rep__label">En Proceso de Atención</div>
+            </div>
+          </div>
+
+          <div class="stat-card-rep">
+            <div class="stat-card-rep__icon stat-card-rep__icon--resolved">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <div>
+              <div class="stat-card-rep__num" id="statResueltas">0</div>
+              <div class="stat-card-rep__label">Resueltas por Gerencia</div>
+            </div>
           </div>
         </div>
 
@@ -103,89 +155,82 @@
           <div class="filters-grid">
             
             <div class="form-group">
-              <label class="form-label">Tipo de Reporte</label>
-              <select class="form-input">
-                <option>Rendimiento de Cosecha</option>
-                <option>Costos de Personal (Cuadrillas)</option>
-                <option>Uso de Agua y Fertilizantes</option>
-                <option>Alertas Fitosanitarias</option>
+              <label class="form-label" for="selectTipoReporte">Módulo de Reporte</label>
+              <select class="form-input" id="selectTipoReporte">
+                <option value="INCIDENCIAS" selected>🚨 Incidencias de Campo (Toma de Decisiones)</option>
+                <option value="COSECHA">🌾 Rendimiento de Cosecha / Producción</option>
+                <option value="CUADRILLAS">👥 Trazabilidad de Cuadrillas y Personal</option>
               </select>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Sector</label>
-              <select class="form-input">
-                <option>Todos los Sectores</option>
-                <option>Sector Norte 1 (Sunflower)</option>
-                <option>Sector Este 1 (Gypsophila)</option>
-                <option>Sector Oeste 1 (Waxflower)</option>
+            <div class="form-group" id="groupFiltroSector">
+              <label class="form-label" for="selectSector">Sector Afectado</label>
+              <select class="form-input" id="selectSector">
+                <option value="TODOS">Todos los Sectores</option>
               </select>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Desde</label>
-              <input type="date" class="form-input" value="2026-01-01">
+            <div class="form-group" id="groupFiltroGravedad">
+              <label class="form-label" for="selectGravedad">Gravedad</label>
+              <select class="form-input" id="selectGravedad">
+                <option value="TODAS">Todas las Gravedades</option>
+                <option value="CRITICA">🔴 Crítica</option>
+                <option value="ALTA">🟠 Alta</option>
+                <option value="MEDIA">🟡 Media</option>
+                <option value="BAJA">🟢 Baja</option>
+              </select>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Hasta</label>
-              <input type="date" class="form-input" value="2026-09-22">
+            <div class="form-group" id="groupFiltroEstado">
+              <label class="form-label" for="selectEstado">Estado</label>
+              <select class="form-input" id="selectEstado">
+                <option value="TODOS">Todos los Estados</option>
+                <option value="ABIERTA">Abiertas / En Revisión</option>
+                <option value="EN_PROCESO">En Proceso</option>
+                <option value="RESUELTA">Resueltas</option>
+              </select>
             </div>
 
             <div class="filters-actions">
-              <button class="btn btn--primary btn--full" id="btnGenerar"><i data-lucide="filter"></i> Generar</button>
+              <button class="btn btn--primary btn--full" id="btnFiltrar"><i data-lucide="filter"></i> Filtrar</button>
             </div>
           </div>
         </div>
 
-        <!-- Vista Previa de Tabla de Reportes -->
+        <!-- Tabla Principal de Reportes -->
         <div class="table-card mt-4">
           <div class="table-card__header">
-            <h2>Vista Previa del Reporte: Rendimiento de Cosecha</h2>
-            <div style="display:flex; gap:0.5rem;">
-                <button class="btn btn--outline" id="btnExcel"><i data-lucide="file-spreadsheet" style="color:#10B981;"></i> Excel</button>
-                <button class="btn btn--outline" id="btnPdf"><i data-lucide="file-text" style="color:#ef4444;"></i> PDF</button>
+            <div>
+              <h2 id="tableCardTitle">Bitácora de Incidencias Operativas en Campo</h2>
+              <p class="table-card__subtitle" id="tableCardSubtitle">
+                Eventos registrados por supervisores de cuadrilla para toma de decisiones gerenciales
+              </p>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items: center;">
+              <span class="records-tag" id="recordsCountTag">0 registros</span>
+              <button class="btn btn--outline" id="btnExportExcel" title="Exportar datos a archivo Excel CSV"><i data-lucide="file-spreadsheet" style="color:#10B981;"></i> Excel</button>
+              <button class="btn btn--outline" id="btnExportPdf" title="Imprimir o guardar PDF"><i data-lucide="printer" style="color:#60A5FA;"></i> Imprimir</button>
             </div>
           </div>
+          
           <div class="table-responsive">
-            <table class="data-table">
-              <thead>
+            <table class="data-table" id="reportesDataTable">
+              <thead id="reportesThead">
                 <tr>
-                  <th>Fecha</th>
-                  <th>Sector</th>
-                  <th>Flor</th>
-                  <th>Volumen (Cajas)</th>
-                  <th>Calidad</th>
+                  <th>Fecha y Hora</th>
+                  <th>Gravedad</th>
+                  <th>Tipo / Título</th>
+                  <th>Sector y Cultivo</th>
+                  <th>Supervisor / Cuadrilla</th>
+                  <th>Descripción de Campo</th>
+                  <th>Estado</th>
+                  <th>Decisión Gerencial</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="reportesTbody">
                 <tr>
-                  <td>2026-09-21</td>
-                  <td>Sector Norte 1</td>
-                  <td>Sunflower</td>
-                  <td>450</td>
-                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
-                </tr>
-                <tr>
-                  <td>2026-09-20</td>
-                  <td>Sector Este 1</td>
-                  <td>Gypsophila</td>
-                  <td>320</td>
-                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
-                </tr>
-                <tr>
-                  <td>2026-09-18</td>
-                  <td>Sector Central</td>
-                  <td>Proteas</td>
-                  <td>110</td>
-                  <td><span class="status-badge status-badge--alerta">Mercado Local (B2)</span></td>
-                </tr>
-                <tr>
-                  <td>2026-09-15</td>
-                  <td>Sector Oeste 1</td>
-                  <td>Waxflower</td>
-                  <td>290</td>
-                  <td><span class="status-badge status-badge--ok">Exportación (A1)</span></td>
+                  <td colspan="9" class="text-center py-4 text-muted">Cargando incidencias operativas...</td>
                 </tr>
               </tbody>
             </table>
@@ -196,7 +241,83 @@
     </div>
   </div>
 
-  <script src="reportes.js"></script>
+  <!-- Modal de Toma de Decisión Gerencial -->
+  <div class="modal-overlay" id="modalDecision">
+    <div class="modal-content-decision">
+      <div class="modal-header-decision">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); background: rgba(16, 185, 129, 0.15); color: #10B981; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="gavel"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Toma de Decisión Operativa</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Instrucción directa de Gerencia General hacia el equipo de campo</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalDecision" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body-decision">
+        
+        <!-- Resumen de la Incidencia -->
+        <div class="incident-summary-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <div id="modalIncidenciaBadges" style="display: flex; gap: 0.4rem;"></div>
+            <span id="modalIncidenciaFecha" style="font-size: 0.75rem; color: var(--color-text-muted);">--</span>
+          </div>
+          <h4 id="modalIncidenciaTitulo" style="color: var(--color-text-title); font-size: 1.0625rem; font-weight: 700; margin-bottom: 0.5rem;">Título</h4>
+          <div style="font-size: 0.8125rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+            <strong style="color: var(--color-text-title);">Ubicación:</strong> <span id="modalIncidenciaSector">--</span> · 
+            <strong style="color: var(--color-text-title);">Reportado por:</strong> <span id="modalIncidenciaSupervisor">--</span>
+          </div>
+          <p id="modalIncidenciaDesc" style="font-size: 0.875rem; color: var(--color-text-body, #cbd5e1); line-height: 1.45; background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: var(--radius-sm); margin: 0;"></p>
+          <div id="modalIncidenciaAccionContainer" style="margin-top: 0.5rem; display: none;">
+            <small style="color: #60A5FA; font-weight: 600;">Medida Preventiva Tomada:</small>
+            <p id="modalIncidenciaAccion" style="font-size: 0.8125rem; color: var(--color-text-muted); margin: 0.2rem 0 0 0;"></p>
+          </div>
+        </div>
+
+        <form id="formDecision">
+          <input type="hidden" id="modalIncidenciaId">
+          
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="selectNuevoEstado">Actualizar Estado de la Incidencia</label>
+            <select class="form-input" id="selectNuevoEstado" required>
+              <option value="EN_PROCESO">🟡 En Proceso de Atención</option>
+              <option value="RESUELTA">🟢 Resuelta y Cerrada</option>
+              <option value="ABIERTA">🔴 Abierta / Requiere Evaluación</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" for="textareaResolucion" style="margin-bottom: 0;">
+                <span>Resolución / Instrucción de Gerencia General</span>
+              </label>
+              <button type="button" class="btn btn--outline" id="btnSugerirResolucionIA" style="font-size: 0.75rem; padding: 0.25rem 0.65rem; border-color: rgba(168, 85, 247, 0.4); color: #c084fc; background: rgba(168, 85, 247, 0.1); display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                <i data-lucide="sparkles" style="width: 13px; height: 13px;"></i> Sugerir con IA Groq
+              </button>
+            </div>
+            <textarea class="form-input" id="textareaResolucion" rows="4" placeholder="Escribe la orden, autorización de compra de repuestos, despliegue de cuadrilla o directiva técnica para el supervisor..." required style="resize: vertical; line-height: 1.5;"></textarea>
+            <div id="aiSuggestionNotice" style="display: none; font-size: 0.75rem; color: #c084fc; margin-top: 0.35rem; padding: 0.4rem 0.6rem; background: rgba(168, 85, 247, 0.1); border-radius: var(--radius-sm); border: 1px solid rgba(168, 85, 247, 0.2);">
+              <i data-lucide="bot" style="width: 13px; height: 13px; vertical-align: middle;"></i> <span id="aiSuggestionNoticeText">Sugerencia técnica generada por Agro-IA.</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+            <button type="button" class="btn btn--outline" id="btnCancelarModalDecision">Cancelar</button>
+            <button type="submit" class="btn btn--primary" id="btnGuardarDecision">
+              <i data-lucide="check-check"></i> Guardar Decisión y Notificar a Campo
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../js/config.js"></script>
+  <script src="reportes.js?v=2"></script>
 </body>
 </html>
-

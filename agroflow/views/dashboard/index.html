@@ -95,56 +95,72 @@
         
         <div class="page-header">
           <div>
-            <h1 class="page-title">Resumen de Operaciones</h1>
-            <p class="page-subtitle">Métricas globales y estado actual de exportaciones Roots SAC</p>
+            <div class="live-status-indicator">
+              <span class="live-pulse"></span>
+              <span class="live-status-text" id="liveSyncText">Conectado al Fundo · Sincronización en vivo</span>
+            </div>
+            <h1 class="page-title">Centro de Control y Trazabilidad Operativa</h1>
+            <p class="page-subtitle">Monitoreo en tiempo real de cuadrillas, supervisores en terreno y gestión de incidencias de campo</p>
           </div>
           <div class="page-actions">
-            <button class="btn btn--outline"><i data-lucide="download"></i> Exportar Reporte</button>
+            <button class="btn btn--outline" id="btnRefreshData">
+              <i data-lucide="refresh-cw" id="refreshIcon"></i> Actualizar
+            </button>
+            <a href="../mapa/index.html" class="btn btn--primary">
+              <i data-lucide="map-pin"></i> Ver Mapa en Vivo
+            </a>
           </div>
         </div>
 
-        <!-- AI Assistant Banner -->
-        <div class="ai-banner mb-4">
+        <!-- AI Assistant Banner: Trazabilidad y Alertas Operativas -->
+        <div class="ai-banner mb-4" id="aiCopilotBanner">
           <div class="ai-banner__icon">
             <i data-lucide="sparkles"></i>
           </div>
           <div class="ai-banner__content">
-            <h3>Agro-IA Copilot</h3>
-            <p><strong>Sugerencia de riego:</strong> Según el pronóstico del clima (alta radiación) y los sensores de suelo, se recomienda adelantar el riego del <em>Sector Este (Gypsophila)</em> en 2 horas para evitar estrés hídrico.</p>
+            <h3 id="aiBannerTitle">Agro-IA Copilot · Monitoreo de Trazabilidad</h3>
+            <p id="aiBannerText">Cargando diagnóstico operativo en tiempo real...</p>
           </div>
           <div class="ai-banner__actions">
-            <button class="btn btn--primary" style="background-color: #8B5CF6; border:none;">Aplicar Sugerencia</button>
-            <button class="icon-btn icon-btn--small" aria-label="Cerrar sugerencia"><i data-lucide="x"></i></button>
+            <button class="btn btn--outline" id="btnAbrirChatIA" style="border-color: rgba(139, 92, 246, 0.5); color: #C084FC;">
+              <i data-lucide="bot"></i> Preguntar a la IA
+            </button>
+            <a href="../cuadrillas/index.html" class="btn btn--primary" id="aiActionBtn" style="background-color: #8B5CF6; border:none; text-decoration: none;">
+              Gestionar Cuadrillas
+            </a>
           </div>
         </div>
 
-        <!-- KPIs -->
+        <!-- KPIs OPERATIVOS (TRAZABILIDAD & INCIDENCIAS) -->
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-card__icon stat-card__icon--green">
-              <i data-lucide="package"></i>
+            <div class="stat-card__icon stat-card__icon--blue">
+              <i data-lucide="users"></i>
             </div>
             <div class="stat-card__data">
-              <span class="stat-card__label">Cajas Exportadas (Mes)</span>
-              <span class="stat-card__value">14,250</span>
+              <span class="stat-card__label">Personal en Fundo</span>
+              <span class="stat-card__value" id="kpiTotalPersonal">--</span>
+              <span class="stat-card__sublabel" id="kpiPersonalDesglose">Cargando obreros...</span>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-card__icon stat-card__icon--blue">
-              <i data-lucide="sprout"></i>
+            <div class="stat-card__icon stat-card__icon--green">
+              <i data-lucide="radio"></i>
             </div>
             <div class="stat-card__data">
-              <span class="stat-card__label">Hectáreas Activas</span>
-              <span class="stat-card__value">85.4 ha</span>
+              <span class="stat-card__label">Supervisores en Terreno</span>
+              <span class="stat-card__value" id="kpiSupervisoresActivos">--</span>
+              <span class="stat-card__sublabel" id="kpiSupervisoresDesglose">Señal GPS y cuadrilla</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-card__icon stat-card__icon--purple">
-              <i data-lucide="users"></i>
+              <i data-lucide="layers"></i>
             </div>
             <div class="stat-card__data">
-              <span class="stat-card__label">Personal en Campo</span>
-              <span class="stat-card__value">142</span>
+              <span class="stat-card__label">Cuadrillas Desplegadas</span>
+              <span class="stat-card__value" id="kpiCuadrillasActivas">--</span>
+              <span class="stat-card__sublabel" id="kpiCuadrillasDesglose">Asignadas a sectores</span>
             </div>
           </div>
           <div class="stat-card">
@@ -152,85 +168,165 @@
               <i data-lucide="alert-triangle"></i>
             </div>
             <div class="stat-card__data">
-              <span class="stat-card__label">Alertas de Riego/Plagas</span>
-              <span class="stat-card__value">3</span>
+              <span class="stat-card__label">Incidencias y Alertas</span>
+              <span class="stat-card__value" id="kpiIncidenciasActivas">--</span>
+              <span class="stat-card__sublabel" id="kpiIncidenciasDesglose">Atención requerida</span>
             </div>
           </div>
         </div>
 
-        <!-- Gráficos -->
+        <!-- Gráficos Operativos -->
         <div class="charts-grid">
           
-          <!-- Gráfico de Línea -->
+          <!-- Gráfico de Barras: Distribución de Personal por Labor -->
           <div class="chart-card">
             <div class="chart-card__header">
-              <h2>Proyección de Cosecha (Miles de Cajas)</h2>
+              <div class="chart-card__title-wrap">
+                <i data-lucide="briefcase" class="chart-icon text-green"></i>
+                <h2>Despliegue de Personal por Tipo de Labor</h2>
+              </div>
+              <span class="chart-card__tag" id="chartTotalTrabajadoresTag">0 trabajadores</span>
             </div>
             <div class="chart-card__body">
-              <canvas id="cosechaChart"></canvas>
+              <canvas id="laboresChart"></canvas>
             </div>
           </div>
 
-          <!-- Gráfico de Dona -->
+          <!-- Gráfico de Dona: Estado Operativo de Sectores -->
           <div class="chart-card">
             <div class="chart-card__header">
-              <h2>Distribución de Cultivos</h2>
+              <div class="chart-card__title-wrap">
+                <i data-lucide="pie-chart" class="chart-icon text-blue"></i>
+                <h2>Estado Operativo de Sectores</h2>
+              </div>
+              <span class="chart-card__tag" id="chartTotalHectareasTag">0.0 ha</span>
             </div>
             <div class="chart-card__body chart-card__body--centered">
-              <canvas id="cultivosChart"></canvas>
+              <canvas id="sectoresChart"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- Tabla Reciente -->
-        <div class="table-card">
-          <div class="table-card__header">
-            <h2>Operaciones Recientes</h2>
-            <button class="btn btn--outline" style="padding: 0.5rem; font-size: 0.8125rem;">Ver Todas</button>
+        <!-- Tablas de Monitoreo en Vivo -->
+        <div class="monitoring-grid">
+          
+          <!-- Tabla 1: Supervisores en Vivo -->
+          <div class="table-card">
+            <div class="table-card__header">
+              <div class="chart-card__title-wrap">
+                <i data-lucide="navigation" class="chart-icon text-green"></i>
+                <div>
+                  <h2>Monitoreo en Vivo de Supervisores</h2>
+                  <p class="table-card__subtitle">Ubicación GPS y cuadrilla asignada en tiempo real</p>
+                </div>
+              </div>
+              <a href="../mapa/index.html" class="btn btn--outline btn--sm">
+                <i data-lucide="map"></i> Abrir Mapa Completo
+              </a>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Supervisor</th>
+                    <th>Cuadrilla</th>
+                    <th>Sector / Cultivo</th>
+                    <th>Estado GPS</th>
+                    <th>Último Reporte</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="supervisoresTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">Cargando supervisores...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Actividad</th>
-                  <th>Sector</th>
-                  <th>Responsable</th>
-                  <th>Estado</th>
-                  <th>Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Corte y Empaque de Gypsophila</td>
-                  <td>Sector Este 1</td>
-                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=ML" class="avatar-small"> María López</div></td>
-                  <td><span class="status-badge status-badge--ok">Completado</span></td>
-                  <td>Hoy, 09:30 AM</td>
-                </tr>
-                <tr>
-                  <td>Aplicación de Fertilizante</td>
-                  <td>Sector Norte 1 (Sunflower)</td>
-                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=JP" class="avatar-small"> Juan Pérez</div></td>
-                  <td><span class="status-badge status-badge--riego">En Progreso</span></td>
-                  <td>Hoy, 10:15 AM</td>
-                </tr>
-                <tr>
-                  <td>Inspección Fitosanitaria</td>
-                  <td>Sector Oeste 1 (Waxflower)</td>
-                  <td><div class="table-user"><img src="https://ui-avatars.com/api/?name=CR" class="avatar-small"> Carlos Ruiz</div></td>
-                  <td><span class="status-badge status-badge--alerta">Requiere Acción</span></td>
-                  <td>Ayer, 16:45 PM</td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- Tabla 2: Bitácora de Trazabilidad e Incidencias Recientes -->
+          <div class="table-card">
+            <div class="table-card__header">
+              <div class="chart-card__title-wrap">
+                <i data-lucide="clipboard-list" class="chart-icon text-orange"></i>
+                <div>
+                  <h2>Bitácora de Trazabilidad e Incidencias Recientes</h2>
+                  <p class="table-card__subtitle">Auditoría legal de traslados (WebAuthn) y solicitudes de insumos</p>
+                </div>
+              </div>
+              <span class="badge-count" id="totalIncidenciasCount">0 registros</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Evento</th>
+                    <th>Detalle / Responsable</th>
+                    <th>Cuadrilla / Destino</th>
+                    <th>Estado / Compliance</th>
+                    <th>Fecha y Hora</th>
+                  </tr>
+                </thead>
+                <tbody id="bitacoraTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Cargando bitácora de trazabilidad...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+
         </div>
 
       </main>
     </div>
   </div>
 
-  <script src="dashboard.js"></script>
+  <!-- Modal Chat Agro-IA Copilot -->
+  <div class="modal-overlay" id="modalChatIA">
+    <div class="modal-content-ia">
+      <div class="modal-header-ia">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); background: rgba(139, 92, 246, 0.2); color: #8B5CF6; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="sparkles"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.0625rem; font-weight: 700; color: var(--color-text-title); margin:0;">Agro-IA Copilot · Asistente Operativo</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted); margin:0.15rem 0 0 0;">Consultas en tiempo real con inteligencia artificial Groq</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarChatIA" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <!-- Quick prompts -->
+      <div class="chat-quick-prompts">
+        <button class="quick-prompt-btn" data-prompt="¿Cuáles son las alertas e incidencias más críticas hoy en el fundo?">🚨 Alertas Críticas</button>
+        <button class="quick-prompt-btn" data-prompt="¿Cómo están distribuidos los trabajadores y cuadrillas?">👥 Personal en Campo</button>
+        <button class="quick-prompt-btn" data-prompt="Recomiéndame una acción preventiva para los sectores en riesgo">🌱 Acción Preventiva</button>
+      </div>
+
+      <!-- Chat Messages Container -->
+      <div class="chat-messages-container" id="chatMessagesContainer">
+        <div class="chat-msg chat-msg--ia">
+          <div class="chat-msg__bubble">
+            ¡Hola! Soy tu asistente <strong>Agro-IA Copilot</strong>. Tengo acceso a las cuadrillas, supervisores, sectores y alertas de Roots SAC. ¿En qué decisión operativa te puedo ayudar hoy?
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Form -->
+      <form class="chat-input-form" id="chatInputForm">
+        <input type="text" id="chatInput" placeholder="Escribe tu consulta operativa (ej: ¿Qué cuadrilla necesita apoyo?)..." required autocomplete="off">
+        <button type="submit" id="btnEnviarChat" class="btn btn--primary" style="background-color: #8B5CF6; border-color: #8B5CF6; padding: 0.65rem 1rem;">
+          <i data-lucide="send"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../../js/config.js"></script>
+  <script src="dashboard.js?v=4"></script>
 </body>
 </html>
 

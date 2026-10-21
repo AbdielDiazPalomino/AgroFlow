@@ -170,8 +170,17 @@
           <!-- Sección de Simulador de Mapa -->
           <div class="map-section panel">
             <div class="panel__header">
-              <h2>Vista Espacial</h2>
+              <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                <h2>Vista Espacial</h2>
+                <div class="live-supervisores-badge" id="liveSupervisoresBadge">
+                  <span class="live-pulse-dot"></span>
+                  <span id="liveSupervisoresText">Rastreando Supervisores (Cada 1 min)</span>
+                </div>
+              </div>
               <div class="map-controls">
+                <button class="icon-btn icon-btn--small" id="btnRefreshSupervisores" title="Actualizar posición de supervisores ahora">
+                  <i data-lucide="refresh-cw"></i>
+                </button>
                 <button class="icon-btn icon-btn--small" id="btnZoomIn" title="Acercar"><i data-lucide="zoom-in"></i></button>
                 <button class="icon-btn icon-btn--small" id="btnZoomOut" title="Alejar"><i data-lucide="zoom-out"></i></button>
                 <button class="icon-btn icon-btn--small" id="btnToggleLayer" title="Cambiar Capa"><i data-lucide="layers"></i></button>

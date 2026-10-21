@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 apellidos: t.apellidos,
                 nombre: `${t.nombres} ${t.apellidos}`,
                 esSupervisor: !!t.es_supervisor,
+                esJefeAlmacen: !!t.es_jefe_almacen,
                 img: t.foto_url || `https://ui-avatars.com/api/?name=${t.nombres}+${t.apellidos}&background=random`,
                 cuadrillaId: t.cuadrilla // FK integer o null
             }));
@@ -131,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="worker-item-info" style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                         <span class="worker-item-name">${worker.nombre}</span>
-                        ${worker.esSupervisor ? '<span style="background: rgba(16, 185, 129, 0.2); color: #10B981; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">SUPERVISOR</span>' : ''}
+                        ${worker.esJefeAlmacen ? '<span style="background: rgba(59, 130, 246, 0.2); color: #60A5FA; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">JEFE DE ALMACÉN</span>' : (worker.esSupervisor ? '<span style="background: rgba(16, 185, 129, 0.2); color: #10B981; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">SUPERVISOR</span>' : '')}
                     </div>
                     <span class="worker-item-crew">DNI: ${worker.dni} • ${crewName}</span>
                 </div>
@@ -148,6 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
             li.addEventListener('click', (e) => {
                 // Evitar seleccionar para traslado si se hizo click en los botones de acción
                 if(e.target.closest('.worker-actions')) return;
+
+                if (worker.esJefeAlmacen) {
+                    alert("ℹ️ El Jefe de Almacén tiene un rol administrativo en Almacén Central y no puede ser asignado a cuadrillas operativas de campo.");
+                    return;
+                }
 
                 selectWorkerForTransfer(worker, crew);
                 // Highlight update
@@ -461,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         formAdd.reset();
         document.getElementById('addTrabajadorId').value = '';
-        document.getElementById('addEsSupervisor').value = 'false';
+        document.getElementById('addEsSupervisor').value = 'OBRERO';
         btnEliminarTrabajador.style.display = 'none';
         modalAdd.classList.add('active');
         lucide.createIcons();
@@ -476,7 +482,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('addNombres').value = worker.nombres || '';
         document.getElementById('addApellidos').value = worker.apellidos || '';
         document.getElementById('addDni').value = worker.dni || '';
-        document.getElementById('addEsSupervisor').value = worker.esSupervisor ? 'true' : 'false';
+        document.getElementById('addEsSupervisor').value = worker.esJefeAlmacen 
+            ? 'JEFE_ALMACEN' 
+            : (worker.esSupervisor ? 'SUPERVISOR' : 'OBRERO');
         btnEliminarTrabajador.style.display = 'inline-flex';
         modalAdd.classList.add('active');
         lucide.createIcons();
@@ -503,7 +511,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombres = document.getElementById('addNombres').value.trim();
             const apellidos = document.getElementById('addApellidos').value.trim();
             const dni = document.getElementById('addDni').value.trim();
-            const esSupervisor = document.getElementById('addEsSupervisor').value === 'true';
+            const rolVal = document.getElementById('addEsSupervisor').value;
+            const esSupervisor = rolVal === 'SUPERVISOR';
+            const esJefeAlmacen = rolVal === 'JEFE_ALMACEN';
             
             const submitBtn = formAdd.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -514,7 +524,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombres: nombres,
                 apellidos: apellidos,
                 dni: dni,
-                es_supervisor: esSupervisor
+                es_supervisor: esSupervisor,
+                es_jefe_almacen: esJefeAlmacen
             };
 
             const method = trabajadorId ? 'PUT' : 'POST';
@@ -533,7 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const err = await response.json();
-                    throw new Error(JSON.stringify(err));
+                    const msg = err.error || err.detail || (typeof err === 'object' ? Object.values(err).flat().join(', ') : JSON.stringify(err));
+                    throw new Error(msg);
                 }
 
                 alert(`✅ Trabajador ${nombres} ${trabajadorId ? 'actualizado' : 'registrado'} correctamente.`);
@@ -545,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch(error) {
                 console.error("Error al guardar:", error);
-                alert("❌ Ocurrió un error al guardar el trabajador. Verifica la consola.");
+                alert("❌ " + (error.message || "Ocurrió un error al guardar el trabajador."));
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;

@@ -70,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.href = '../obrero/index.html';
                     } else if (data.role === 'SUPERVISOR') {
                         window.location.href = '../supervisor/index.html';
+                    } else if (data.role === 'JEFE_ALMACEN') {
+                        window.location.href = '../jefealmacen/index.html';
                     } else {
                         // GERENTE / ADMIN
                         window.location.href = '../dashboard/index.html';

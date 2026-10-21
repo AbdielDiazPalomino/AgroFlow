@@ -297,6 +297,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    let lastSentTimestamp = 0;
+    let currentReportedLat = null;
+    let currentReportedLng = null;
+    let lastSavedLat = null;
+    let lastSavedLng = null;
+
+    function hasMovedSignificantly(lat1, lon1, lat2, lon2) {
+        if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return true;
+        const dLat = (lat2 - lat1) * 111000;
+        const dLng = (lon2 - lon1) * 111000 * Math.cos(lat1 * Math.PI / 180);
+        return Math.sqrt(dLat * dLat + dLng * dLng) > 10; // Solo si se movió más de 10 metros
+    }
+
+    async function sendLocationToServer(lat, lng, force = false) {
+        if (!currentSupervisorId) return;
+        const now = Date.now();
+
+        // Enviar solo si pasaron al menos 60 segundos O si hubo desplazamiento significativo (>10m) O si es forzado
+        const moved = hasMovedSignificantly(lastSavedLat, lastSavedLng, lat, lng);
+        if (!force && !moved && (now - lastSentTimestamp < 60000)) return;
+        if (!force && (now - lastSentTimestamp < 15000)) return; // Mínimo 15s de espera entre pings
+
+        lastSentTimestamp = now;
+        currentReportedLat = lat;
+        currentReportedLng = lng;
+        lastSavedLat = lat;
+        lastSavedLng = lng;
+
+        try {
+            await fetch(`${CONFIG.API_BASE_URL}/supervisores/actualizar-ubicacion/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    trabajador_id: currentSupervisorId,
+                    latitud: lat,
+                    longitud: lng
+                })
+            });
+            console.log(`🛰️ Ubicación sincronizada con el Gerente General: [${lat}, ${lng}]`);
+        } catch (e) {
+            console.warn("No se pudo sincronizar ubicación con el servidor:", e);
+        }
+    }
+
     function updateGpsDisplay(lat, lng, accuracy, isSimulated) {
         if (!userMarker) {
             userMarker = L.marker([lat, lng], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(map);
@@ -326,7 +370,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             : "🛰️ GPS Activo: Rastreando en tiempo real";
         
         gpsDetailText.textContent = `Lat: ${lat.toFixed(6)} | Lng: ${lng.toFixed(6)} (Precisión: ±${Math.round(accuracy)}m)`;
+
+        // Enviar la ubicación al servidor para que el Gerente General la visualice
+        sendLocationToServer(lat, lng, isSimulated);
     }
+
+    // Ping de presencia cada 60 segundos para mantener la señal en el mapa del Gerente
+    setInterval(() => {
+        if (currentReportedLat !== null && currentReportedLng !== null) {
+            sendLocationToServer(currentReportedLat, currentReportedLng, true);
+        }
+    }, 60000);
 
     // 7. Botones de Control
     btnCentrarSector?.addEventListener('click', () => {

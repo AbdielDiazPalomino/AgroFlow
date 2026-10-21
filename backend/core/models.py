@@ -80,7 +80,13 @@ class Trabajador(models.Model):
     # Si es null, es personal nuevo sin asignar (Tal como lo diseñamos en el frontend)
     cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.SET_NULL, null=True, blank=True, related_name='trabajadores')
     es_supervisor = models.BooleanField(default=False, help_text="¿Tiene rol de supervisor de campo?")
+    es_jefe_almacen = models.BooleanField(default=False, help_text="¿Tiene rol de Jefe de Almacén?")
     password = models.CharField(max_length=128, blank=True, null=True, help_text="Contraseña personal (por defecto es su DNI)")
+    
+    # Geolocalización en tiempo real (Supervisores de Campo)
+    latitud_actual = models.FloatField(null=True, blank=True, help_text="Última latitud GPS registrada")
+    longitud_actual = models.FloatField(null=True, blank=True, help_text="Última longitud GPS registrada")
+    ultima_conexion_gps = models.DateTimeField(null=True, blank=True, help_text="Fecha y hora de última señal GPS")
     
     fecha_contratacion = models.DateField(auto_now_add=True)
 
@@ -191,3 +197,47 @@ class SolicitudInsumo(models.Model):
 
     def __str__(self):
         return f"{self.insumo_nombre} ({self.cantidad} {self.unidad_medida}) - {self.cuadrilla.nombre} [{self.estado}]"
+
+# ==========================================
+# 6. INCIDENCIAS DE CAMPO Y REPORTES OPERATIVOS
+# ==========================================
+
+class Incidencia(models.Model):
+    TIPO_CHOICES = [
+        ('FITOSANITARIA', 'Plagas / Fitosanitaria'),
+        ('RIEGO', 'Falla de Riego / Hídrico'),
+        ('CLIMA', 'Factor Climático / Viento / Radiación'),
+        ('HERRAMIENTAS', 'Maquinaria y Herramientas'),
+        ('SEGURIDAD', 'Seguridad y Salud Ocupacional'),
+        ('OPERATIVA', 'Operativa / Cuadrilla / Logística'),
+    ]
+    GRAVEDAD_CHOICES = [
+        ('BAJA', 'Baja'),
+        ('MEDIA', 'Media'),
+        ('ALTA', 'Alta'),
+        ('CRITICA', 'Crítica'),
+    ]
+    ESTADO_CHOICES = [
+        ('ABIERTA', 'Abierta'),
+        ('EN_PROCESO', 'En Proceso'),
+        ('RESUELTA', 'Resuelta'),
+    ]
+
+    titulo = models.CharField(max_length=200)
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES, default='OPERATIVA')
+    gravedad = models.CharField(max_length=20, choices=GRAVEDAD_CHOICES, default='MEDIA')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ABIERTA')
+    
+    descripcion = models.TextField()
+    accion_tomada = models.TextField(blank=True, null=True, help_text="Acción inmediata tomada por el supervisor")
+    resolucion_gerencia = models.TextField(blank=True, null=True, help_text="Decisión o instrucción dada por Gerencia General")
+    
+    sector = models.ForeignKey(Sector, on_delete=models.SET_NULL, null=True, blank=True, related_name='incidencias')
+    cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.SET_NULL, null=True, blank=True, related_name='incidencias')
+    reportado_por = models.ForeignKey(Trabajador, on_delete=models.SET_NULL, null=True, blank=True, related_name='incidencias_reportadas')
+    
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"[{self.gravedad}] {self.titulo} - {self.sector} ({self.estado})"

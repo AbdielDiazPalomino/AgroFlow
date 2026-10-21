@@ -156,17 +156,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const card = document.createElement('div');
             
             let statusClass = 'status-pending';
+            let pillClass = 'status-pill--pending';
             let badgeText = '🟡 Pendiente';
-            let badgeColor = 'rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3);';
 
             if (s.estado === 'APROBADO') {
                 statusClass = 'status-approved';
+                pillClass = 'status-pill--approved';
                 badgeText = '✅ Aprobado (SÍ)';
-                badgeColor = 'rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3);';
             } else if (s.estado === 'RECHAZADO') {
                 statusClass = 'status-rejected';
+                pillClass = 'status-pill--rejected';
                 badgeText = '❌ Rechazado (NO)';
-                badgeColor = 'rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3);';
             }
 
             card.className = `solicitud-card ${statusClass}`;
@@ -183,19 +183,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 respuestaAlmacenHtml = `
                     <div class="almacen-response-box">
                         <div class="almacen-response-header">
-                            <span style="font-size:0.75rem; font-weight:600; color:#FBBF24;">🟡 En espera de respuesta de Almacén</span>
+                            <span style="font-size:0.8125rem; font-weight:600; color:#FBBF24; display:flex; align-items:center; gap:0.4rem;">
+                                <i data-lucide="clock" style="width:15px; height:15px;"></i> 🟡 En espera de respuesta de Almacén
+                            </span>
                         </div>
-                        <p style="font-size:0.75rem; color:var(--color-text-muted); margin-bottom:0.25rem;">
-                            ¿Qué responde Almacén Central?
+                        <p style="font-size:0.8125rem; color:var(--color-text-muted); margin:0;">
+                            Solicitud en cola de revisión. El Jefe de Almacén responderá con la confirmación de retiro o motivo.
                         </p>
-                        <div class="almacen-sim-actions">
-                            <button class="btn-almacen-si" data-id="${s.id}">
-                                <i data-lucide="check"></i> Aprobar (SÍ)
-                            </button>
-                            <button class="btn-almacen-no" data-id="${s.id}">
-                                <i data-lucide="x"></i> Rechazar (NO)
-                            </button>
-                        </div>
                     </div>
                 `;
             } else if (s.estado === 'APROBADO') {
@@ -208,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span style="font-size:0.72rem; color:#34D399;">Listo en Almacén</span>
                         </div>
                         <p style="font-size:0.8125rem; color:var(--color-text-title);">
-                            ${s.respuesta_almacen || 'Insumo verificado con stock y listo para retiro en puerta 1 de almacén.'}
+                            ${s.respuesta_almacen || 'Insumo verificado con stock y listo para retiro en almacén.'}
                         </p>
                     </div>
                 `;
@@ -236,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <i data-lucide="calendar" style="width: 14px; height: 14px;"></i> ${fechaFormat}
                             </div>
                         </div>
-                        <span class="badge" style="${badgeColor}; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+                        <span class="status-pill ${pillClass}">
                             ${badgeText}
                         </span>
                     </div>
@@ -252,8 +246,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span class="solicitud-meta-label">Nivel de Prioridad:</span>
                             <span>
                                 ${esUrgente 
-                                    ? '<span class="badge" style="background:#EF4444; color:white; font-size:10px;">URGENTE</span>' 
-                                    : '<span class="badge badge--neutral" style="font-size:10px;">Normal</span>'
+                                    ? '<span class="priority-tag priority-tag--urgent">URGENTE</span>' 
+                                    : '<span class="priority-tag priority-tag--normal">Normal</span>'
                                 }
                             </span>
                         </div>
@@ -267,56 +261,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${respuestaAlmacenHtml}
             `;
 
-            // Event listeners para la simulación de respuesta de almacén
-            const btnSi = card.querySelector('.btn-almacen-si');
-            const btnNo = card.querySelector('.btn-almacen-no');
-
-            btnSi?.addEventListener('click', async () => {
-                await responderAlmacen(s.id, 'APROBADO');
-            });
-
-            btnNo?.addEventListener('click', async () => {
-                await responderAlmacen(s.id, 'RECHAZADO');
-            });
-
             solicitudesGrid.appendChild(card);
         });
 
         lucide.createIcons();
-    }
-
-    // 5. Responder a la Solicitud (SÍ o NO)
-    async function responderAlmacen(solicitudId, nuevoEstado) {
-        let nota = "";
-        if (nuevoEstado === 'APROBADO') {
-            nota = prompt("Nota de Almacén para la Cuadrilla (Opcional):", "Aprobado por Almacén Central. Pasar a retirar por ventanilla 2 con firma de remisión.");
-            if (nota === null) return; // Cancelado
-        } else {
-            nota = prompt("Motivo del Rechazo de Almacén (Requerido):", "Sin stock disponible en almacén central. Se coordinará reposición con compras.");
-            if (nota === null) return; // Cancelado
-        }
-
-        try {
-            const res = await fetch(`${CONFIG.API_BASE_URL}/insumos/${solicitudId}/`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    estado: nuevoEstado,
-                    respuesta_almacen: nota
-                })
-            });
-
-            if (!res.ok) throw new Error("No se pudo actualizar la respuesta de almacén.");
-
-            const accionTexto = nuevoEstado === 'APROBADO' ? 'APROBADO (SÍ)' : 'RECHAZADO (NO)';
-            alert(`✅ Respuesta de almacén registrada: ${accionTexto}`);
-
-            await loadInsumosApp();
-
-        } catch (err) {
-            console.error(err);
-            alert("Error al responder: " + err.message);
-        }
     }
 
     // 6. Tabs de Filtro

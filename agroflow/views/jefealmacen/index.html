@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Panel del Jefe de Almacén</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="jefealmacen.css">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR DEL JEFE DE ALMACÉN -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="index.html" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar" aria-label="Cerrar menú"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Almacén Central</span>
+          <a href="index.html" class="nav-link active" id="navInsumos">
+            <i data-lucide="package-check"></i><span>Peticiones de Insumos</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../login/index.html" class="nav-link nav-link--danger" id="btnLogout">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar" aria-label="Abrir menú"><i data-lucide="menu"></i></button>
+          <div class="topbar__location-tag">
+            <i data-lucide="warehouse" style="color: var(--color-primary); width: 16px; height: 16px;"></i>
+            <span>Almacén Central • Despacho</span>
+          </div>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" id="btnRefresh" title="Actualizar solicitudes" aria-label="Actualizar">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Jefe+Almacen&background=10B981&color=022c22" alt="Jefe de Almacén" class="avatar" id="topAvatar">
+            <div class="user-info">
+              <span class="user-name" id="topNombre">Jefe de Almacén</span>
+              <span class="user-role" style="color: var(--color-primary); font-weight: 600;">Jefe de Almacén</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="content">
+        
+        <div class="page-header mb-4" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h1 class="page-title">Gestión de Almacén - Peticiones de Insumos</h1>
+            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+              Revisa los pedidos de herramientas, agroquímicos y materiales solicitados por los supervisores de cuadrilla y autoriza (SÍ) o deniega (NO) su despacho.
+            </p>
+          </div>
+        </div>
+
+        <!-- Barra informativa de Almacén Central -->
+        <div class="almacen-banner">
+          <div style="display: flex; align-items: center; gap: 0.875rem;">
+            <div class="almacen-banner__icon">
+              <i data-lucide="boxes" style="width: 22px; height: 22px; color: var(--color-primary);"></i>
+            </div>
+            <div>
+              <span style="font-size: 0.9375rem; font-weight: 700; color: var(--color-text-title); display: block;">
+                Centro de Atención y Control de Despachos
+              </span>
+              <span style="font-size: 0.8125rem; color: var(--color-text-muted);">
+                Tus respuestas (SÍ o NO) notifican de forma inmediata a los supervisores en campo.
+              </span>
+            </div>
+          </div>
+          <div class="almacen-banner__badge">
+            <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+            <span>Administración Exclusiva de Insumos</span>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="jefealmacen-stats-grid">
+          
+          <div class="stat-card-almacen">
+            <div class="stat-card-almacen__icon stat-card-almacen__icon--total">
+              <i data-lucide="package"></i>
+            </div>
+            <div>
+              <div class="stat-card-almacen__num" id="statTotal">0</div>
+              <div class="stat-card-almacen__label">Total de Solicitudes</div>
+            </div>
+          </div>
+
+          <div class="stat-card-almacen stat-card-almacen--alert">
+            <div class="stat-card-almacen__icon stat-card-almacen__icon--pending">
+              <i data-lucide="clock"></i>
+            </div>
+            <div>
+              <div class="stat-card-almacen__num" id="statPendientes" style="color: #FBBF24;">0</div>
+              <div class="stat-card-almacen__label">Por Atender (Pendientes)</div>
+            </div>
+          </div>
+
+          <div class="stat-card-almacen">
+            <div class="stat-card-almacen__icon stat-card-almacen__icon--approved">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <div>
+              <div class="stat-card-almacen__num" id="statAprobados" style="color: #34D399;">0</div>
+              <div class="stat-card-almacen__label">Aprobadas (SÍ)</div>
+            </div>
+          </div>
+
+          <div class="stat-card-almacen">
+            <div class="stat-card-almacen__icon stat-card-almacen__icon--rejected">
+              <i data-lucide="x-circle"></i>
+            </div>
+            <div>
+              <div class="stat-card-almacen__num" id="statRechazados" style="color: #F87171;">0</div>
+              <div class="stat-card-almacen__label">Rechazadas (NO)</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Barra de Filtros y Búsqueda -->
+        <div class="jefealmacen-filters">
+          <div class="tabs-group">
+            <button class="tab-btn active" data-filter="TODOS">Todos</button>
+            <button class="tab-btn" data-filter="PENDIENTE">
+              Pendientes <span class="tab-badge" id="badgeTabPendientes">0</span>
+            </button>
+            <button class="tab-btn" data-filter="APROBADO">Aprobadas (SÍ)</button>
+            <button class="tab-btn" data-filter="RECHAZADO">Rechazadas (NO)</button>
+          </div>
+
+          <div class="filters-search-wrapper">
+            <div class="search-input-box">
+              <i data-lucide="search" style="width: 16px; height: 16px; color: var(--color-text-muted);"></i>
+              <input type="text" id="searchInput" placeholder="Buscar insumo, cuadrilla o supervisor...">
+            </div>
+            <span class="solicitudes-count" id="solicitudesCountText">0 pedidos</span>
+          </div>
+        </div>
+
+        <!-- Grid de Solicitudes -->
+        <div class="solicitudes-grid" id="solicitudesGrid">
+          <div style="padding: 3rem; text-align: center; color: var(--color-text-muted); grid-column: 1 / -1;">
+            Cargando solicitudes de insumos...
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal para Responder a la Solicitud (SÍ o NO) -->
+  <div class="modal-overlay" id="modalRespuesta">
+    <div class="modal-content-respuesta">
+      <div class="modal-header-respuesta" id="modalRespuestaHeader">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="modal-badge-action-icon" id="modalActionIcon">
+            <i data-lucide="check"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);" id="modalRespuestaTitle">
+              Responder a la Solicitud
+            </h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);" id="modalRespuestaSub">
+              Confirmación de Almacén Central
+            </p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalRespuesta" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <form id="formRespuestaAlmacen" class="modal-body-respuesta">
+        
+        <!-- Tarjeta de Resumen del Insumo -->
+        <div class="modal-resumen-box">
+          <div class="resumen-row">
+            <span class="resumen-label">Insumo Requerido:</span>
+            <span class="resumen-val" id="resumenInsumoNombre" style="color: var(--color-primary); font-weight: 700;">-</span>
+          </div>
+          <div class="resumen-row">
+            <span class="resumen-label">Cantidad / Unidad:</span>
+            <span class="resumen-val" id="resumenCantidad">-</span>
+          </div>
+          <div class="resumen-row">
+            <span class="resumen-label">Cuadrilla Solicitante:</span>
+            <span class="resumen-val" id="resumenCuadrilla">-</span>
+          </div>
+          <div class="resumen-row">
+            <span class="resumen-label">Supervisor a Cargo:</span>
+            <span class="resumen-val" id="resumenSupervisor">-</span>
+          </div>
+          <div class="resumen-row">
+            <span class="resumen-label">Motivo en Campo:</span>
+            <span class="resumen-val" id="resumenMotivo" style="font-style: italic;">-</span>
+          </div>
+        </div>
+
+        <div class="form-group-respuesta mt-4">
+          <label class="form-label-respuesta" for="inputNotaAlmacen">
+            <span id="labelNotaAlmacen">Nota / Instrucciones de Almacén</span>
+            <span style="font-size: 0.72rem; font-weight: 400; text-transform: none; color: var(--color-text-muted);" id="subNotaAlmacen">
+              Visible para el supervisor
+            </span>
+          </label>
+          <div class="input-wrapper-respuesta">
+            <textarea id="inputNotaAlmacen" class="form-textarea-respuesta" rows="3" required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer-respuesta mt-4">
+          <button type="button" class="btn btn--secondary" id="btnCancelarRespuesta">Cancelar</button>
+          <button type="submit" class="btn" id="btnConfirmarRespuesta">
+            <i data-lucide="check"></i> <span id="btnConfirmarTexto">Confirmar Respuesta</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../../js/config.js"></script>
+  <script src="jefealmacen.js"></script>
+</body>
+</html>
+

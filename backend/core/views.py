@@ -6,12 +6,13 @@ from django.contrib.auth import authenticate
 
 from .models import (
     PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
-    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo
+    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo, Incidencia
 )
 from .serializers import (
     PerfilUsuarioSerializer, CultivoSerializer, SectorSerializer, CuadrillaSerializer, 
     TrabajadorSerializer, SolicitudTrasladoSerializer, 
-    ActividadCampoSerializer, RegistroCosechaSerializer, SolicitudInsumoSerializer
+    ActividadCampoSerializer, RegistroCosechaSerializer, SolicitudInsumoSerializer,
+    IncidenciaSerializer
 )
 
 @api_view(['POST'])
@@ -45,7 +46,12 @@ def api_login(request):
         # Clave esperada: la personalizada o por defecto su propio DNI
         expected_password = trabajador.password if trabajador.password else trabajador.dni
         if password == expected_password:
-            role = 'SUPERVISOR' if trabajador.es_supervisor else 'OBRERO'
+            if trabajador.es_jefe_almacen:
+                role = 'JEFE_ALMACEN'
+            elif trabajador.es_supervisor:
+                role = 'SUPERVISOR'
+            else:
+                role = 'OBRERO'
             return Response({
                 'message': 'Login exitoso',
                 'role': role,
@@ -192,8 +198,23 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.all()
     serializer_class = TrabajadorSerializer
 
+    def perform_create(self, serializer):
+        es_jefe = serializer.validated_data.get('es_jefe_almacen', False)
+        if es_jefe and Trabajador.objects.filter(es_jefe_almacen=True).exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"error": "Ya existe un Jefe de Almacén registrado en el sistema. Solo se permite uno."})
+        serializer.save()
+
+    def perform_update(self, serializer):
+        es_jefe = serializer.validated_data.get('es_jefe_almacen', False)
+        instance = self.get_object()
+        if es_jefe and Trabajador.objects.filter(es_jefe_almacen=True).exclude(id=instance.id).exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"error": "Ya existe un Jefe de Almacén registrado en el sistema. Solo se permite uno."})
+        serializer.save()
+
 class SolicitudTrasladoViewSet(viewsets.ModelViewSet):
-    queryset = SolicitudTraslado.objects.all()
+    queryset = SolicitudTraslado.objects.all().order_by('-fecha_solicitud')
     serializer_class = SolicitudTrasladoSerializer
 
     def perform_update(self, serializer):
@@ -235,6 +256,126 @@ def api_supervisores(request):
         })
     return Response(result)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_actualizar_ubicacion_supervisor(request):
+    """
+    Permite a un supervisor reportar su latitud y longitud GPS periódicamente (cada 30-60 seg).
+    Ideal para cPanel / arquitecturas sin WebSockets mediante HTTP Heartbeat.
+    """
+    from django.utils import timezone
+    trabajador_id = request.data.get('trabajador_id')
+    latitud = request.data.get('latitud')
+    longitud = request.data.get('longitud')
+
+    if not trabajador_id or latitud is None or longitud is None:
+        return Response({'error': 'trabajador_id, latitud y longitud son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        trabajador = Trabajador.objects.get(id=trabajador_id, es_supervisor=True)
+    except Trabajador.DoesNotExist:
+        return Response({'error': 'Supervisor no encontrado o no tiene rol de supervisor'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        trabajador.latitud_actual = float(latitud)
+        trabajador.longitud_actual = float(longitud)
+        trabajador.ultima_conexion_gps = timezone.now()
+        trabajador.save(update_fields=['latitud_actual', 'longitud_actual', 'ultima_conexion_gps'])
+    except (ValueError, TypeError):
+        return Response({'error': 'Coordenadas inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        'status': 'success',
+        'supervisor': f"{trabajador.nombres} {trabajador.apellidos}",
+        'latitud': trabajador.latitud_actual,
+        'longitud': trabajador.longitud_actual,
+        'ultima_conexion_gps': trabajador.ultima_conexion_gps.isoformat()
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_ubicaciones_supervisores(request):
+    """
+    Retorna la lista de todos los supervisores con su ubicación GPS más reciente,
+    el sector asignado a su cuadrilla, su cultivo y estado de actividad.
+    Permite polling cada minuto desde la vista del Gerente General.
+    """
+    from django.utils import timezone
+    import json
+    
+    supervisores = Trabajador.objects.filter(es_supervisor=True)
+    ahora = timezone.now()
+    result = []
+
+    for s in supervisores:
+        # Determinar su cuadrilla (sea como encargado o como miembro asignado)
+        cuadrilla = Cuadrilla.objects.filter(encargado=s).first()
+        if not cuadrilla and s.cuadrilla:
+            cuadrilla = s.cuadrilla
+
+        sector = cuadrilla.sector_asignado if cuadrilla else None
+        cultivo = sector.cultivo if sector else None
+
+        # Coordenadas: si tiene GPS real/simulado guardado, se usa.
+        # Si aún no tiene señal GPS pero tiene sector asignado, podemos estimar el centro de su sector.
+        lat = s.latitud_actual
+        lng = s.longitud_actual
+        es_estimado = False
+
+        if (lat is None or lng is None) and sector and sector.coordenadas_poligono:
+            try:
+                parsed = json.loads(sector.coordenadas_poligono)
+                if isinstance(parsed, list) and len(parsed) > 0:
+                    lat = parsed[0][0]
+                    lng = parsed[0][1]
+                    es_estimado = True
+            except Exception:
+                pass
+
+        # Calcular si está activo recientemente (últimos 5 minutos)
+        esta_activo = False
+        tiempo_texto = "Sin reporte GPS"
+        if s.ultima_conexion_gps:
+            diff_segundos = int((ahora - s.ultima_conexion_gps).total_seconds())
+            if diff_segundos < 300: # 5 minutos
+                esta_activo = True
+            
+            if diff_segundos < 60:
+                tiempo_texto = f"Hace {diff_segundos} s"
+            elif diff_segundos < 3600:
+                minutos = diff_segundos // 60
+                tiempo_texto = f"Hace {minutos} min"
+            elif diff_segundos < 86400:
+                horas = diff_segundos // 3600
+                tiempo_texto = f"Hace {horas} h"
+            else:
+                tiempo_texto = s.ultima_conexion_gps.strftime("%d/%m %H:%M")
+        elif es_estimado:
+            tiempo_texto = "Ubicación estimada en Sector"
+
+        result.append({
+            'id': s.id,
+            'dni': s.dni,
+            'nombres': s.nombres,
+            'apellidos': s.apellidos,
+            'nombre_completo': f"{s.nombres} {s.apellidos}",
+            'foto_url': s.foto_url,
+            'latitud': lat,
+            'longitud': lng,
+            'es_estimado': es_estimado,
+            'esta_activo': esta_activo,
+            'tiempo_texto': tiempo_texto,
+            'ultima_conexion_gps': s.ultima_conexion_gps.isoformat() if s.ultima_conexion_gps else None,
+            'cuadrilla_id': cuadrilla.id if cuadrilla else None,
+            'cuadrilla_nombre': cuadrilla.nombre if cuadrilla else 'Sin Cuadrilla Asignada',
+            'cuadrilla_tipo': cuadrilla.get_tipo_display() if cuadrilla else None,
+            'sector_id': sector.id if sector else None,
+            'sector_nombre': sector.nombre if sector else 'Sin Sector Asignado',
+            'cultivo_nombre': cultivo.nombre if cultivo else ('Sin Cultivo' if sector else '-')
+        })
+
+    return Response(result)
+
 class SolicitudInsumoViewSet(viewsets.ModelViewSet):
     queryset = SolicitudInsumo.objects.all().order_by('-fecha_solicitud')
     serializer_class = SolicitudInsumoSerializer
@@ -245,3 +386,71 @@ class SolicitudInsumoViewSet(viewsets.ModelViewSet):
         if solicitud.estado in ['APROBADO', 'RECHAZADO'] and not solicitud.fecha_respuesta:
             solicitud.fecha_respuesta = timezone.now()
             solicitud.save()
+
+class IncidenciaViewSet(viewsets.ModelViewSet):
+    queryset = Incidencia.objects.all().order_by('-fecha_reporte')
+    serializer_class = IncidenciaSerializer
+
+    def perform_create(self, serializer):
+        incidencia = serializer.save()
+        # Si la incidencia es crítica o fitosanitaria alta, podemos automáticamente marcar el sector en ALERTA
+        if incidencia.sector and (incidencia.gravedad == 'CRITICA' or incidencia.tipo == 'FITOSANITARIA'):
+            sector = incidencia.sector
+            if sector.estado != 'ALERTA':
+                sector.estado = 'ALERTA'
+                sector.save()
+
+# ==========================================
+# 7. ENDPOINTS DE INTELIGENCIA ARTIFICIAL (GROQ)
+# ==========================================
+
+from .ai_service import generar_diagnostico_ia, sugerir_resolucion_incidencia, chat_asistente_agroflow
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_ia_diagnostico(request):
+    """
+    Retorna un diagnóstico operativo integral generado por el modelo Groq LLM
+    con base en el estado real de la base de datos (sectores, cuadrillas, obreros, incidencias).
+    """
+    try:
+        diagnostico = generar_diagnostico_ia()
+        return Response(diagnostico)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_ia_sugerir_resolucion(request):
+    """
+    Genera una recomendación de resolución técnica y directiva gerencial
+    para una incidencia específica reportada por un supervisor.
+    """
+    incidencia_id = request.data.get('incidencia_id')
+    if not incidencia_id:
+        return Response({"error": "Falta el ID de la incidencia"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        resultado = sugerir_resolucion_incidencia(incidencia_id)
+        return Response(resultado)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_ia_chat(request):
+    """
+    Permite al Gerente General hacer preguntas operativas en lenguaje natural
+    y recibir respuestas contextualizadas con los datos de AgroFlow.
+    """
+    pregunta = request.data.get('pregunta', '').strip()
+    if not pregunta:
+        return Response({"error": "La pregunta no puede estar vacía"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        respuesta = chat_asistente_agroflow(pregunta)
+        return Response(respuesta)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
