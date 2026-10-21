@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Tecnológica TO-BE - AgroFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .layer-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            text-align: center;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .item-box {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            color: #334155;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        .item-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .icon-layer { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8 flex justify-center items-center min-h-screen">
+
+    <div class="w-full max-w-[1200px] bg-white p-8 shadow-lg border border-gray-200">
+        <!-- Título -->
+        <div class="bg-blue-900 py-4 text-center mb-8 shadow-sm">
+            <h1 class="text-2xl font-bold text-white tracking-wide">Arquitectura Tecnológica (TO-BE) - Sistema AgroFlow</h1>
+            <p class="text-sm text-blue-200 mt-1">Ecosistema Integrado, Bidireccional y Offline-First para Roots S.A.</p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            
+            <!-- Capa de Presentación -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#10b981] layer-box text-white border border-[#059669]">
+                    Capa de<br>Presentación
+                </div>
+                <div class="flex-1 bg-[#ecfdf5] p-4 grid grid-cols-3 gap-4 border border-[#34d399]">
+                    <div class="item-box border-t-4 border-t-[#10b981]">
+                        <i class="fa-solid fa-chart-line text-[#10b981] icon-layer"></i>
+                        <span>Dashboard Gerencial Web</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Monitoreo y Planificación</span>
+                    </div>
+                    <div class="item-box border-t-4 border-t-[#10b981]">
+                        <i class="fa-solid fa-mobile-screen text-[#10b981] icon-layer"></i>
+                        <span>App Web Táctica (Campo)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">UI Optimizada para luz solar</span>
+                    </div>
+                    <div class="item-box border-t-4 border-t-[#10b981]">
+                        <i class="fa-solid fa-boxes-stacked text-[#10b981] icon-layer"></i>
+                        <span>Panel Logístico Web</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Recepción de Solicitudes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Intercambio de Datos -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#6366f1] layer-box text-white border border-[#4f46e5]">
+                    Capa de<br>Intercambio<br>de Datos
+                </div>
+                <div class="flex-1 bg-[#eef2ff] p-4 grid grid-cols-3 gap-4 border border-[#a5b4fc]">
+                    <div class="item-box">
+                        <i class="fa-solid fa-bolt text-[#6366f1] icon-layer"></i>
+                        <span>WebSockets (WSS)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Conexión Bidireccional (<200ms)</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-network-wired text-[#6366f1] icon-layer"></i>
+                        <span>APIs REST (HTTPS)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Sincronización Transaccional</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-fingerprint text-[#6366f1] icon-layer"></i>
+                        <span>Protocolo WebAuthn</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Firmas Criptográficas (FIDO2)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Soporte de Servicio -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#3b82f6] layer-box text-white border border-[#2563eb]">
+                    Capa de<br>Soporte de<br>Servicio
+                </div>
+                <div class="flex-1 bg-[#eff6ff] p-4 grid grid-cols-3 gap-4 border border-[#93c5fd]">
+                    <div class="item-box">
+                        <i class="fa-solid fa-project-diagram text-[#3b82f6] icon-layer"></i>
+                        <span>Django Channels</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Orquestador de Eventos Asíncronos</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-server text-[#3b82f6] icon-layer"></i>
+                        <span>Web Server (Gunicorn/Nginx)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Proxy Inverso y Balanceo</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-rotate text-[#3b82f6] icon-layer"></i>
+                        <span>Gestor de Sincronización</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Resolución de Conflictos Offline</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Implementación de Servicios -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#f59e0b] layer-box text-white border border-[#d97706]">
+                    Capa de<br>Implementación<br>de Servicios
+                </div>
+                <div class="flex-1 bg-[#fffbeb] p-4 grid grid-cols-3 gap-4 border border-[#fcd34d]">
+                    <div class="item-box border-l-4 border-l-[#f59e0b]">
+                        <i class="fa-brands fa-python text-[#f59e0b] icon-layer"></i>
+                        <span>Backend Core (Python/Django)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Lógica Central de Negocio</span>
+                    </div>
+                    <div class="item-box border-l-4 border-l-[#f59e0b]">
+                        <i class="fa-solid fa-brain text-[#f59e0b] icon-layer"></i>
+                        <span>Motor Analítico IA</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Análisis de Patrones en 2do Plano</span>
+                    </div>
+                    <div class="item-box border-l-4 border-l-[#f59e0b]">
+                        <i class="fa-solid fa-shield-halved text-[#f59e0b] icon-layer"></i>
+                        <span>Módulo de Seguridad (Auth)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Gestión de Perfiles y JWT</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Almacenamiento -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#0ea5e9] layer-box text-white border border-[#0284c7]">
+                    Capa de<br>Almacenamiento
+                </div>
+                <div class="flex-1 bg-[#f0f9ff] p-4 grid grid-cols-2 gap-4 border border-[#7dd3fc]">
+                    <div class="item-box">
+                        <i class="fa-solid fa-database text-[#0ea5e9] icon-layer"></i>
+                        <span>Base de Datos Central (Relacional)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Almacenamiento Estructurado Seguro</span>
+                    </div>
+                    <div class="item-box bg-yellow-50 border-yellow-200">
+                        <i class="fa-solid fa-hard-drive text-[#0ea5e9] icon-layer"></i>
+                        <span>Caché Local / IndexedDB</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Almacenamiento Táctico Offline-First (Navegador)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa de Infraestructura -->
+            <div class="flex gap-4">
+                <div class="w-48 bg-[#475569] layer-box text-white border border-[#334155]">
+                    Capa de<br>Infraestructura
+                </div>
+                <div class="flex-1 bg-[#f8fafc] p-4 grid grid-cols-3 gap-4 border border-[#cbd5e1]">
+                    <div class="item-box">
+                        <i class="fa-solid fa-cloud text-[#475569] icon-layer"></i>
+                        <span>Servidores en la Nube (Cloud)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Hosting Escalable del Backend</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-tablet-screen-button text-[#475569] icon-layer"></i>
+                        <span>Dispositivos Móviles (Tablets)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Hardware en Invernaderos</span>
+                    </div>
+                    <div class="item-box">
+                        <i class="fa-solid fa-desktop text-[#475569] icon-layer"></i>
+                        <span>PCs de Oficina</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Estaciones de Gerencia y Almacén</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
