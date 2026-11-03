@@ -43,6 +43,9 @@
           <a href="mapa/index.html" class="nav-link" id="navMapa">
             <i data-lucide="map"></i><span>Mapa</span>
           </a>
+          <a href="tareas/index.html" class="nav-link" id="navTareas">
+            <i data-lucide="calendar-check-2"></i><span>Plan de Tareas</span>
+          </a>
           <a href="insumos/index.html" class="nav-link" id="navInsumos">
             <i data-lucide="package"></i><span>Insumos</span>
           </a>
@@ -116,6 +119,32 @@
               <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Encargado Oficial
             </span>
             <span class="badge badge--neutral" id="crewTotalCount" style="padding: 0.45rem 1rem; font-size: 0.875rem;">0 obreros</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Plan de Trabajo Diario y Estado de Tareas -->
+        <div class="daily-tasks-card" id="dailyTasksCard">
+          <div class="daily-tasks-card__header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="daily-tasks-icon">
+                <i data-lucide="calendar-check-2"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 1.0625rem; font-weight: 700; color: var(--color-text-title); margin: 0;">Plan de Trabajo del Día · Tareas de mi Cuadrilla</h3>
+                <p style="font-size: 0.8125rem; color: var(--color-text-muted); margin: 0.2rem 0 0 0;" id="dailyTasksSubtitle">
+                  Trazabilidad de labores para hoy con registro de inicio y término
+                </p>
+              </div>
+            </div>
+            <a href="tareas/index.html" class="btn btn--outline btn--sm" style="display: inline-flex; align-items: center; gap: 0.4rem; border-color: rgba(16, 185, 129, 0.4); color: #34D399;">
+              <i data-lucide="calendar-days"></i> Ver Planificador Completo
+            </a>
+          </div>
+
+          <div class="daily-tasks-list" id="dailyTasksList">
+            <div style="padding: 1.25rem; text-align: center; color: var(--color-text-muted); font-size: 0.875rem;">
+              <i data-lucide="loader" class="spinning" style="width: 16px; height: 16px; vertical-align: middle;"></i> Cargando tareas del día...
+            </div>
           </div>
         </div>
 
@@ -222,7 +251,7 @@
 
   <!-- Scripts -->
   <script src="../../js/config.js"></script>
-  <script src="supervisor.js?v=1"></script>
+  <script src="supervisor.js?v=2"></script>
 </body>
 </html>
 

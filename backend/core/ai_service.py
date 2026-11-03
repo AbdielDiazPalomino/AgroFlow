@@ -8,7 +8,7 @@ import json
 import logging
 import os
 from django.conf import settings
-from .models import Sector, Cuadrilla, Trabajador, SolicitudTraslado, SolicitudInsumo, Incidencia
+from .models import Sector, Cuadrilla, Trabajador, SolicitudTraslado, SolicitudInsumo, Incidencia, TareaCuadrilla
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +84,13 @@ def obtener_contexto_fundo():
     insumos_pendientes = list(SolicitudInsumo.objects.filter(estado='PENDIENTE').order_by('-fecha_solicitud')[:5])
     traslados_pendientes = list(SolicitudTraslado.objects.filter(estado='PENDIENTE'))
 
+    # Tareas y Plan de Trabajo de Cuadrillas
+    tareas_todas = list(TareaCuadrilla.objects.all())
+    tareas_completadas = [t for t in tareas_todas if t.estado == 'COMPLETADA']
+    tareas_en_proceso = [t for t in tareas_todas if t.estado == 'EN_PROCESO']
+    tareas_pendientes = [t for t in tareas_todas if t.estado == 'PENDIENTE']
+    total_horas_tareas = round(sum(t.duracion_minutos / 60.0 for t in tareas_completadas), 1)
+
     contexto = {
         'total_obreros': len(obreros),
         'obreros_asignados': len(asignados),
@@ -91,6 +98,14 @@ def obtener_contexto_fundo():
         'total_cuadrillas': len(cuadrillas),
         'total_supervisores': len(supervisores),
         'supervisores_con_gps_reciente': sum(1 for s in supervisores if s.ultima_conexion_gps is not None),
+        'plan_trabajo_tareas': {
+            'total_tareas': len(tareas_todas),
+            'completadas': len(tareas_completadas),
+            'en_proceso': len(tareas_en_proceso),
+            'pendientes': len(tareas_pendientes),
+            'horas_totales_ejecutadas': total_horas_tareas,
+            'porcentaje_avance': round((len(tareas_completadas) / max(1, len(tareas_todas))) * 100, 1)
+        },
         'sectores': [
             {
                 'nombre': s.nombre,

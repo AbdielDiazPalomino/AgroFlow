@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGROFLOW | Plan de Trabajo y Tareas de Cuadrilla</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../../../assets/icons/favicon.svg">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../../css/variables.css">
+  <link rel="stylesheet" href="../../../css/base.css">
+  <link rel="stylesheet" href="../../../css/layout.css">
+  <link rel="stylesheet" href="tareas.css?v=4">
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <div class="app-layout">
+    
+    <!-- SIDEBAR SUPERVISOR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">
+          <div class="logo__icon-wrapper">
+            <i data-lucide="leaf" class="logo__icon"></i>
+          </div>
+          <span class="logo__text">AGROFLOW</span>
+        </a>
+        <button class="sidebar__close" id="closeSidebar" aria-label="Cerrar menú"><i data-lucide="x"></i></button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-group">
+          <span class="nav-group__title">Mi Supervisión</span>
+          <a href="../index.html" class="nav-link" id="navCuadrilla">
+            <i data-lucide="users"></i><span>Mi Cuadrilla</span>
+          </a>
+          <a href="../mapa/index.html" class="nav-link" id="navMapa">
+            <i data-lucide="map"></i><span>Mapa</span>
+          </a>
+          <a href="#" class="nav-link active" id="navTareas">
+            <i data-lucide="calendar-check-2"></i><span>Plan de Tareas</span>
+          </a>
+          <a href="../insumos/index.html" class="nav-link" id="navInsumos">
+            <i data-lucide="package"></i><span>Insumos</span>
+          </a>
+          <a href="../incidencias/index.html" class="nav-link" id="navIncidencias">
+            <i data-lucide="alert-triangle"></i><span>Incidencias</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <a href="../../login/index.html" class="nav-link nav-link--danger" id="btnLogout">
+          <i data-lucide="log-out"></i><span>Cerrar Sesión</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-toggle" id="openSidebar" aria-label="Abrir menú"><i data-lucide="menu"></i></button>
+        </div>
+        <div class="topbar__right">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <i data-lucide="bell"></i><span class="badge" id="topBadge" style="display:none;">0</span>
+          </button>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Supervisor&background=10B981&color=fff" alt="Supervisor" class="avatar" id="topAvatar">
+            <div class="user-info">
+              <span class="user-name" id="topNombre">Supervisor</span>
+              <span class="user-role">Supervisor de Campo</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="content">
+        
+        <!-- Header de la página -->
+        <div class="page-header mb-4" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div class="live-status-indicator">
+              <span class="live-pulse"></span>
+              <span class="live-status-text">Plan Operativo de Cuadrilla · Trazabilidad Horaria</span>
+            </div>
+            <h1 class="page-title">Plan de Trabajo y Tareas Diarias</h1>
+            <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+              Planifica, inicia y finaliza las labores agrícolas en tiempo real con cálculo automático de horas ejecutadas.
+            </p>
+          </div>
+          <button class="btn btn--primary" id="btnNuevaTarea">
+            <i data-lucide="plus-circle"></i><span>+ Programar Nueva Labor</span>
+          </button>
+        </div>
+
+        <!-- Banner de Cuadrilla y Cumplimiento Diario -->
+        <div class="task-summary-banner mb-4">
+          <div class="task-summary-main">
+            <div class="task-summary-icon">
+              <i data-lucide="clipboard-check"></i>
+            </div>
+            <div class="task-summary-texts">
+              <div class="task-summary-title">
+                <span id="crewName">Cargando Cuadrilla...</span>
+              </div>
+              <div class="task-summary-details">
+                <span id="crewSector"><i data-lucide="map-pin"></i> Sector: --</span>
+                <span>•</span>
+                <span id="todayDateText"><i data-lucide="calendar"></i> Hoy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso del Día -->
+          <div class="task-progress-box">
+            <div class="task-progress-labels">
+              <span class="task-progress-label">Cumplimiento del Plan Diario</span>
+              <span class="task-progress-percent" id="taskProgressPercent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="taskProgressBarFill" style="width: 0%;"></div>
+            </div>
+            <div class="task-progress-sub" id="taskProgressSub">
+              0 de 0 tareas completadas hoy
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini KPIs de Tareas -->
+        <div class="task-kpis-grid mb-4">
+          <div class="task-kpi-card">
+            <div class="task-kpi-icon task-kpi-icon--total">
+              <i data-lucide="list-checks"></i>
+            </div>
+            <div class="task-kpi-data">
+              <span class="task-kpi-val" id="kpiTotalTareas">0</span>
+              <span class="task-kpi-desc">Total Tareas en Plan</span>
+            </div>
+          </div>
+
+          <div class="task-kpi-card">
+            <div class="task-kpi-icon task-kpi-icon--process">
+              <i data-lucide="play-circle"></i>
+            </div>
+            <div class="task-kpi-data">
+              <span class="task-kpi-val" id="kpiEnProceso">0</span>
+              <span class="task-kpi-desc">En Ejecución Ahora</span>
+            </div>
+          </div>
+
+          <div class="task-kpi-card">
+            <div class="task-kpi-icon task-kpi-icon--done">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+            <div class="task-kpi-data">
+              <span class="task-kpi-val" id="kpiCompletadas">0</span>
+              <span class="task-kpi-desc">Labores Completadas</span>
+            </div>
+          </div>
+
+          <div class="task-kpi-card">
+            <div class="task-kpi-icon task-kpi-icon--hours">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="task-kpi-data">
+              <span class="task-kpi-val" id="kpiHorasTrabajadas">0.0h</span>
+              <span class="task-kpi-desc">Horas Efectivas Hoy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Filtros -->
+        <div class="task-filters-card mb-4">
+          <div class="task-filter-pills" id="taskStatusFilters">
+            <button class="filter-pill active" data-filter="TODAS">Todas</button>
+            <button class="filter-pill" data-filter="HOY">📅 Plan de Hoy</button>
+            <button class="filter-pill" data-filter="EN_PROCESO">▶️ En Proceso</button>
+            <button class="filter-pill" data-filter="COMPLETADA">✅ Completadas</button>
+            <button class="filter-pill" data-filter="PENDIENTE">⏳ Pendientes</button>
+          </div>
+
+          <div class="task-filter-selects">
+            <select class="form-input form-select-sm" id="filterTipoLabor">
+              <option value="TODOS">Todas las Labores</option>
+              <option value="COSECHA">🌾 Cosecha de Flor</option>
+              <option value="PODA">✂️ Poda y Raleo</option>
+              <option value="DESHIERBE">🌿 Deshierbe Manual</option>
+              <option value="RIEGO">💧 Riego y Fertirriego</option>
+              <option value="FITOSANITARIA">🧪 Fitosanitaria / Control</option>
+              <option value="ENCANASTADO">📦 Encanastado / Mallas</option>
+              <option value="MANTENIMIENTO">🔧 Mantenimiento General</option>
+            </select>
+
+            <span class="task-count-tag" id="taskCountTag">0 tareas encontradas</span>
+          </div>
+        </div>
+
+        <!-- Grid de Tareas -->
+        <div class="tasks-grid" id="tasksGrid">
+          <div class="tasks-loading">
+            <i data-lucide="loader" class="spinning" style="width: 28px; height: 28px; color: var(--color-primary);"></i>
+            <p>Cargando plan de trabajo de tu cuadrilla...</p>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA TAREA / LABOR -->
+  <div class="modal-overlay" id="modalNuevaTarea">
+    <div class="modal-content-task">
+      <div class="modal-header-task">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="modal-icon-task">
+            <i data-lucide="plus-circle"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Programar Labor en Plan de Trabajo</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Asigna una tarea operativa para tu cuadrilla con registro de tiempos</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalTarea" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <form id="formNuevaTarea" class="modal-body-task">
+        <div class="form-group mb-3">
+          <label class="form-label" for="taskTitulo">Título de la Labor o Actividad <span class="text-danger">*</span></label>
+          <input type="text" class="form-input" id="taskTitulo" placeholder="Ej: Cosecha selectiva Gypsophila hileras 1 a 6" required>
+        </div>
+
+        <div class="form-row-2 mb-3">
+          <div class="form-group">
+            <label class="form-label" for="taskCuadrilla">Cuadrilla Asignada <span class="text-danger">*</span></label>
+            <select class="form-input" id="taskCuadrilla" required>
+              <option value="">Cargando cuadrillas...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="taskSector">Sector Afectado <span class="text-danger">*</span></label>
+            <select class="form-input" id="taskSector" required>
+              <option value="">Cargando sectores...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2 mb-3">
+          <div class="form-group">
+            <label class="form-label" for="taskTipoLabor">Tipo de Labor Agrícola <span class="text-danger">*</span></label>
+            <select class="form-input" id="taskTipoLabor" required>
+              <option value="COSECHA">🌾 Cosecha de Flor de Exportación</option>
+              <option value="PODA">✂️ Poda y Raleo Fitosanitario</option>
+              <option value="DESHIERBE">🌿 Deshierbe Manual y Limpieza</option>
+              <option value="RIEGO">💧 Riego por Goteo y Fertirriego</option>
+              <option value="FITOSANITARIA">🧪 Aplicación Fitosanitaria</option>
+              <option value="ENCANASTADO">📦 Encanastado / Colocación de Mallas</option>
+              <option value="MANTENIMIENTO">🔧 Mantenimiento de Canales</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="taskPrioridad">Prioridad Operativa</label>
+            <select class="form-input" id="taskPrioridad">
+              <option value="ALTA">🔴 Alta Prioridad</option>
+              <option value="MEDIA" selected>🟡 Media / Estándar</option>
+              <option value="BAJA">🟢 Baja / Mantenimiento</option>
+              <option value="URGENTE">🚨 Urgente (Atención Inmediata)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label" for="taskFecha">Fecha Programada <span class="text-danger">*</span></label>
+          <input type="date" class="form-input" id="taskFecha" required>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="taskDescripcion">Instrucciones o Especificaciones de Campo</label>
+          <textarea class="form-input" id="taskDescripcion" rows="3" placeholder="Detalla pautas técnicas, herramientas necesarias o especificaciones para el personal de la cuadrilla..."></textarea>
+        </div>
+
+        <div class="modal-footer-task">
+          <button type="button" class="btn btn--outline" id="btnCancelarTarea">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btnGuardarTarea">
+            <i data-lucide="check"></i> Guardar en Plan de Trabajo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FINALIZAR TAREA -->
+  <div class="modal-overlay" id="modalFinalizarTarea">
+    <div class="modal-content-task" style="max-width: 480px;">
+      <div class="modal-header-task">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="modal-icon-task" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+            <i data-lucide="check-circle-2"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Finalizar Labor de Campo</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Registrar hora de término y observaciones de cierre</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalFin" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <form id="formFinalizarTarea" class="modal-body-task">
+        <input type="hidden" id="finTareaId">
+        
+        <div class="fin-task-summary mb-3" id="finTaskSummary">
+          <strong id="finTaskTitle" style="color: var(--color-text-title); display: block; margin-bottom: 0.25rem;">Título</strong>
+          <span style="font-size: 0.8125rem; color: var(--color-text-muted);" id="finTaskTimes">Iniciada a las: --:--</span>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="finObservaciones">Observaciones o Resultados (Opcional)</label>
+          <textarea class="form-input" id="finObservaciones" rows="3" placeholder="Ej: Se completó la cosecha de 40 mallas de Gypsophila grado A1 sin mermas. Personal listo para siguiente tarea."></textarea>
+        </div>
+
+        <div class="modal-footer-task">
+          <button type="button" class="btn btn--outline" id="btnCancelarFin">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btnConfirmarFin" style="background-color: #10B981; border-color: #10B981;">
+            <i data-lucide="check-check"></i> Confirmar y Registrar Horas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../../../js/config.js"></script>
+  <script src="tareas.js?v=4"></script>
+</body>
+</html>
+

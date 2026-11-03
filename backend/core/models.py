@@ -241,3 +241,68 @@ class Incidencia(models.Model):
 
     def __str__(self):
         return f"[{self.gravedad}] {self.titulo} - {self.sector} ({self.estado})"
+
+# ==========================================
+# 7. PLAN DE TRABAJO Y TAREAS DE CUADRILLA (TRAZABILIDAD & HEATMAP)
+# ==========================================
+
+class TareaCuadrilla(models.Model):
+    TIPO_LABOR_CHOICES = [
+        ('COSECHA', 'Cosecha de Flor de Exportación'),
+        ('PODA', 'Poda y Raleo Fitosanitario'),
+        ('DESHIERBE', 'Deshierbe Manual y Limpieza'),
+        ('RIEGO', 'Riego por Goteo y Fertirriego'),
+        ('FITOSANITARIA', 'Aplicación Fitosanitaria y Control'),
+        ('ENCANASTADO', 'Encanastado / Colocación de Mallas'),
+        ('MANTENIMIENTO', 'Mantenimiento de Canales e Infraestructura'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_PROCESO', 'En Proceso'),
+        ('COMPLETADA', 'Completada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    PRIORIDAD_CHOICES = [
+        ('BAJA', 'Baja'),
+        ('MEDIA', 'Media'),
+        ('ALTA', 'Alta'),
+        ('URGENTE', 'Urgente'),
+    ]
+
+    titulo = models.CharField(max_length=200, help_text="Título o actividad a realizar")
+    tipo_labor = models.CharField(max_length=40, choices=TIPO_LABOR_CHOICES, default='COSECHA')
+    cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.CASCADE, related_name='tareas_cuadrilla')
+    supervisor = models.ForeignKey(Trabajador, on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_supervisadas')
+    sector = models.ForeignKey(Sector, on_delete=models.SET_NULL, null=True, blank=True, related_name='tareas_sector')
+    
+    fecha_programada = models.DateField(help_text="Fecha para la que está programada la labor")
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='MEDIA')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
+    
+    # Trazabilidad de tiempos
+    hora_inicio = models.DateTimeField(null=True, blank=True, help_text="Momento en que el supervisor inició la labor")
+    hora_fin = models.DateTimeField(null=True, blank=True, help_text="Momento en que la cuadrilla completó la labor")
+    duracion_minutos = models.IntegerField(default=0, help_text="Duración efectiva en minutos calculada")
+    
+    descripcion = models.TextField(blank=True, null=True, help_text="Instrucciones o especificaciones de la labor")
+    observaciones = models.TextField(blank=True, null=True, help_text="Comentarios del supervisor al completar la tarea")
+    
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-fecha_programada', '-id']
+
+    def save(self, *args, **kwargs):
+        # Auto-calcular duración en minutos si inicio y fin están definidos
+        if self.hora_inicio and self.hora_fin and self.hora_fin > self.hora_inicio:
+            diff = self.hora_fin - self.hora_inicio
+            secs = diff.total_seconds()
+            self.duracion_minutos = max(1, round(secs / 60)) if secs >= 30 else (1 if secs > 0 else 0)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.cuadrilla.nombre} [{self.get_estado_display()}]"
+

@@ -1,18 +1,20 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
+from django.utils import timezone
 
 from .models import (
     PerfilUsuario, Cultivo, Sector, Cuadrilla, Trabajador, 
-    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo, Incidencia
+    SolicitudTraslado, ActividadCampo, RegistroCosecha, SolicitudInsumo, Incidencia,
+    TareaCuadrilla
 )
 from .serializers import (
     PerfilUsuarioSerializer, CultivoSerializer, SectorSerializer, CuadrillaSerializer, 
     TrabajadorSerializer, SolicitudTrasladoSerializer, 
     ActividadCampoSerializer, RegistroCosechaSerializer, SolicitudInsumoSerializer,
-    IncidenciaSerializer
+    IncidenciaSerializer, TareaCuadrillaSerializer
 )
 
 @api_view(['POST'])
@@ -399,6 +401,320 @@ class IncidenciaViewSet(viewsets.ModelViewSet):
             if sector.estado != 'ALERTA':
                 sector.estado = 'ALERTA'
                 sector.save()
+
+# ==========================================
+# 6.5. PLAN DE TRABAJO, TAREAS Y MAPA DE CALOR
+# ==========================================
+
+class TareaCuadrillaViewSet(viewsets.ModelViewSet):
+    queryset = TareaCuadrilla.objects.all().order_by('-fecha_programada', '-id')
+    serializer_class = TareaCuadrillaSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        supervisor_id = self.request.query_params.get('supervisor')
+        cuadrilla_id = self.request.query_params.get('cuadrilla')
+        fecha = self.request.query_params.get('fecha')
+        estado = self.request.query_params.get('estado')
+        tipo_labor = self.request.query_params.get('tipo_labor')
+
+        if supervisor_id:
+            qs = qs.filter(supervisor_id=supervisor_id)
+        if cuadrilla_id:
+            qs = qs.filter(cuadrilla_id=cuadrilla_id)
+        if fecha:
+            qs = qs.filter(fecha_programada=fecha)
+        if estado and estado != 'TODOS':
+            qs = qs.filter(estado=estado)
+        if tipo_labor and tipo_labor != 'TODOS':
+            qs = qs.filter(tipo_labor=tipo_labor)
+        return qs
+
+    def perform_create(self, serializer):
+        # Si no viene supervisor pero sí cuadrilla, auto-asociar al supervisor de la cuadrilla
+        cuadrilla = serializer.validated_data.get('cuadrilla')
+        supervisor = serializer.validated_data.get('supervisor')
+        if not supervisor and cuadrilla and cuadrilla.encargado:
+            serializer.save(supervisor=cuadrilla.encargado)
+        else:
+            serializer.save()
+
+    @action(detail=True, methods=['post'])
+    def iniciar(self, request, pk=None):
+        """
+        Marca la tarea como 'EN_PROCESO' y estampa la hora actual de inicio.
+        """
+        tarea = self.get_object()
+        tarea.estado = 'EN_PROCESO'
+        tarea.hora_inicio = timezone.now()
+        tarea.save()
+        return Response(self.get_serializer(tarea).data)
+
+    @action(detail=True, methods=['post'])
+    def completar(self, request, pk=None):
+        """
+        Marca la tarea como 'COMPLETADA', estampa la hora de fin y calcula la duración.
+        """
+        tarea = self.get_object()
+        tarea.estado = 'COMPLETADA'
+        tarea.hora_fin = timezone.now()
+        if not tarea.hora_inicio:
+            # Si no se inició previamente, asumir inicio 1 hora antes como fallback
+            tarea.hora_inicio = tarea.hora_fin - timezone.timedelta(hours=1)
+        
+        observaciones = request.data.get('observaciones')
+        if observaciones:
+            tarea.observaciones = observaciones
+            
+        tarea.save()
+        return Response(self.get_serializer(tarea).data)
+
+    @action(detail=False, methods=['get'])
+    def mapa_calor(self, request):
+        """
+        Calcula las matrices de horas y tareas para el Mapa de Calor de Rendimiento.
+        1. mapa_dias: Horas trabajadas por día de la semana actual (Lunes a Sábado) para cada cuadrilla.
+        2. mapa_franjas: Horas trabajadas en cada franja horaria (06:00 a 18:00) del DÍA SELECCIONADO (por defecto hoy).
+           Calcula el solapamiento exacto de cada labor en su franja horaria (máximo 2.0h por bloque de 2 horas).
+        """
+        import datetime
+        from django.utils import timezone
+        
+        # Fecha de análisis para franjas horarias (por defecto la fecha local de hoy)
+        fecha_str = request.query_params.get('fecha')
+        if fecha_str:
+            try:
+                fecha_target = datetime.datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except ValueError:
+                fecha_target = timezone.localdate()
+        else:
+            fecha_target = timezone.localdate()
+
+        cuadrillas = list(Cuadrilla.objects.all().order_by('nombre'))
+        tareas = list(TareaCuadrilla.objects.all().order_by('fecha_programada', 'hora_inicio'))
+
+        # Días de la semana estándar (Lunes = 0, Sábado = 5)
+        dias_nombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+        
+        # Determinar el lunes de la semana de fecha_target
+        lunes_semana = fecha_target - datetime.timedelta(days=fecha_target.weekday())
+        fechas_semana = [lunes_semana + datetime.timedelta(days=i) for i in range(6)]
+        
+        # Franjas horarias estándar de jornada agrícola (bloques de 2 horas)
+        franjas_labels = [
+            '06:00 - 08:00',
+            '08:00 - 10:00',
+            '10:00 - 12:00',
+            '12:00 - 14:00',
+            '14:00 - 16:00',
+            '16:00 - 18:00'
+        ]
+
+        cuadrillas_dias = []
+        cuadrillas_franjas = []
+
+        total_horas_semana = 0.0
+        total_tareas_completadas_semana = 0
+
+        # Función para calcular solapamiento exacto en horas
+        def calcular_solapamiento_horas(dt_ini, dt_fin, slot_h_ini, slot_h_fin, d_target, estado='COMPLETADA'):
+            if not dt_ini:
+                return 0.0
+            
+            local_ini = timezone.localtime(dt_ini)
+            
+            # Si la tarea está en proceso, la hora fin para el cálculo es la hora actual
+            if estado == 'EN_PROCESO':
+                now_local = timezone.localtime(timezone.now())
+                if now_local.date() == d_target:
+                    local_fin = max(now_local, local_ini + datetime.timedelta(minutes=30))
+                else:
+                    local_fin = local_ini + datetime.timedelta(hours=2)
+            else:
+                if not dt_fin:
+                    return 0.0
+                local_fin = timezone.localtime(dt_fin)
+            
+            # Solo consideramos tareas que ocurrieron o están ocurriendo en la fecha objetivo
+            if local_ini.date() != d_target and local_fin.date() != d_target:
+                return 0.0
+            
+            tz = local_ini.tzinfo
+            s_start = datetime.datetime.combine(d_target, datetime.time(slot_h_ini, 0), tzinfo=tz)
+            s_end = datetime.datetime.combine(d_target, datetime.time(slot_h_fin, 0), tzinfo=tz)
+            
+            overlap_start = max(local_ini, s_start)
+            overlap_end = min(local_fin, s_end)
+            
+            delta_sec = (overlap_end - overlap_start).total_seconds()
+            if delta_sec > 0:
+                # Máximo 2.0 horas en una franja de 2 horas
+                return min(2.0, round(delta_sec / 3600.0, 1))
+            return 0.0
+
+        from .serializers import format_time_12h
+
+        for c in cuadrillas:
+            encargado_str = f"{c.encargado.nombres} {c.encargado.apellidos}" if c.encargado else (c.supervisor.username if c.supervisor else "Sin Supervisor")
+            sector_str = c.sector_asignado.nombre if c.sector_asignado else "General"
+            
+            c_tareas = [t for t in tareas if t.cuadrilla_id == c.id]
+            c_completadas = [t for t in c_tareas if t.estado == 'COMPLETADA']
+            
+            # 1. Matriz por Días de la Semana (Lunes a Sábado de la semana en curso)
+            dias_data = []
+            horas_semana_c = 0.0
+            completadas_semana_c = 0
+            
+            for idx, dia_nombre in enumerate(dias_nombres):
+                dia_f = fechas_semana[idx]
+                tareas_dia = [t for t in c_completadas if t.fecha_programada == dia_f]
+                horas_dia = round(sum(t.duracion_minutos / 60.0 for t in tareas_dia), 1)
+                horas_semana_c += horas_dia
+                completadas_semana_c += len(tareas_dia)
+                
+                dias_data.append({
+                    'dia': dia_nombre,
+                    'fecha': dia_f.strftime('%Y-%m-%d'),
+                    'horas': horas_dia,
+                    'tareas_count': len(tareas_dia),
+                    'tareas': [
+                        {
+                            'titulo': t.titulo,
+                            'tipo': t.get_tipo_labor_display(),
+                            'estado_detalle': f"(Terminado) {format_time_12h(t.hora_inicio)} - {format_time_12h(t.hora_fin)}",
+                            'duracion': f"{t.duracion_minutos // 60}h {t.duracion_minutos % 60}m" if t.duracion_minutos >= 60 else f"{t.duracion_minutos}m",
+                            'sector': t.sector.nombre if t.sector else 'General'
+                        } for t in tareas_dia
+                    ]
+                })
+
+            total_horas_semana += horas_semana_c
+            total_tareas_completadas_semana += completadas_semana_c
+
+            cuadrillas_dias.append({
+                'cuadrilla_id': c.id,
+                'cuadrilla_nombre': c.nombre,
+                'supervisor_nombre': encargado_str,
+                'sector_nombre': sector_str,
+                'total_horas': round(horas_semana_c, 1),
+                'tareas_completadas': completadas_semana_c,
+                'dias': dias_data
+            })
+
+            # 2. Matriz por Franjas Horarias del DÍA OBJETIVO (Hoy)
+            tareas_hoy_c = [t for t in c_tareas if t.fecha_programada == fecha_target]
+            franjas_data = []
+            horas_hoy_c = 0.0
+
+            for slot_idx, slot_label in enumerate(franjas_labels):
+                hora_ini_slot = 6 + (slot_idx * 2)
+                hora_fin_slot = hora_ini_slot + 2
+                
+                tareas_slot = []
+                horas_slot = 0.0
+
+                for t in tareas_hoy_c:
+                    if t.estado == 'COMPLETADA' and t.hora_inicio and t.hora_fin:
+                        overlap = calcular_solapamiento_horas(t.hora_inicio, t.hora_fin, hora_ini_slot, hora_fin_slot, fecha_target, estado='COMPLETADA')
+                        local_ini = timezone.localtime(t.hora_inicio)
+                        inicia_aqui = (hora_ini_slot <= local_ini.hour < hora_fin_slot)
+                        # Solo se incluye si inició en el bloque o si trabajó al menos 15 minutos (0.25h) en él
+                        if overlap >= 0.25 or (inicia_aqui and overlap > 0):
+                            horas_slot += overlap
+                            tareas_slot.append(t)
+                    elif t.estado == 'EN_PROCESO' and t.hora_inicio:
+                        overlap = calcular_solapamiento_horas(t.hora_inicio, None, hora_ini_slot, hora_fin_slot, fecha_target, estado='EN_PROCESO')
+                        local_ini = timezone.localtime(t.hora_inicio)
+                        inicia_aqui = (hora_ini_slot <= local_ini.hour < hora_fin_slot)
+                        if overlap > 0 or inicia_aqui:
+                            if overlap <= 0:
+                                overlap = 0.5 # estimación mínima de avance si recién inicia
+                            horas_slot += overlap
+                            if t not in tareas_slot:
+                                tareas_slot.append(t)
+
+                # Cap máximo: una cuadrilla en una franja de 2 horas puede trabajar como máximo 2.0 horas
+                horas_slot = min(2.0, round(horas_slot, 1))
+                horas_hoy_c += horas_slot
+                
+                franjas_data.append({
+                    'franja': slot_label,
+                    'horas': horas_slot,
+                    'tareas_count': len(tareas_slot),
+                    'tareas': [
+                        {
+                            'titulo': t.titulo,
+                            'tipo': t.get_tipo_labor_display(),
+                            'estado': t.estado,
+                            'estado_detalle': (
+                                f"(Terminado) {format_time_12h(t.hora_inicio)} - {format_time_12h(t.hora_fin)}" if t.estado == 'COMPLETADA'
+                                else f"(En proceso) {format_time_12h(t.hora_inicio)}"
+                            ),
+                            'duracion': (
+                                (f"{t.duracion_minutos // 60}h {t.duracion_minutos % 60}m" if t.duracion_minutos >= 60 else f"{t.duracion_minutos}m")
+                                if t.estado == 'COMPLETADA'
+                                else (
+                                    f"{max(1, int((timezone.now() - t.hora_inicio).total_seconds() // 60)) // 60}h {max(1, int((timezone.now() - t.hora_inicio).total_seconds() // 60)) % 60}m (en curso)"
+                                    if (t.estado == 'EN_PROCESO' and t.hora_inicio)
+                                    else "En curso"
+                                )
+                            ),
+                            'sector': t.sector.nombre if t.sector else 'General'
+                        } for t in tareas_slot
+                    ]
+                })
+
+            completadas_hoy_c = sum(1 for t in tareas_hoy_c if t.estado == 'COMPLETADA')
+            en_proceso_hoy_c = sum(1 for t in tareas_hoy_c if t.estado == 'EN_PROCESO')
+            pendientes_hoy_c = sum(1 for t in tareas_hoy_c if t.estado == 'PENDIENTE')
+
+            cuadrillas_franjas.append({
+                'cuadrilla_id': c.id,
+                'cuadrilla_nombre': c.nombre,
+                'supervisor_nombre': encargado_str,
+                'sector_nombre': sector_str,
+                'total_horas': round(horas_hoy_c, 1),
+                'tareas_completadas': completadas_hoy_c,
+                'tareas_en_proceso': en_proceso_hoy_c,
+                'tareas_pendientes': pendientes_hoy_c,
+                'franjas': franjas_data
+            })
+
+        # Cuadrilla líder de la semana o del día
+        cuadrilla_lider = None
+        if cuadrillas_dias:
+            sorted_c = sorted(cuadrillas_dias, key=lambda x: x['total_horas'], reverse=True)
+            if sorted_c and sorted_c[0]['total_horas'] > 0:
+                cuadrilla_lider = {
+                    'nombre': sorted_c[0]['cuadrilla_nombre'],
+                    'supervisor': sorted_c[0]['supervisor_nombre'],
+                    'horas': sorted_c[0]['total_horas'],
+                    'tareas': sorted_c[0]['tareas_completadas']
+                }
+
+        tareas_hoy_totales = [t for t in tareas if t.fecha_programada == fecha_target]
+        tareas_hoy_completadas = [t for t in tareas_hoy_totales if t.estado == 'COMPLETADA']
+        horas_hoy_totales = sum(round(t.duracion_minutos / 60.0, 1) for t in tareas_hoy_completadas)
+
+        return Response({
+            'fecha_consulta': fecha_target.strftime('%Y-%m-%d'),
+            'resumen': {
+                'total_tareas': len(tareas_hoy_totales),
+                'tareas_completadas': len(tareas_hoy_completadas),
+                'tareas_en_proceso': sum(1 for t in tareas_hoy_totales if t.estado == 'EN_PROCESO'),
+                'tareas_pendientes': sum(1 for t in tareas_hoy_totales if t.estado == 'PENDIENTE'),
+                'total_horas_hoy': round(horas_hoy_totales, 1),
+                'total_horas_semana': round(total_horas_semana, 1),
+                'total_tareas_semana': total_tareas_completadas_semana,
+                'porcentaje_cumplimiento': round((len(tareas_hoy_completadas) / max(1, len(tareas_hoy_totales))) * 100, 1) if tareas_hoy_totales else 0.0,
+                'cuadrilla_lider': cuadrilla_lider
+            },
+            'dias_semana_labels': dias_nombres,
+            'franjas_labels': franjas_labels,
+            'mapa_dias': cuadrillas_dias,
+            'mapa_franjas': cuadrillas_franjas
+        })
 
 # ==========================================
 # 7. ENDPOINTS DE INTELIGENCIA ARTIFICIAL (GROQ)

@@ -136,6 +136,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Renderizar lista de obreros
             renderSupervisorWorkers(misObreros);
 
+            // Cargar plan de tareas del día de la cuadrilla
+            await loadDailyTasks(miCuadrilla.id);
+
             // Restablecer panel de reasignación
             resetTransferPanel();
 
@@ -420,6 +423,166 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         renderSupervisorWorkers(filtered);
     });
+
+    // 11. Cargar Plan de Trabajo y Tareas de Hoy para la Cuadrilla
+    async function loadDailyTasks(cuadrillaId) {
+        const dailyTasksList = document.getElementById('dailyTasksList');
+        if (!dailyTasksList) return;
+
+        try {
+            const hoy = new Date().toISOString().split('T')[0];
+            const res = await fetch(`${CONFIG.API_BASE_URL}/tareas/?cuadrilla=${cuadrillaId}`);
+            if (!res.ok) throw new Error('Error al consultar tareas');
+            const tareas = await res.json();
+            
+            // Filtrar tareas de hoy (o fallback a las 5 primeras)
+            const tareasHoy = tareas.filter(t => t.fecha_programada === hoy);
+            const listToShow = tareasHoy.length > 0 ? tareasHoy : tareas.slice(0, 5);
+
+            if (listToShow.length === 0) {
+                dailyTasksList.innerHTML = `
+                    <div style="padding: 1.5rem; text-align: center; color: var(--color-text-muted); font-size: 0.875rem;">
+                        No hay tareas programadas para hoy. Puedes planificarlas en la sección <a href="tareas/index.html" style="color: var(--color-primary); font-weight:600;">Plan de Tareas</a>.
+                    </div>
+                `;
+                return;
+            }
+
+            dailyTasksList.innerHTML = listToShow.map((t, idx) => {
+                let tagClass = 'tag--falta';
+                let statusIcon = '⏳';
+                if (t.estado === 'EN_PROCESO') {
+                    tagClass = 'tag--proceso';
+                    statusIcon = '▶️';
+                } else if (t.estado === 'COMPLETADA') {
+                    tagClass = 'tag--terminado';
+                    statusIcon = '✅';
+                }
+
+                const estadoTexto = getEstadoDetalle(t);
+
+                let actionBtn = '';
+                if (t.estado === 'PENDIENTE') {
+                    actionBtn = `
+                        <button class="btn btn--primary btn--sm btn-iniciar-quick" data-id="${t.id}" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+                            <i data-lucide="play" style="width: 13px; height: 13px;"></i> Iniciar
+                        </button>
+                    `;
+                } else if (t.estado === 'EN_PROCESO') {
+                    actionBtn = `
+                        <button class="btn btn--primary btn--sm btn-finalizar-quick" data-id="${t.id}" style="background-color: #10B981; border-color: #10B981; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+                            <i data-lucide="check" style="width: 13px; height: 13px;"></i> Terminar
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="daily-task-item">
+                        <div class="daily-task-left">
+                            <span class="daily-task-number">${idx + 1}</span>
+                            <div class="daily-task-info">
+                                <h4>
+                                    <span>${escapeHtml(t.titulo)}</span>
+                                    <span class="task-status-tag ${tagClass}">
+                                        ${statusIcon} ${escapeHtml(estadoTexto)}
+                                    </span>
+                                </h4>
+                                <p>
+                                    <span><i data-lucide="map-pin" style="width: 12px; height: 12px; display: inline;"></i> ${escapeHtml(t.sector_nombre || 'General')} (${escapeHtml(t.cultivo_nombre || 'Fundo')})</span>
+                                    ${t.descripcion ? ` · <span>${escapeHtml(t.descripcion)}</span>` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="daily-task-actions">
+                            ${actionBtn}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+
+            // Event listeners para Iniciar y Terminar
+            document.querySelectorAll('.btn-iniciar-quick').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    btn.disabled = true;
+                    btn.innerHTML = `<i data-lucide="loader" class="spinning" style="width: 12px; height: 12px;"></i>`;
+                    lucide.createIcons();
+                    await fetch(`${CONFIG.API_BASE_URL}/tareas/${id}/iniciar/`, { method: 'POST' });
+                    await loadDailyTasks(cuadrillaId);
+                });
+            });
+
+            document.querySelectorAll('.btn-finalizar-quick').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.dataset.id;
+                    const obs = prompt('Observaciones o resultado de la labor (opcional):', 'Labor completada con éxito.');
+                    if (obs === null) return;
+                    btn.disabled = true;
+                    btn.innerHTML = `<i data-lucide="loader" class="spinning" style="width: 12px; height: 12px;"></i>`;
+                    lucide.createIcons();
+                    await fetch(`${CONFIG.API_BASE_URL}/tareas/${id}/completar/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ observaciones: obs })
+                    });
+                    await loadDailyTasks(cuadrillaId);
+                });
+            });
+
+        } catch (e) {
+            console.error('Error cargando tareas diarias:', e);
+            dailyTasksList.innerHTML = `
+                <div style="padding: 1.25rem; text-align: center; color: var(--color-text-muted); font-size: 0.875rem;">
+                    No se pudieron cargar las tareas de hoy.
+                </div>
+            `;
+        }
+    }
+
+    function formatTime12(isoStr) {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) {
+            const parts = String(isoStr).split(':');
+            if (parts.length >= 2) {
+                let h = parseInt(parts[0], 10);
+                const m = parts[1];
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12 || 12;
+                return `${h}:${m} ${ampm}`;
+            }
+            return isoStr;
+        }
+        let h = d.getHours();
+        const m = d.getMinutes().toString().padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${m} ${ampm}`;
+    }
+
+    function getEstadoDetalle(t) {
+        if (t.estado_detalle) return t.estado_detalle;
+        if (t.estado === 'COMPLETADA') {
+            const ini = formatTime12(t.hora_inicio);
+            const fin = formatTime12(t.hora_fin);
+            if (ini && fin) return `(Terminado) ${ini} - ${fin}`;
+            if (fin) return `(Terminado) ${fin}`;
+            return `(Terminado)`;
+        } else if (t.estado === 'EN_PROCESO') {
+            const ini = formatTime12(t.hora_inicio);
+            return ini ? `(En proceso) ${ini}` : `(En proceso)`;
+        }
+        return `(Falta)`;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     // Carga inicial
     await initSupervisorApp();

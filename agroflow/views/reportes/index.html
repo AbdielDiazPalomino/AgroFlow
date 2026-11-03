@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../../css/variables.css">
   <link rel="stylesheet" href="../../css/base.css">
   <link rel="stylesheet" href="../../css/layout.css">
-  <link rel="stylesheet" href="reportes.css">
+  <link rel="stylesheet" href="reportes.css?v=5">
   
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -157,9 +157,31 @@
             <div class="form-group">
               <label class="form-label" for="selectTipoReporte">Módulo de Reporte</label>
               <select class="form-input" id="selectTipoReporte">
-                <option value="INCIDENCIAS" selected>🚨 Incidencias de Campo (Toma de Decisiones)</option>
+                <option value="TAREAS" selected>📅 Plan de Trabajo, Rendimiento & Mapa de Calor</option>
+                <option value="INCIDENCIAS">🚨 Incidencias de Campo (Toma de Decisiones)</option>
                 <option value="COSECHA">🌾 Rendimiento de Cosecha / Producción</option>
                 <option value="CUADRILLAS">👥 Trazabilidad de Cuadrillas y Personal</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="groupFiltroCuadrilla">
+              <label class="form-label" for="selectCuadrilla">Cuadrilla / Equipo</label>
+              <select class="form-input" id="selectCuadrilla">
+                <option value="TODAS">Todas las Cuadrillas</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="groupFiltroLabor">
+              <label class="form-label" for="selectLabor">Tipo de Labor</label>
+              <select class="form-input" id="selectLabor">
+                <option value="TODOS">Todas las Labores</option>
+                <option value="COSECHA">🌾 Cosecha de Flor</option>
+                <option value="PODA">✂️ Poda y Raleo</option>
+                <option value="DESHIERBE">🌿 Deshierbe Manual</option>
+                <option value="RIEGO">💧 Riego y Fertirriego</option>
+                <option value="FITOSANITARIA">🧪 Fitosanitaria / Control</option>
+                <option value="ENCANASTADO">📦 Encanastado / Mallas</option>
+                <option value="MANTENIMIENTO">🔧 Mantenimiento General</option>
               </select>
             </div>
 
@@ -170,7 +192,7 @@
               </select>
             </div>
 
-            <div class="form-group" id="groupFiltroGravedad">
+            <div class="form-group" id="groupFiltroGravedad" style="display: none;">
               <label class="form-label" for="selectGravedad">Gravedad</label>
               <select class="form-input" id="selectGravedad">
                 <option value="TODAS">Todas las Gravedades</option>
@@ -185,14 +207,62 @@
               <label class="form-label" for="selectEstado">Estado</label>
               <select class="form-input" id="selectEstado">
                 <option value="TODOS">Todos los Estados</option>
-                <option value="ABIERTA">Abiertas / En Revisión</option>
-                <option value="EN_PROCESO">En Proceso</option>
-                <option value="RESUELTA">Resueltas</option>
+                <option value="COMPLETADA">✅ Completadas</option>
+                <option value="EN_PROCESO">▶️ En Proceso</option>
+                <option value="PENDIENTE">⏳ Pendientes</option>
               </select>
             </div>
 
             <div class="filters-actions">
               <button class="btn btn--primary btn--full" id="btnFiltrar"><i data-lucide="filter"></i> Filtrar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAPA DE CALOR DE RENDIMIENTO DE CUADRILLAS (HEATMAP) -->
+        <div class="heatmap-card mt-4" id="heatmapCard">
+          <div class="heatmap-header">
+            <div class="heatmap-header__info">
+              <div class="heatmap-header__icon">
+                <i data-lucide="flame"></i>
+              </div>
+              <div>
+                <h2 class="heatmap-title">Mapa de Calor: Rendimiento y Horas Trabajadas por Cuadrilla</h2>
+                <p class="heatmap-subtitle">
+                  Historial de labores completadas, concentración horaria y productividad efectiva de cada supervisor en campo
+                </p>
+              </div>
+            </div>
+
+            <div class="heatmap-header__controls">
+              <div class="heatmap-toggle-group">
+                <button type="button" class="heatmap-toggle-btn active" id="btnHeatmapDias" data-view="DIAS">
+                  <i data-lucide="calendar-days"></i> Días de la Semana
+                </button>
+                <button type="button" class="heatmap-toggle-btn" id="btnHeatmapHoras" data-view="HORAS">
+                  <i data-lucide="clock"></i> Franjas Horarias del Día
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenedor del Grid del Heatmap -->
+          <div class="heatmap-container" id="heatmapContainer">
+            <div style="text-align: center; padding: 3rem; color: var(--color-text-muted);">
+              <i data-lucide="loader" class="spinning" style="width: 28px; height: 28px; color: var(--color-primary); margin: 0 auto 0.5rem auto;"></i>
+              <p>Generando matriz del mapa de calor...</p>
+            </div>
+          </div>
+
+          <!-- Leyenda y Métricas del Heatmap -->
+          <div class="heatmap-footer">
+            <div class="heatmap-legend" id="heatmapLegend">
+              <!-- Se genera dinámicamente según la vista (Días o Franjas) -->
+            </div>
+
+            <div class="heatmap-leader" id="heatmapLeaderBadge">
+              <i data-lucide="trophy"></i>
+              <span id="heatmapLeaderText">Cuadrilla Líder: Cargando...</span>
             </div>
           </div>
         </div>
@@ -318,6 +388,6 @@
 
   <!-- Scripts -->
   <script src="../../js/config.js"></script>
-  <script src="reportes.js?v=2"></script>
+  <script src="reportes.js?v=6"></script>
 </body>
 </html>

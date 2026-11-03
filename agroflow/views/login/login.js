@@ -59,10 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('agroflow_user_role', data.role);
                     localStorage.setItem('agroflow_username', data.username || data.dni);
                     localStorage.setItem('agroflow_nombre', data.nombre || data.username);
+                    localStorage.setItem('agroflow_user_name', data.nombre || data.username);
+                    localStorage.setItem('agroflow_user_dni', data.dni || data.username || '');
                     if (data.id) {
                         localStorage.setItem('agroflow_trabajador_id', data.id);
+                        localStorage.setItem('agroflow_user_id', data.id);
                     } else {
                         localStorage.removeItem('agroflow_trabajador_id');
+                        localStorage.removeItem('agroflow_user_id');
                     }
                     
                     // Redirección según rol
