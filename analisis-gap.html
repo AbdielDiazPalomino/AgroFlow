@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anexo 21: Análisis GAP - AgroFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .y-axis-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+        }
+        .chart-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.5rem;
+            border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .chart-block:hover {
+            filter: brightness(1.05);
+        }
+        
+        /* Colores de los factores (escalones) */
+        .bg-asis { background-color: #64748b; color: white; } /* Slate 500 */
+        .bg-pt1 { background-color: #bae6fd; color: #0369a1; } /* Sky 200 */
+        .bg-pt2 { background-color: #bbf7d0; color: #166534; } /* Green 200 */
+        .bg-pt3 { background-color: #fef08a; color: #854d0e; } /* Yellow 200 */
+        .bg-pt4 { background-color: #fbcfe8; color: #9d174d; } /* Pink 200 */
+
+        .target-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #16a34a; /* Green 600 */
+            z-index: 10;
+        }
+        .base-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #dc2626; /* Red 600 */
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8 flex justify-center items-center min-h-screen font-sans">
+
+    <div class="w-full max-w-5xl bg-white p-8 shadow-lg border border-gray-200 relative">
+        
+        <!-- Encabezado -->
+        <div class="text-center mb-10">
+            <h1 class="text-2xl font-bold text-gray-800 uppercase tracking-wide">Anexo 21. Diagrama de Análisis GAP</h1>
+            <p class="text-gray-500 mt-1">Transición escalonada de capacidades: Situación Actual (AS-IS) hacia Objetivo (TO-BE)</p>
+        </div>
+
+        <!-- Leyenda Superior -->
+        <div class="flex flex-col items-center justify-center mb-8 gap-2">
+            <div class="flex items-center gap-2">
+                <div class="w-16 h-1 bg-green-600"></div>
+                <span class="font-bold text-green-700 text-sm">Capacidad Operativa que Roots S.A. Podría Tener (Objetivo TO-BE)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-16 h-1 bg-red-600"></div>
+                <span class="font-bold text-red-600 text-sm">Capacidad Operativa que Roots S.A. Tiene Actualmente (Base AS-IS)</span>
+            </div>
+        </div>
+
+        <!-- Contenedor del Gráfico -->
+        <div class="flex h-[450px] relative ml-8 mr-24">
+            
+            <!-- Eje Y -->
+            <div class="absolute -left-12 top-0 bottom-0 flex items-center">
+                <span class="y-axis-text font-bold text-gray-600 tracking-widest text-sm">Madurez y Eficiencia Operativa</span>
+            </div>
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-gray-400"></div> <!-- Línea Eje Y -->
+            <div class="absolute left-0 right-0 bottom-0 h-px bg-gray-400"></div> <!-- Línea Eje X -->
+
+            <!-- Línea Objetivo (Verde) -->
+            <div class="target-line top-[0%]"></div>
+            <!-- Línea Base (Roja) -->
+            <div class="base-line bottom-[25%]"></div>
+
+            <!-- Columnas (Fases del Roadmap) -->
+            <div class="flex-1 flex items-end pl-1">
+                
+                <!-- Hito 1 (Noviembre) -->
+                <div class="flex-1 flex flex-col justify-end h-full px-1 relative group">
+                    <div class="chart-block bg-pt1 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 1 (PT1)</span>
+                        <span>Despliegue Cloud y<br>Dashboard Central</span>
+                    </div>
+                    <div class="chart-block bg-asis h-[25%] relative z-0">
+                        <span class="font-bold">Capacidad AS-IS</span>
+                        <span class="text-[0.65rem] font-normal mt-1">Papel y 18h Desfase</span>
+                    </div>
+                    <div class="absolute -bottom-8 left-0 right-0 text-center font-bold text-gray-700 text-xs">
+                        Hito 1<br><span class="font-normal text-[0.65rem]">Nov (Año Actual)</span>
+                    </div>
+                </div>
+
+                <!-- Hito 2 (Diciembre) -->
+                <div class="flex-1 flex flex-col justify-end h-full px-1 relative">
+                    <div class="chart-block bg-pt2 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 2 (PT2)</span>
+                        <span>App Táctica<br>Offline-First</span>
+                    </div>
+                    <div class="chart-block bg-pt1 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 1 (PT1)</span>
+                        <span>Despliegue Cloud y<br>Dashboard Central</span>
+                    </div>
+                    <div class="chart-block bg-asis h-[25%] relative z-0">
+                        <span class="font-bold">Capacidad AS-IS</span>
+                        <span class="text-[0.65rem] font-normal mt-1">Papel y 18h Desfase</span>
+                    </div>
+                    <div class="absolute -bottom-8 left-0 right-0 text-center font-bold text-gray-700 text-xs">
+                        Hito 2<br><span class="font-normal text-[0.65rem]">Dic (Año Actual)</span>
+                    </div>
+                </div>
+
+                <!-- Hito 3 (Enero - Go Live) -->
+                <div class="flex-1 flex flex-col justify-end h-full px-1 relative">
+                    <div class="target-line top-[25%] bg-green-600/0"></div> <!-- Espaciador visual -->
+                    <div class="chart-block bg-pt3 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 3 (PT3)</span>
+                        <span>Seguridad Biométrica<br>(WebAuthn)</span>
+                    </div>
+                    <div class="chart-block bg-pt2 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 2 (PT2)</span>
+                        <span>App Táctica<br>Offline-First</span>
+                    </div>
+                    <div class="chart-block bg-pt1 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 1 (PT1)</span>
+                        <span>Despliegue Cloud y<br>Dashboard Central</span>
+                    </div>
+                    <div class="chart-block bg-asis h-[25%] relative z-0">
+                        <span class="font-bold">Capacidad AS-IS</span>
+                        <span class="text-[0.65rem] font-normal mt-1">Papel y 18h Desfase</span>
+                    </div>
+                    <div class="absolute -bottom-8 left-0 right-0 text-center font-bold text-green-700 text-xs">
+                        Hito 3 (Go-Live Piloto)<br><span class="font-normal text-[0.65rem]">Ene (Próximo Año)</span>
+                    </div>
+                </div>
+
+                <!-- Hito 4 (Febrero) -->
+                <div class="flex-1 flex flex-col justify-end h-full px-1 relative">
+                    <div class="chart-block bg-pt4 h-[25%] relative z-0 border-t-2 border-t-green-600">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 4 (PT4)</span>
+                        <span>Motor IA Predictiva<br>(Sugerencias)</span>
+                    </div>
+                    <div class="chart-block bg-pt3 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 3 (PT3)</span>
+                        <span>Seguridad Biométrica<br>(WebAuthn)</span>
+                    </div>
+                    <div class="chart-block bg-pt2 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 2 (PT2)</span>
+                        <span>App Táctica<br>Offline-First</span>
+                    </div>
+                    <div class="chart-block bg-pt1 h-[25%] relative z-0">
+                        <span class="font-bold text-[0.7rem] uppercase mb-1">Factor 1 (PT1)</span>
+                        <span>Despliegue Cloud y<br>Dashboard Central</span>
+                    </div>
+                    <div class="chart-block bg-asis h-[25%] relative z-0 border-b-2 border-b-red-600">
+                        <span class="font-bold">Capacidad AS-IS</span>
+                        <span class="text-[0.65rem] font-normal mt-1">Papel y 18h Desfase</span>
+                    </div>
+                    <div class="absolute -bottom-8 left-0 right-0 text-center font-bold text-gray-700 text-xs">
+                        Hito 4 (Masificación)<br><span class="font-normal text-[0.65rem]">Feb (Próximo Año)</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Flecha de Objetivo (Lado Derecho) -->
+            <div class="absolute -right-24 top-0 bottom-[25%] w-20 flex items-center justify-center">
+                <!-- Línea de la flecha -->
+                <div class="absolute left-10 top-2 bottom-0 w-1 bg-black"></div>
+                <!-- Punta de la flecha -->
+                <div class="absolute left-[34px] top-0 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[15px] border-b-black"></div>
+                <!-- Punta inferior (opcional para indicar inicio) -->
+                <div class="absolute left-[34px] bottom-0 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-black"></div>
+                
+                <!-- Etiqueta Negra de Objetivo -->
+                <div class="absolute z-20 bg-black text-white font-bold py-2 px-4 rounded-md shadow-md text-sm border border-gray-600">
+                    Cierre de<br>Brecha
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+</body>
+</html>

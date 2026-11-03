@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura de Datos TO-BE - AgroFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        
+        .layer-label {
+            width: 180px;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            padding: 1rem;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        .data-box {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+            border-radius: 0.5rem;
+        }
+
+        .data-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Arrows pointing up */
+        .arrow-up {
+            width: 0; 
+            height: 0; 
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid #94a3b8;
+            margin: 0 auto;
+        }
+        .line-up {
+            width: 2px;
+            height: 20px;
+            background-color: #94a3b8;
+            margin: 0 auto;
+        }
+
+        .flow-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-center min-h-screen">
+
+    <div class="w-full max-w-[1200px] bg-white p-6 md:p-8 shadow-xl border border-gray-200 rounded-xl">
+        
+        <div class="text-center mb-10 border-b pb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Diagrama de Arquitectura de Datos (Situación Propuesta TO-BE)</h1>
+            <p class="text-gray-500 mt-2 text-sm md:text-base">Sistema AgroFlow - Flujo centralizado, bidireccional y Offline-First para Roots S.A.</p>
+        </div>
+
+        <div class="flex flex-col gap-2 relative">
+
+            <div class="flex w-full rounded-lg overflow-hidden border border-emerald-200 shadow-sm">
+                <div class="layer-label bg-emerald-100 text-emerald-800 border-l-4 border-emerald-500">
+                    Consumo de Datos
+                </div>
+                <div class="flex-1 bg-emerald-50/50 p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="data-box border-t-4 border-emerald-500">
+                        <i class="fa-solid fa-chart-pie text-emerald-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Dashboard de Gerencia</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Indicadores operativos en tiempo real</span>
+                    </div>
+                    <div class="data-box border-t-4 border-emerald-500">
+                        <i class="fa-solid fa-money-bill-trend-up text-emerald-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Auditoría de Costos</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Costeo acumulado exacto por lote</span>
+                    </div>
+                    <div class="data-box border-t-4 border-emerald-500">
+                        <i class="fa-solid fa-lightbulb text-emerald-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Alertas y Recomendaciones</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Sugerencias predictivas de la IA</span>
+                    </div>
+                    <div class="data-box border-t-4 border-emerald-500">
+                        <i class="fa-solid fa-boxes-stacked text-emerald-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Panel Logístico</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Gestión de despachos solicitados</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow Arrows -->
+            <div class="flex w-full justify-around pr-[180px] pl-[180px]">
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+            </div>
+
+            <div class="flex w-full rounded-lg overflow-hidden border border-blue-200 shadow-sm relative">
+                <div class="layer-label bg-blue-100 text-blue-800 border-l-4 border-blue-600">
+                    Procesamiento y Almacenamiento Central
+                </div>
+                <div class="flex-1 bg-blue-50/50 p-4 flex flex-col gap-4">
+                    
+                    <!-- Procesamiento Lógico -->
+                    <div class="bg-white border border-blue-200 rounded-lg p-3 relative">
+                        <div class="absolute -top-3 left-4 bg-blue-600 text-white text-[0.65rem] font-bold px-2 py-1 rounded shadow">PROCESAMIENTO BACKEND (PYTHON/DJANGO)</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                            <div class="flex flex-col items-center justify-center p-2">
+                                <i class="fa-solid fa-microchip text-blue-500 text-xl mb-1"></i>
+                                <span class="text-xs font-bold text-gray-700">Lógica Transaccional</span>
+                                <span class="text-[0.6rem] text-gray-500 text-center">Validación de planificaciones y reasignaciones</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center p-2 border-l border-r border-gray-100">
+                                <i class="fa-solid fa-brain text-purple-500 text-xl mb-1"></i>
+                                <span class="text-xs font-bold text-gray-700">Motor IA en 2do Plano</span>
+                                <span class="text-[0.6rem] text-gray-500 text-center">Análisis de patrones históricos operativos</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center p-2">
+                                <i class="fa-solid fa-shield-halved text-blue-500 text-xl mb-1"></i>
+                                <span class="text-xs font-bold text-gray-700">Servicio Criptográfico</span>
+                                <span class="text-[0.6rem] text-gray-500 text-center">Verificación de firmas WebAuthn</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Repositorios de Datos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="data-box bg-blue-50 border-blue-300">
+                            <i class="fa-solid fa-database text-blue-600 text-3xl mb-2"></i>
+                            <span class="font-bold text-sm text-gray-800">Base de Datos Central (Relacional)</span>
+                            <span class="text-[0.65rem] text-gray-600 mt-1">Fuente Única de Verdad (SSOT) para toda la organización. Consolida Lotes, Asignaciones, Registros e Insumos.</span>
+                        </div>
+                        <div class="data-box bg-amber-50 border-amber-300 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[0.6rem] font-bold px-2 py-1 rounded-bl">OFFLINE-FIRST</div>
+                            <i class="fa-solid fa-hard-drive text-amber-600 text-3xl mb-2"></i>
+                            <span class="font-bold text-sm text-gray-800">Caché Local / IndexedDB (Navegador)</span>
+                            <span class="text-[0.65rem] text-gray-600 mt-1">Almacenamiento temporal en tablets de campo. Garantiza tolerancia a fallos de red sin pérdida de datos.</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Flow Arrows -->
+            <div class="flex w-full justify-around pr-[180px] pl-[180px]">
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div><span class="text-[0.6rem] font-bold text-gray-400 mt-1">APIs REST</span></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div><span class="text-[0.6rem] font-bold text-indigo-400 mt-1">WebSockets</span></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div><span class="text-[0.6rem] font-bold text-gray-400 mt-1">Sincronización</span></div>
+            </div>
+
+            <div class="flex w-full rounded-lg overflow-hidden border border-indigo-200 shadow-sm">
+                <div class="layer-label bg-indigo-100 text-indigo-800 border-l-4 border-indigo-500">
+                    Intercambio y Tránsito
+                </div>
+                <div class="flex-1 bg-indigo-50/50 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="data-box border-indigo-300 border-dashed">
+                        <i class="fa-solid fa-bolt text-indigo-500 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Conexión Bidireccional (WSS)</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Transmisión de alertas en tiempo real (<200ms)</span>
+                    </div>
+                    <div class="data-box border-indigo-300 border-dashed">
+                        <i class="fa-solid fa-rotate text-indigo-500 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Gestor de Sincronización</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Envío de cola de datos al recuperar señal</span>
+                    </div>
+                    <div class="data-box border-indigo-300 border-dashed">
+                        <i class="fa-solid fa-fingerprint text-indigo-500 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Protocolo WebAuthn</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Tránsito seguro de aserciones biométricas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow Arrows -->
+            <div class="flex w-full justify-around pr-[180px] pl-[180px]">
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+                <div class="flow-connector"><div class="arrow-up"></div><div class="line-up"></div></div>
+            </div>
+
+            <div class="flex w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                <div class="layer-label bg-gray-200 text-gray-800 border-l-4 border-gray-500">
+                    Fuentes de Captura (Origen)
+                </div>
+                <div class="flex-1 bg-gray-50 p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="data-box bg-white border-l-4 border-l-gray-400">
+                        <i class="fa-solid fa-tablet-screen-button text-gray-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">App Web de Campo</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Inputs de avance, incidencias y traslados (Supervisor)</span>
+                    </div>
+                    <div class="data-box bg-white border-l-4 border-l-gray-400">
+                        <i class="fa-solid fa-satellite-dish text-gray-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Señal GPS Dispositivo</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Captura de coordenadas para auditar rondas</span>
+                    </div>
+                    <div class="data-box bg-white border-l-4 border-l-gray-400">
+                        <i class="fa-solid fa-id-badge text-gray-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">Hardware Biométrico</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Validación de identidad del Jornalero localmente</span>
+                    </div>
+                    <div class="data-box bg-white border-l-4 border-l-gray-400">
+                        <i class="fa-solid fa-desktop text-gray-600 text-2xl mb-2"></i>
+                        <span class="font-bold text-sm text-gray-700">PC Central / Almacén</span>
+                        <span class="text-[0.65rem] text-gray-500 mt-1">Creación de planificaciones y aprobación de insumos</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
