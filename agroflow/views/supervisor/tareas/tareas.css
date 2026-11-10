@@ -689,3 +689,123 @@ input[type="date"].form-input {
   border-radius: var(--radius-lg);
 }
 
+/* =========================================
+   ACCIONES DE EDICIÓN Y BORRADO EN TARJETA
+========================================= */
+.task-card__menu-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-icon-task {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-icon-task i {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-icon-task:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #F8FAFC;
+}
+
+.btn-icon-task.btn-editar-tarea:hover {
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-icon-task.btn-eliminar-tarea:hover {
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.15);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   PICKER DE HORA PERSONALIZADA Y DURACIÓN
+========================================= */
+.time-picker-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.time-input-custom {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color-scheme: dark;
+}
+
+.btn-set-now {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #94A3B8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-set-now:hover {
+  color: #F8FAFC;
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.btn-set-now i {
+  width: 13px;
+  height: 13px;
+}
+
+.calculated-duration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.35rem 0.75rem;
+  border-radius: 99px;
+  color: #34D399;
+  font-size: 0.8125rem;
+}
+
+.calculated-duration-badge i {
+  width: 14px;
+  height: 14px;
+}
+
+.calculated-duration-badge strong {
+  color: #ffffff;
+}
+
+.form-input-help {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+  margin-top: 0.25rem;
+}
+

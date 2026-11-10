@@ -42,6 +42,7 @@ class Sector(models.Model):
     area_hectareas = models.DecimalField(max_digits=6, decimal_places=2)
     cultivo = models.ForeignKey(Cultivo, on_delete=models.SET_NULL, null=True, blank=True, related_name='sectores')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO')
+    color = models.CharField(max_length=20, default='#10B981', help_text="Color hexadecimal del sector en el mapa")
     
     def __str__(self):
         return self.nombre
@@ -81,6 +82,7 @@ class Trabajador(models.Model):
     cuadrilla = models.ForeignKey(Cuadrilla, on_delete=models.SET_NULL, null=True, blank=True, related_name='trabajadores')
     es_supervisor = models.BooleanField(default=False, help_text="¿Tiene rol de supervisor de campo?")
     es_jefe_almacen = models.BooleanField(default=False, help_text="¿Tiene rol de Jefe de Almacén?")
+    activo = models.BooleanField(default=True, help_text="¿Trabajador activo actualmente o en receso de temporada (inactivo)?")
     password = models.CharField(max_length=128, blank=True, null=True, help_text="Contraseña personal (por defecto es su DNI)")
     
     # Geolocalización en tiempo real (Supervisores de Campo)

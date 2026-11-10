@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../../../css/variables.css">
   <link rel="stylesheet" href="../../../css/base.css">
   <link rel="stylesheet" href="../../../css/layout.css">
-  <link rel="stylesheet" href="tareas.css?v=4">
+  <link rel="stylesheet" href="tareas.css?v=5">
   
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -218,26 +218,28 @@
     </div>
   </div>
 
-  <!-- MODAL: NUEVA TAREA / LABOR -->
+  <!-- MODAL: NUEVA / EDITAR TAREA -->
   <div class="modal-overlay" id="modalNuevaTarea">
     <div class="modal-content-task">
       <div class="modal-header-task">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div class="modal-icon-task">
+          <div class="modal-icon-task" id="modalTareaIcon">
             <i data-lucide="plus-circle"></i>
           </div>
           <div>
-            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Programar Labor en Plan de Trabajo</h3>
-            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Asigna una tarea operativa para tu cuadrilla con registro de tiempos</p>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);" id="modalTareaTitle">Programar Labor en Plan de Trabajo</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);" id="modalTareaSubtitle">Asigna una tarea operativa para tu cuadrilla con registro de tiempos</p>
           </div>
         </div>
         <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalTarea" aria-label="Cerrar"><i data-lucide="x"></i></button>
       </div>
 
       <form id="formNuevaTarea" class="modal-body-task">
+        <input type="hidden" id="editTaskId" value="">
+
         <div class="form-group mb-3">
           <label class="form-label" for="taskTitulo">Título de la Labor o Actividad <span class="text-danger">*</span></label>
-          <input type="text" class="form-input" id="taskTitulo" placeholder="Ej: Cosecha selectiva Gypsophila hileras 1 a 6" required>
+          <input type="text" class="form-input" id="taskTitulo" placeholder="Ej: Cosecha selectiva Gypsophila hileras 1 a 6" required autocomplete="off">
         </div>
 
         <div class="form-row-2 mb-3">
@@ -294,16 +296,63 @@
         <div class="modal-footer-task">
           <button type="button" class="btn btn--outline" id="btnCancelarTarea">Cancelar</button>
           <button type="submit" class="btn btn--primary" id="btnGuardarTarea">
-            <i data-lucide="check"></i> Guardar en Plan de Trabajo
+            <i data-lucide="check"></i> <span id="btnGuardarTareaText">Guardar en Plan de Trabajo</span>
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: FINALIZAR TAREA -->
-  <div class="modal-overlay" id="modalFinalizarTarea">
+  <!-- MODAL: INICIAR LABOR (HORA PERSONALIZADA) -->
+  <div class="modal-overlay" id="modalIniciarTarea">
     <div class="modal-content-task" style="max-width: 480px;">
+      <div class="modal-header-task">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="modal-icon-task" style="background: rgba(59, 130, 246, 0.15); color: #3B82F6;">
+            <i data-lucide="play-circle"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Iniciar Labor en Campo</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Establece la hora de inicio operativo para la cuadrilla</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalIniciar" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <form id="formIniciarTarea" class="modal-body-task">
+        <input type="hidden" id="iniciarTareaId">
+        
+        <div class="fin-task-summary mb-3" style="border-left: 3px solid #3B82F6;">
+          <strong id="iniciarTaskTitle" style="color: var(--color-text-title); display: block; margin-bottom: 0.25rem;">Título</strong>
+          <span style="font-size: 0.8125rem; color: var(--color-text-muted);" id="iniciarTaskDetails">Cuadrilla • Sector</span>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label" for="iniciarHora">
+            Hora Oficial de Inicio <span class="text-danger">*</span>
+          </label>
+          <div class="time-picker-action-group">
+            <input type="time" class="form-input time-input-custom" id="iniciarHora" required>
+            <button type="button" class="btn btn--outline btn-set-now" id="btnSetNowIniciar" title="Fijar la hora actual del sistema">
+              <i data-lucide="clock"></i> Hora Actual
+            </button>
+          </div>
+          <span class="form-input-help">Por defecto se toma la hora actual de tu dispositivo, pero puedes ajustarla libremente si la labor empezó antes.</span>
+        </div>
+
+        <div class="modal-footer-task">
+          <button type="button" class="btn btn--outline" id="btnCancelarIniciar">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btnConfirmarIniciar" style="background-color: #3B82F6; border-color: #3B82F6;">
+            <i data-lucide="play"></i> Iniciar Labor (Registrar Hora)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FINALIZAR TAREA (HORA PERSONALIZADA) -->
+  <div class="modal-overlay" id="modalFinalizarTarea">
+    <div class="modal-content-task" style="max-width: 490px;">
       <div class="modal-header-task">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
           <div class="modal-icon-task" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
@@ -325,6 +374,28 @@
           <span style="font-size: 0.8125rem; color: var(--color-text-muted);" id="finTaskTimes">Iniciada a las: --:--</span>
         </div>
 
+        <div class="form-row-2 mb-3">
+          <div class="form-group">
+            <label class="form-label" for="finHoraInicio">Hora de Inicio</label>
+            <input type="time" class="form-input time-input-custom" id="finHoraInicio">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="finHora">Hora de Término <span class="text-danger">*</span></label>
+            <input type="time" class="form-input time-input-custom" id="finHora" required>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div class="calculated-duration-badge" id="finDurationBadge">
+            <i data-lucide="timer"></i>
+            <span>Duración: <strong id="finDurationText">--</strong></span>
+          </div>
+          <button type="button" class="btn btn--outline btn-set-now" id="btnSetNowFin" title="Fijar la hora actual de término">
+            <i data-lucide="clock"></i> Término Actual
+          </button>
+        </div>
+
         <div class="form-group mb-4">
           <label class="form-label" for="finObservaciones">Observaciones o Resultados (Opcional)</label>
           <textarea class="form-input" id="finObservaciones" rows="3" placeholder="Ej: Se completó la cosecha de 40 mallas de Gypsophila grado A1 sin mermas. Personal listo para siguiente tarea."></textarea>
@@ -340,9 +411,42 @@
     </div>
   </div>
 
+  <!-- MODAL: CONFIRMAR ELIMINACIÓN -->
+  <div class="modal-overlay" id="modalEliminarTarea">
+    <div class="modal-content-task" style="max-width: 440px;">
+      <div class="modal-header-task">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="modal-icon-task" style="background: rgba(239, 68, 68, 0.15); color: #EF4444;">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-title);">Eliminar Labor</h3>
+            <p style="font-size: 0.75rem; color: var(--color-text-muted);">Confirmación de borrado operativo</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn icon-btn--small" id="btnCerrarModalEliminar" aria-label="Cerrar"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-body-task">
+        <p style="color: var(--color-text-body); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.25rem;">
+          ¿Estás seguro que deseas eliminar la labor <strong id="eliminarTaskNombre" style="color: #F8FAFC;"></strong> del plan de trabajo? Esta acción removerá el registro de horas y trazabilidad.
+        </p>
+
+        <div class="modal-footer-task" style="margin-top: 0; padding-top: 0; border-top: none;">
+          <button type="button" class="btn btn--outline" id="btnCancelarEliminar">Cancelar</button>
+          <button type="button" class="btn btn--danger" id="btnConfirmarEliminar" style="background: #EF4444; border-color: #EF4444; color: #fff;">
+            <i data-lucide="trash-2"></i> Sí, Eliminar Labor
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="../../../js/config.js"></script>
-  <script src="tareas.js?v=4"></script>
+  <script src="tareas.js?v=5"></script>
+</body>
+</html>
 </body>
 </html>
 

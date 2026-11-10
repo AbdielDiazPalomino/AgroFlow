@@ -157,13 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
      * Renderiza los 4 KPIs clave de trazabilidad
      */
     function renderKPIs(trabajadores, cuadrillas, sectores, supervisores, traslados, insumos, incidencias) {
-        // KPI 1: Personal en Fundo
-        const obreros = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen);
+        // KPI 1: Personal en Fundo (solo activos en temporada)
+        const obreros = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen && t.activo !== false);
+        const inactivos = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen && t.activo === false);
         const asignados = obreros.filter(t => t.cuadrilla !== null).length;
         const sinCuadrilla = obreros.filter(t => t.cuadrilla === null).length;
 
         elKpiTotalPersonal.textContent = obreros.length;
-        elKpiPersonalDesglose.textContent = `${asignados} asignados · ${sinCuadrilla} disponibles`;
+        let desglose = `${asignados} asignados · ${sinCuadrilla} disponibles`;
+        if (inactivos.length > 0) {
+            desglose += ` (${inactivos.length} en receso)`;
+        }
+        elKpiPersonalDesglose.textContent = desglose;
 
         // KPI 2: Supervisores en Terreno
         const supActivos = supervisores.filter(s => s.esta_activo).length;
@@ -196,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * combinando heurísticas rápidas y el motor Groq LLM (/api/ia/diagnostico/)
      */
     async function renderAICopilot(trabajadores, cuadrillas, sectores, supervisores, traslados, insumos, incidencias) {
-        const obrerosSinCuadrilla = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen && t.cuadrilla === null).length;
+        const obrerosSinCuadrilla = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen && t.cuadrilla === null && t.activo !== false).length;
         const incidenciaCritica = (incidencias || []).find(i => (i.gravedad === 'CRITICA' || i.gravedad === 'ALTA') && i.estado !== 'RESUELTA');
         const sectorEnAlerta = sectores.find(s => s.estado === 'ALERTA');
         const aiBtn = document.getElementById('aiActionBtn');
@@ -267,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cuadrillaTipoMap[c.id] = (c.tipo || 'COSECHA').toUpperCase();
         });
 
-        const obreros = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen);
+        const obreros = trabajadores.filter(t => !t.es_supervisor && !t.es_jefe_almacen && t.activo !== false);
         obreros.forEach(t => {
             if (t.cuadrilla && cuadrillaTipoMap[t.cuadrilla]) {
                 const tipo = cuadrillaTipoMap[t.cuadrilla];

@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isMySector = miSector && sector.id === miSector.id;
             
             // Color del sector
-            let fillColor = '#10B981'; // Verde óptimo
+            let fillColor = sector.color || '#10B981'; // Color personalizado del sector
             if (sector.estado === 'RIEGO') fillColor = '#3B82F6';
             if (sector.estado === 'ALERTA') fillColor = '#F59E0B';
             if (sector.estado === 'MANTENIMIENTO') fillColor = '#9CA3AF';

@@ -289,12 +289,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // MODAL: NUEVO SECTOR
+    // MODAL: NUEVO SECTOR & SELECTOR DE COLOR
     // ==========================================
     const modalAgregarSector = document.getElementById('modalAgregarSector');
     const btnAgregarSector = document.getElementById('btnAgregarSector');
     const btnCerrarModalSector = document.getElementById('btnCerrarModalSector');
+    const btnCancelarSector = document.getElementById('btnCancelarSector');
     const formAgregarSector = document.getElementById('formAgregarSector');
+
+    // Elementos de la paleta de colores
+    const addSectorColorInput = document.getElementById('addSectorColor');
+    const selectedColorPreview = document.getElementById('selectedColorPreview');
+    const selectedColorHex = document.getElementById('selectedColorHex');
+    const colorSwatchBtns = document.querySelectorAll('.color-swatch-btn');
+
+    function setSectorColor(hexColor) {
+        const color = hexColor ? hexColor.toUpperCase() : '#10B981';
+        if (addSectorColorInput) addSectorColorInput.value = color;
+        if (selectedColorPreview) selectedColorPreview.style.backgroundColor = color;
+        if (selectedColorHex) selectedColorHex.textContent = color;
+
+        colorSwatchBtns.forEach(btn => {
+            const btnColor = (btn.dataset.color || '').toUpperCase();
+            if (btnColor === color) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // Eventos al hacer click en los botones de color predefinidos
+    colorSwatchBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const color = btn.dataset.color;
+            setSectorColor(color);
+        });
+    });
+
+    // Evento al usar el picker nativo de color
+    if (addSectorColorInput) {
+        addSectorColorInput.addEventListener('input', (e) => {
+            setSectorColor(e.target.value);
+        });
+    }
 
     let currentOpenedSectorId = null; // Guardará el ID del sector abierto en el modal de detalle
 
@@ -303,10 +341,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('formSectorTitle').textContent = 'Nuevo Sector Agrícola';
             formAgregarSector.reset();
             document.getElementById('addSectorId').value = '';
+            setSectorColor('#10B981');
             modalAgregarSector.classList.add('active');
         });
 
-        btnCerrarModalSector.addEventListener('click', () => {
+        btnCerrarModalSector?.addEventListener('click', () => {
+            modalAgregarSector.classList.remove('active');
+        });
+
+        btnCancelarSector?.addEventListener('click', () => {
             modalAgregarSector.classList.remove('active');
         });
 
@@ -318,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const coordsText = document.getElementById('addSectorCoords').value;
             const area = document.getElementById('addSectorArea').value;
             const cultivoId = document.getElementById('addSectorCultivo').value;
+            const colorVal = (addSectorColorInput ? addSectorColorInput.value : null) || '#10B981';
 
             // Parsear textarea a array de coordenadas
             let coordenadasArray = [];
@@ -336,14 +380,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const submitBtn = formAgregarSector.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Guardando...';
+            submitBtn.innerHTML = '<i data-lucide="loader" class="spin"></i> Guardando...';
 
             const payload = {
                 nombre: nombre,
                 coordenadas_poligono: JSON.stringify(coordenadasArray),
                 area_hectareas: parseFloat(area),
                 cultivo: cultivoId ? parseInt(cultivoId) : null,
-                estado: 'ACTIVO' // TODO: se podría permitir editar estado también
+                estado: 'ACTIVO',
+                color: colorVal
             };
 
             try {
@@ -368,10 +413,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (err) {
                 console.error(err);
-                alert("❌ Error al guardar el sector.");
+                alert("❌ Error al guardar el sector. Verifica los datos y coordenadas.");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
+                lucide.createIcons();
             }
         });
     }
@@ -392,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('active');
             
             // Rellenar formulario de edición
-            document.getElementById('formSectorTitle').textContent = 'Editar Sector';
+            document.getElementById('formSectorTitle').textContent = 'Editar Sector Agrícola';
             document.getElementById('addSectorId').value = s.id;
             document.getElementById('addSectorNombre').value = s.nombre;
             
@@ -407,6 +453,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.getElementById('addSectorArea').value = s.area_hectareas;
             document.getElementById('addSectorCultivo').value = s.cultivo || '';
+
+            // Asignar color guardado
+            setSectorColor(s.color || '#10B981');
             
             // Abrir formulario
             modalAgregarSector.classList.add('active');
@@ -466,6 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openSectorModal(sector) {
         currentOpenedSectorId = sector.id;
+        const sColor = sector.color || '#10B981';
+
         document.getElementById('modalTitle').textContent = sector.nombre;
         document.getElementById('modalCultivo').textContent = getCultivoNombre(sector.cultivo);
         document.getElementById('modalArea').textContent = `${sector.area_hectareas} ha`;
@@ -473,19 +524,27 @@ document.addEventListener('DOMContentLoaded', () => {
         let estadoTexto = sector.estado;
         if(estadoTexto === 'ACTIVO') estadoTexto = 'Óptimo';
         document.getElementById('modalEstado').textContent = estadoTexto;
-        
-        // Simulado: en el futuro esto puede ser la cantidad de trabajadores en cuadrillas asignadas
-        document.getElementById('modalTrabajadores').textContent = "Consultando..."; 
+
+        // Color badge en el modal de detalle
+        const headerDot = document.getElementById('modalHeaderColorDot');
+        if (headerDot) {
+            headerDot.style.backgroundColor = sColor;
+            headerDot.style.boxShadow = `0 0 10px ${sColor}99`;
+        }
+
+        const colorBadge = document.getElementById('modalColorBadge');
+        if (colorBadge) colorBadge.style.backgroundColor = sColor;
+
+        const colorText = document.getElementById('modalColorText');
+        if (colorText) colorText.textContent = sColor;
         
         document.getElementById('sectorModal').classList.add('active');
     }
 
     function renderSectorsOnMap(map, sectoresList) {
         sectoresList.forEach(sector => {
-            let fillColor = '#10B981'; // Óptimo (Activo)
-            if (sector.estado === 'RIEGO') fillColor = '#3B82F6';
-            if (sector.estado === 'ALERTA') fillColor = '#F59E0B';
-            if (sector.estado === 'MANTENIMIENTO') fillColor = '#9CA3AF';
+            // Usar el color personalizado del sector
+            const sectorColor = sector.color || '#10B981';
 
             // Parsea JSON polygon
             let lat = baseLat, lng = baseLng;
@@ -505,13 +564,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if(boundsArray) {
                 const polygon = L.polygon(boundsArray, {
-                    color: fillColor,
-                    weight: 2,
-                    fillColor: fillColor,
-                    fillOpacity: 0.5
+                    color: sectorColor,
+                    weight: 2.5,
+                    fillColor: sectorColor,
+                    fillOpacity: 0.45
                 }).addTo(map);
 
-                polygon.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+                polygon.bindTooltip(`
+                    <div style="font-family:'Inter',sans-serif; text-align:center;">
+                        <strong style="color:#0F172A; display:block;">${sector.nombre}</strong>
+                        <span style="font-size:0.75rem; color:#059669; font-weight:600;">${sector.area_hectareas} ha</span>
+                    </div>
+                `, { permanent: false, direction: 'center' });
                 
                 polygon.on('click', () => {
                     openSectorModal(sector);
@@ -521,14 +585,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Fallback a círculo si no hay polígono válido
                 const radioCalculado = Math.sqrt((sector.area_hectareas * 10000) / Math.PI);
                 const circle = L.circle([lat, lng], {
-                    color: fillColor,
-                    weight: 2,
-                    fillColor: fillColor,
-                    fillOpacity: 0.5,
+                    color: sectorColor,
+                    weight: 2.5,
+                    fillColor: sectorColor,
+                    fillOpacity: 0.45,
                     radius: radioCalculado > 10 ? radioCalculado : 50
                 }).addTo(map);
 
-                circle.bindTooltip(sector.nombre, { permanent: false, direction: 'center' });
+                circle.bindTooltip(`
+                    <div style="font-family:'Inter',sans-serif; text-align:center;">
+                        <strong style="color:#0F172A; display:block;">${sector.nombre}</strong>
+                        <span style="font-size:0.75rem; color:#059669; font-weight:600;">${sector.area_hectareas} ha</span>
+                    </div>
+                `, { permanent: false, direction: 'center' });
 
                 circle.on('click', () => {
                     openSectorModal(sector);
@@ -544,6 +613,8 @@ document.addEventListener('DOMContentLoaded', () => {
         listContainer.innerHTML = '';
 
         sectoresList.forEach(sector => {
+            const sectorColor = sector.color || '#10B981';
+
             let badgeHtml = '';
             if (sector.estado === 'ACTIVO') {
                 badgeHtml = `<span class="status-badge status-badge--ok"><i data-lucide="check-circle"></i> Óptimo</span>`;
@@ -557,10 +628,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const item = document.createElement('div');
             item.className = 'sector-item';
+            item.style.setProperty('--sector-color', sectorColor);
             
             item.innerHTML = `
                 <div class="sector-item__info">
-                    <span class="sector-item__name">${sector.nombre}</span>
+                    <div class="sector-item__title-row">
+                        <span class="sector-color-dot" style="background-color: ${sectorColor}; box-shadow: 0 0 8px ${sectorColor}66;"></span>
+                        <span class="sector-item__name">${sector.nombre}</span>
+                    </div>
                     <span class="sector-item__meta">
                         <i data-lucide="sprout" style="width:12px;height:12px"></i> ${getCultivoNombre(sector.cultivo)} • ${sector.area_hectareas} ha
                     </span>

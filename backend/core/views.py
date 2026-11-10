@@ -48,6 +48,10 @@ def api_login(request):
         # Clave esperada: la personalizada o por defecto su propio DNI
         expected_password = trabajador.password if trabajador.password else trabajador.dni
         if password == expected_password:
+            if not trabajador.activo:
+                return Response({
+                    'error': 'Tu cuenta de trabajador se encuentra actualmente INACTIVA por receso de temporada. Consulta con el Administrador / Gerente.'
+                }, status=status.HTTP_403_FORBIDDEN)
             if trabajador.es_jefe_almacen:
                 role = 'JEFE_ALMACEN'
             elif trabajador.es_supervisor:
@@ -200,6 +204,16 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.all()
     serializer_class = TrabajadorSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        activo_param = self.request.query_params.get('activo')
+        if activo_param is not None:
+            if activo_param.lower() in ['true', '1']:
+                qs = qs.filter(activo=True)
+            elif activo_param.lower() in ['false', '0']:
+                qs = qs.filter(activo=False)
+        return qs
+
     def perform_create(self, serializer):
         es_jefe = serializer.validated_data.get('es_jefe_almacen', False)
         if es_jefe and Trabajador.objects.filter(es_jefe_almacen=True).exists():
@@ -214,6 +228,21 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import ValidationError
             raise ValidationError({"error": "Ya existe un Jefe de Almacén registrado en el sistema. Solo se permite uno."})
         serializer.save()
+
+    @action(detail=True, methods=['post'])
+    def toggle_activo(self, request, pk=None):
+        """
+        Alterna el estado del trabajador entre Activo (en temporada) e Inactivo (en receso).
+        No desvincula su cuadrilla para que al reactivarlo vuelva automáticamente a ella.
+        """
+        trabajador = self.get_object()
+        nuevo_estado = request.data.get('activo')
+        if nuevo_estado is not None:
+            trabajador.activo = bool(nuevo_estado)
+        else:
+            trabajador.activo = not trabajador.activo
+        trabajador.save()
+        return Response(self.get_serializer(trabajador).data)
 
 class SolicitudTrasladoViewSet(viewsets.ModelViewSet):
     queryset = SolicitudTraslado.objects.all().order_by('-fecha_solicitud')
@@ -248,7 +277,7 @@ def api_supervisores(request):
     Retorna los trabajadores que tienen rol de supervisor (es_supervisor=True).
     El encargado de cuadrilla debe ser un trabajador con rol de supervisor, no el admin.
     """
-    supervisores = Trabajador.objects.filter(es_supervisor=True)
+    supervisores = Trabajador.objects.filter(es_supervisor=True, activo=True)
     result = []
     for s in supervisores:
         result.append({
@@ -305,7 +334,7 @@ def api_ubicaciones_supervisores(request):
     from django.utils import timezone
     import json
     
-    supervisores = Trabajador.objects.filter(es_supervisor=True)
+    supervisores = Trabajador.objects.filter(es_supervisor=True, activo=True)
     ahora = timezone.now()
     result = []
 
@@ -439,31 +468,77 @@ class TareaCuadrillaViewSet(viewsets.ModelViewSet):
         else:
             serializer.save()
 
+    def _parse_custom_dt(self, val_str, base_date=None):
+        """
+        Parsea un string de fecha/hora ISO o solo 'HH:MM' o 'HH:MM:SS' combinándolo con base_date.
+        Retorna datetime timezone-aware o None.
+        """
+        if not val_str:
+            return None
+        import datetime
+        from django.utils.dateparse import parse_datetime, parse_time
+        from django.utils import timezone
+
+        # 1. Intentar como datetime completo (ISO)
+        dt = parse_datetime(str(val_str))
+        if dt:
+            if timezone.is_naive(dt):
+                return timezone.make_aware(dt)
+            return dt
+
+        # 2. Intentar como solo hora 'HH:MM' o 'HH:MM:SS'
+        t = parse_time(str(val_str))
+        if t:
+            date_part = base_date or timezone.localdate()
+            combined = datetime.datetime.combine(date_part, t)
+            return timezone.make_aware(combined)
+
+        return None
+
     @action(detail=True, methods=['post'])
     def iniciar(self, request, pk=None):
         """
-        Marca la tarea como 'EN_PROCESO' y estampa la hora actual de inicio.
+        Marca la tarea como 'EN_PROCESO' y estampa la hora de inicio (actual o personalizada).
         """
         tarea = self.get_object()
         tarea.estado = 'EN_PROCESO'
-        tarea.hora_inicio = timezone.now()
+        
+        hora_inicio_str = request.data.get('hora_inicio')
+        base_date = tarea.fecha_programada or timezone.localdate()
+        dt_inicio = self._parse_custom_dt(hora_inicio_str, base_date) if hora_inicio_str else None
+
+        tarea.hora_inicio = dt_inicio if dt_inicio else timezone.now()
         tarea.save()
         return Response(self.get_serializer(tarea).data)
 
     @action(detail=True, methods=['post'])
     def completar(self, request, pk=None):
         """
-        Marca la tarea como 'COMPLETADA', estampa la hora de fin y calcula la duración.
+        Marca la tarea como 'COMPLETADA', estampa la hora de fin (actual o personalizada) y calcula la duración.
         """
         tarea = self.get_object()
         tarea.estado = 'COMPLETADA'
-        tarea.hora_fin = timezone.now()
+        
+        base_date = tarea.fecha_programada or timezone.localdate()
+
+        # Opcionalmente si se envía una hora_inicio personalizada también al completar (para corregir inicio):
+        hora_inicio_str = request.data.get('hora_inicio')
+        if hora_inicio_str:
+            dt_inicio = self._parse_custom_dt(hora_inicio_str, base_date)
+            if dt_inicio:
+                tarea.hora_inicio = dt_inicio
+
+        # Hora de fin (personalizada o ahora)
+        hora_fin_str = request.data.get('hora_fin')
+        dt_fin = self._parse_custom_dt(hora_fin_str, base_date) if hora_fin_str else None
+        tarea.hora_fin = dt_fin if dt_fin else timezone.now()
+
         if not tarea.hora_inicio:
             # Si no se inició previamente, asumir inicio 1 hora antes como fallback
             tarea.hora_inicio = tarea.hora_fin - timezone.timedelta(hours=1)
         
         observaciones = request.data.get('observaciones')
-        if observaciones:
+        if observaciones is not None:
             tarea.observaciones = observaciones
             
         tarea.save()

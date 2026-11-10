@@ -121,10 +121,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (crewTipo) crewTipo.textContent = `Labor: ${miCuadrilla.tipo || 'General'}`;
             if (sourceCrewName) sourceCrewName.textContent = miCuadrilla.nombre;
 
-            // Filtrar ÚNICAMENTE los obreros de SU cuadrilla (excluyendo al propio supervisor)
+            // Filtrar ÚNICAMENTE los obreros de SU cuadrilla (excluyendo al propio supervisor y trabajadores en receso/inactivos)
             misObreros = allTrabajadores.filter(t => 
                 t.cuadrilla === miCuadrilla.id && 
-                t.id !== currentSupervisorId
+                t.id !== currentSupervisorId &&
+                t.activo !== false
             );
 
             if (crewTotalCount) crewTotalCount.textContent = `${misObreros.length} obreros`;
@@ -295,13 +296,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 7. Dibuja la cuadrilla destino (solo lectura)
     function renderTargetCrew(crewId) {
-        const destWorkers = allTrabajadores.filter(t => t.cuadrilla == crewId);
+        const destWorkers = allTrabajadores.filter(t => t.cuadrilla == crewId && t.activo !== false);
         targetCrewCount.textContent = `${destWorkers.length} personas`;
         
         targetWorkerList.innerHTML = '';
         if (destWorkers.length === 0) {
             targetWorkerList.innerHTML = `
-                <div class="empty-state-small">Esta cuadrilla destino aún no tiene integrantes asignados.</div>
+                <div class="empty-state-small">Esta cuadrilla destino no tiene integrantes activos en temporada.</div>
             `;
             return;
         }

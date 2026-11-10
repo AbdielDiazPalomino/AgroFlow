@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="../../css/variables.css">
   <link rel="stylesheet" href="../../css/base.css">
   <link rel="stylesheet" href="../../css/layout.css">
-  <link rel="stylesheet" href="mapa.css">
+  <link rel="stylesheet" href="mapa.css?v=3">
   
   <!-- Leaflet CSS & JS para Mapas Interactivos -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -213,9 +213,15 @@
 
   <!-- Modal de Información de Sector -->
   <div class="modal-overlay" id="sectorModal">
-    <div class="modal">
+    <div class="modal sector-detail-modal">
       <div class="modal__header">
-        <h3 id="modalTitle">Nombre del Sector</h3>
+        <div class="sector-modal-header-info">
+          <div class="sector-color-indicator" id="modalHeaderColorDot"></div>
+          <div>
+            <h3 id="modalTitle">Nombre del Sector</h3>
+            <span class="sector-modal-sub" id="modalSubtitle">Detalle de delimitación geográfica</span>
+          </div>
+        </div>
         <button class="icon-btn icon-btn--small" id="closeModal">
           <i data-lucide="x"></i>
         </button>
@@ -235,16 +241,19 @@
             <span class="info-value" id="modalEstado">-</span>
           </div>
           <div class="modal-info-item">
-            <span class="info-label">Personal Activo</span>
-            <span class="info-value" id="modalTrabajadores">-</span>
+            <span class="info-label">Color en Mapa</span>
+            <div class="modal-color-preview-box">
+              <span class="color-dot-sm" id="modalColorBadge"></span>
+              <span class="info-value" id="modalColorText">#10B981</span>
+            </div>
           </div>
         </div>
         
-        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-          <button class="btn btn--outline btn--full" id="btnEditarSector" style="color: var(--color-primary); border-color: var(--color-primary);">
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.85rem;">
+          <button class="btn btn--outline btn--full" id="btnEditarSector" style="color: var(--color-primary); border-color: rgba(16, 185, 129, 0.4);">
             <i data-lucide="edit-2"></i> Editar
           </button>
-          <button class="btn btn--outline btn--full" id="btnEliminarSector" style="color: #EF4444; border-color: #EF4444;">
+          <button class="btn btn--outline btn--full" id="btnEliminarSector" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.4);">
             <i data-lucide="trash-2"></i> Eliminar
           </button>
         </div>
@@ -252,40 +261,105 @@
     </div>
   </div>
 
-  <!-- Modal Agregar Sector -->
+  <!-- Modal Agregar / Editar Sector -->
   <div class="modal-overlay" id="modalAgregarSector" style="z-index: 1000;">
-    <div class="modal" style="width: 450px; max-width: 90%;">
+    <div class="modal sector-form-modal">
       <div class="modal__header">
-        <h3 id="formSectorTitle">Nuevo Sector Agrícola</h3>
-        <button class="icon-btn icon-btn--small" id="btnCerrarModalSector">
+        <div class="modal-header-title-wrap">
+          <div class="modal-header-icon-badge">
+            <i data-lucide="map-pin"></i>
+          </div>
+          <div>
+            <h3 id="formSectorTitle">Nuevo Sector Agrícola</h3>
+            <p class="modal-header-desc">Configuración espacial y visual del sector en el fundo</p>
+          </div>
+        </div>
+        <button class="icon-btn icon-btn--small" id="btnCerrarModalSector" type="button">
           <i data-lucide="x"></i>
         </button>
       </div>
-      <form id="formAgregarSector" style="padding: 1.5rem;">
+      <form id="formAgregarSector" class="sector-form-body">
         <input type="hidden" id="addSectorId" value="">
-        <div class="form-group mb-4">
-          <label class="form-label">Nombre del Sector</label>
-          <input type="text" id="addSectorNombre" class="form-input" placeholder="Ej: Sector Oeste 3" required>
+        
+        <!-- Nombre del Sector -->
+        <div class="form-group">
+          <label class="form-label" for="addSectorNombre">
+            Nombre del Sector <span class="text-danger">*</span>
+          </label>
+          <input type="text" id="addSectorNombre" class="form-input" placeholder="Ej: Sector Norte 1 (Achillea)" required autocomplete="off">
         </div>
-        <div class="form-group mb-4">
-          <label class="form-label">Coordenadas del Polígono (Una por línea: Lat, Lng)</label>
-          <textarea id="addSectorCoords" class="form-input form-textarea" rows="4" placeholder="-14.0303, -75.7322&#10;-14.0315, -75.7322&#10;-14.0315, -75.7345&#10;-14.0303, -75.7345" required></textarea>
-        </div>
-        <div class="form-group mb-4">
-          <label class="form-label">Área (Hectáreas)</label>
-          <input type="number" step="0.01" id="addSectorArea" class="form-input" placeholder="10.5" required>
-        </div>
-        <div class="form-group mb-4">
-          <label class="form-label">Cultivo Principal (Opcional)</label>
-          <div class="custom-select-wrapper">
-            <select id="addSectorCultivo" class="custom-select">
+
+        <!-- Fila 2 columnas: Área y Cultivo -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="addSectorArea">
+              Área (Hectáreas) <span class="text-danger">*</span>
+            </label>
+            <input type="number" step="0.01" min="0.01" id="addSectorArea" class="form-input" placeholder="Ej: 10.50" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="addSectorCultivo">
+              Cultivo Principal
+            </label>
+            <select id="addSectorCultivo" class="form-input select-styled">
               <option value="">Sin Cultivo / Preparación</option>
             </select>
-            <i data-lucide="chevron-down" class="custom-select-icon"></i>
           </div>
         </div>
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-          <button type="submit" class="btn btn--primary" style="width: 100%;">Guardar Sector</button>
+
+        <!-- Coordenadas del Polígono -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label mb-0" for="addSectorCoords">
+              Coordenadas del Polígono (Lat, Lng) <span class="text-danger">*</span>
+            </label>
+            <span class="form-hint-badge">Una por línea</span>
+          </div>
+          <textarea id="addSectorCoords" class="form-input form-textarea" rows="4" placeholder="-14.0303, -75.7322&#10;-14.0315, -75.7322&#10;-14.0315, -75.7345&#10;-14.0303, -75.7345" required spellcheck="false"></textarea>
+          <span class="form-input-help">Ingresa al menos 3 vértices para delimitar el área poligonal en el mapa satelital.</span>
+        </div>
+
+        <!-- Selector de Color del Sector -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label class="form-label mb-0">
+              Color de Identificación en el Mapa
+            </label>
+            <div class="selected-color-tag">
+              <span class="selected-color-circle" id="selectedColorPreview" style="background-color: #10B981;"></span>
+              <span class="selected-color-code" id="selectedColorHex">#10B981</span>
+            </div>
+          </div>
+
+          <!-- Paleta de colores predefinidos -->
+          <div class="color-palette-grid">
+            <button type="button" class="color-swatch-btn active" data-color="#10B981" style="--swatch-color: #10B981;" title="Verde Esmeralda"></button>
+            <button type="button" class="color-swatch-btn" data-color="#059669" style="--swatch-color: #059669;" title="Verde Selva"></button>
+            <button type="button" class="color-swatch-btn" data-color="#3B82F6" style="--swatch-color: #3B82F6;" title="Azul Real"></button>
+            <button type="button" class="color-swatch-btn" data-color="#06B6D4" style="--swatch-color: #06B6D4;" title="Cian Brillante"></button>
+            <button type="button" class="color-swatch-btn" data-color="#8B5CF6" style="--swatch-color: #8B5CF6;" title="Púrpura Vibrante"></button>
+            <button type="button" class="color-swatch-btn" data-color="#EC4899" style="--swatch-color: #EC4899;" title="Rosa Fucsia"></button>
+            <button type="button" class="color-swatch-btn" data-color="#F59E0B" style="--swatch-color: #F59E0B;" title="Ámbar Dorado"></button>
+            <button type="button" class="color-swatch-btn" data-color="#F97316" style="--swatch-color: #F97316;" title="Naranja Intenso"></button>
+            <button type="button" class="color-swatch-btn" data-color="#EF4444" style="--swatch-color: #EF4444;" title="Rojo Carmesí"></button>
+            <button type="button" class="color-swatch-btn" data-color="#84CC16" style="--swatch-color: #84CC16;" title="Verde Lima"></button>
+            
+            <!-- Selector libre con input type="color" -->
+            <label class="color-custom-btn" title="Color personalizado">
+              <input type="color" id="addSectorColor" value="#10B981">
+              <i data-lucide="pipette"></i>
+            </label>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="modal-form-actions">
+          <button type="button" class="btn btn--outline" id="btnCancelarSector" style="border-color: rgba(255, 255, 255, 0.15); color: var(--color-text-title);">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn--primary" id="btnGuardarSectorSubmit">
+            <i data-lucide="check"></i> Guardar Sector
+          </button>
         </div>
       </form>
     </div>
@@ -293,7 +367,7 @@
 
   <!-- Scripts -->
   <script src="../../js/config.js"></script>
-  <script src="mapa.js?v=2"></script>
+  <script src="mapa.js?v=3"></script>
 </body>
 </html>
 

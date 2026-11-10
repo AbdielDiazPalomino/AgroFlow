@@ -49,7 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let sectores = [];
     let activeFilterStatus = 'TODAS';
     let activeFilterLabor = 'TODOS';
+    let tareaToStart = null;
     let tareaToFinish = null;
+    let tareaToDelete = null;
 
     // Elementos DOM
     const crewName = document.getElementById('crewName');
@@ -69,13 +71,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskCountTag = document.getElementById('taskCountTag');
     const tasksGrid = document.getElementById('tasksGrid');
 
-    // Modales
+    // Modal Nueva / Editar Tarea
     const btnNuevaTarea = document.getElementById('btnNuevaTarea');
     const modalNuevaTarea = document.getElementById('modalNuevaTarea');
     const btnCerrarModalTarea = document.getElementById('btnCerrarModalTarea');
     const btnCancelarTarea = document.getElementById('btnCancelarTarea');
     const formNuevaTarea = document.getElementById('formNuevaTarea');
+    const editTaskId = document.getElementById('editTaskId');
+    const modalTareaTitle = document.getElementById('modalTareaTitle');
+    const modalTareaSubtitle = document.getElementById('modalTareaSubtitle');
+    const btnGuardarTareaText = document.getElementById('btnGuardarTareaText');
 
+    // Modal Iniciar Tarea
+    const modalIniciarTarea = document.getElementById('modalIniciarTarea');
+    const btnCerrarModalIniciar = document.getElementById('btnCerrarModalIniciar');
+    const btnCancelarIniciar = document.getElementById('btnCancelarIniciar');
+    const formIniciarTarea = document.getElementById('formIniciarTarea');
+    const iniciarTareaId = document.getElementById('iniciarTareaId');
+    const iniciarTaskTitle = document.getElementById('iniciarTaskTitle');
+    const iniciarTaskDetails = document.getElementById('iniciarTaskDetails');
+    const iniciarHora = document.getElementById('iniciarHora');
+    const btnSetNowIniciar = document.getElementById('btnSetNowIniciar');
+    const btnConfirmarIniciar = document.getElementById('btnConfirmarIniciar');
+
+    // Modal Finalizar Tarea
     const modalFinalizarTarea = document.getElementById('modalFinalizarTarea');
     const btnCerrarModalFin = document.getElementById('btnCerrarModalFin');
     const btnCancelarFin = document.getElementById('btnCancelarFin');
@@ -83,7 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const finTareaId = document.getElementById('finTareaId');
     const finTaskTitle = document.getElementById('finTaskTitle');
     const finTaskTimes = document.getElementById('finTaskTimes');
+    const finHoraInicio = document.getElementById('finHoraInicio');
+    const finHora = document.getElementById('finHora');
+    const btnSetNowFin = document.getElementById('btnSetNowFin');
+    const finDurationText = document.getElementById('finDurationText');
     const finObservaciones = document.getElementById('finObservaciones');
+
+    // Modal Eliminar Tarea
+    const modalEliminarTarea = document.getElementById('modalEliminarTarea');
+    const btnCerrarModalEliminar = document.getElementById('btnCerrarModalEliminar');
+    const btnCancelarEliminar = document.getElementById('btnCancelarEliminar');
+    const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+    const eliminarTaskNombre = document.getElementById('eliminarTaskNombre');
 
     // Fecha actual formateada
     const now = new Date();
@@ -402,9 +432,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="badge-labor ${laborClass}">${escapeHtml(laborLabel)}</span>
                                 ${prioBadge}
                             </div>
-                            <span class="task-status-tag ${tagClass}">
-                                ${statusIcon} ${escapeHtml(estadoTexto)}
-                            </span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="task-status-tag ${tagClass}">
+                                    ${statusIcon} ${escapeHtml(estadoTexto)}
+                                </span>
+                                <div class="task-card__menu-actions">
+                                    <button type="button" class="btn-icon-task btn-editar-tarea" data-id="${t.id}" title="Editar Labor">
+                                        <i data-lucide="edit-2"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon-task btn-eliminar-tarea" data-id="${t.id}" title="Eliminar Labor">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <h3 class="task-card__title">${escapeHtml(t.titulo)}</h3>
@@ -428,55 +468,140 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lucide.createIcons();
 
-        // Enlazar botones de Iniciar Tarea
+        // Enlazar botones de Iniciar Tarea (Abre Modal de Inicio con hora personalizable)
         document.querySelectorAll('.btn-iniciar-tarea').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
-                iniciarTarea(id, btn);
+                abrirModalIniciar(id);
             });
         });
 
-        // Enlazar botones de Finalizar Tarea
+        // Enlazar botones de Finalizar Tarea (Abre Modal con hora personalizable)
         document.querySelectorAll('.btn-finalizar-tarea').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
                 abrirModalFinalizar(id);
             });
         });
-    }
 
-    /**
-     * Iniciar Tarea (pasa a EN_PROCESO)
-     */
-    async function iniciarTarea(id, btn) {
-        if (!confirm('¿Deseas iniciar esta labor en campo ahora mismo? Se estampará la hora de inicio oficial.')) return;
-
-        const origHtml = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `<i data-lucide="loader" class="spinning"></i> Iniciando...`;
-        lucide.createIcons();
-
-        try {
-            const res = await fetch(`${apiBase}/tareas/${id}/iniciar/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+        // Enlazar botones de Editar Tarea
+        document.querySelectorAll('.btn-editar-tarea').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                abrirModalEditar(id);
             });
+        });
 
-            if (!res.ok) throw new Error('Error al iniciar labor');
-
-            await loadTareas();
-            showToast('✅ Labor iniciada. Cronómetro en marcha para la cuadrilla.');
-        } catch (e) {
-            console.error(e);
-            alert('Error al iniciar tarea: ' + e.message);
-            btn.disabled = false;
-            btn.innerHTML = origHtml;
-            lucide.createIcons();
-        }
+        // Enlazar botones de Eliminar Tarea
+        document.querySelectorAll('.btn-eliminar-tarea').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                abrirModalEliminar(id);
+            });
+        });
     }
 
     /**
-     * Abrir modal para finalizar tarea
+     * Helpers de Formateo de Hora
+     */
+    function getCurrentHhMm() {
+        const d = new Date();
+        const h = d.getHours().toString().padStart(2, '0');
+        const m = d.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    function getHhMmFromIso(isoStr) {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return '';
+        const h = d.getHours().toString().padStart(2, '0');
+        const m = d.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    function buildDateTimeIso(fechaBase, timeStr) {
+        if (!timeStr) return null;
+        const fecha = fechaBase || hoyISO;
+        const cleanTime = timeStr.length === 5 ? `${timeStr}:00` : timeStr;
+        const [h, m, s] = cleanTime.split(':').map(Number);
+        const [y, mon, day] = fecha.split('-').map(Number);
+        const d = new Date(y, mon - 1, day, h, m, s || 0);
+        return d.toISOString();
+    }
+
+    function updateCalculatedDuration() {
+        if (!finHoraInicio || !finHora || !finDurationText) return;
+        const v1 = finHoraInicio.value;
+        const v2 = finHora.value;
+        if (!v1 || !v2) {
+            finDurationText.textContent = '--';
+            return;
+        }
+        const [h1, m1] = v1.split(':').map(Number);
+        const [h2, m2] = v2.split(':').map(Number);
+        let diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+        if (diffMin < 0) diffMin += 24 * 60; // cruce de día
+        const hrs = (diffMin / 60).toFixed(1);
+        const hrsInt = Math.floor(diffMin / 60);
+        const minsRest = diffMin % 60;
+        finDurationText.textContent = hrsInt > 0 ? `${hrsInt}h ${minsRest}min (${hrs} hrs)` : `${minsRest} min`;
+    }
+
+    /**
+     * Abrir modal para iniciar tarea con hora personalizable
+     */
+    function abrirModalIniciar(id) {
+        tareaToStart = tareas.find(t => String(t.id) === String(id));
+        if (!tareaToStart) return;
+
+        iniciarTareaId.value = tareaToStart.id;
+        iniciarTaskTitle.textContent = tareaToStart.titulo;
+        iniciarTaskDetails.textContent = `${tareaToStart.cuadrilla_nombre || 'Cuadrilla'} • Sector: ${tareaToStart.sector_nombre || 'General'} (${tareaToStart.cultivo_nombre || 'Fundo'})`;
+        iniciarHora.value = getCurrentHhMm();
+
+        modalIniciarTarea.classList.add('active');
+        lucide.createIcons();
+    }
+
+    /**
+     * Abrir modal para editar tarea
+     */
+    function abrirModalEditar(id) {
+        const t = tareas.find(x => String(x.id) === String(id));
+        if (!t) return;
+
+        editTaskId.value = t.id;
+        modalTareaTitle.textContent = 'Editar Labor en Plan de Trabajo';
+        modalTareaSubtitle.textContent = 'Modifica los datos operativos de esta actividad';
+        btnGuardarTareaText.textContent = 'Actualizar Labor';
+
+        document.getElementById('taskTitulo').value = t.titulo || '';
+        document.getElementById('taskCuadrilla').value = t.cuadrilla || (currentCuadrilla ? currentCuadrilla.id : '');
+        document.getElementById('taskSector').value = t.sector || '';
+        document.getElementById('taskTipoLabor').value = t.tipo_labor || 'COSECHA';
+        document.getElementById('taskPrioridad').value = t.prioridad || 'MEDIA';
+        document.getElementById('taskFecha').value = t.fecha_programada || hoyISO;
+        document.getElementById('taskDescripcion').value = t.descripcion || '';
+
+        modalNuevaTarea.classList.add('active');
+        lucide.createIcons();
+    }
+
+    /**
+     * Abrir modal para eliminar tarea
+     */
+    function abrirModalEliminar(id) {
+        tareaToDelete = tareas.find(x => String(x.id) === String(id));
+        if (!tareaToDelete) return;
+
+        eliminarTaskNombre.textContent = `"${tareaToDelete.titulo}"`;
+        modalEliminarTarea.classList.add('active');
+        lucide.createIcons();
+    }
+
+    /**
+     * Abrir modal para finalizar tarea con hora personalizable
      */
     function abrirModalFinalizar(id) {
         tareaToFinish = tareas.find(t => String(t.id) === String(id));
@@ -485,7 +610,12 @@ document.addEventListener('DOMContentLoaded', () => {
         finTareaId.value = tareaToFinish.id;
         finTaskTitle.textContent = tareaToFinish.titulo;
         finTaskTimes.textContent = `Iniciada a las: ${formatTimeString(tareaToFinish.hora_inicio)} • Sector: ${tareaToFinish.sector_nombre || 'General'}`;
-        finObservaciones.value = '';
+        finObservaciones.value = tareaToFinish.observaciones || '';
+
+        const iniHhMm = getHhMmFromIso(tareaToFinish.hora_inicio);
+        finHoraInicio.value = iniHhMm || getCurrentHhMm();
+        finHora.value = getCurrentHhMm();
+        updateCalculatedDuration();
 
         modalFinalizarTarea.classList.add('active');
         lucide.createIcons();
@@ -514,6 +644,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Abrir modal nueva tarea
         btnNuevaTarea.addEventListener('click', () => {
             formNuevaTarea.reset();
+            editTaskId.value = '';
+            modalTareaTitle.textContent = 'Programar Labor en Plan de Trabajo';
+            modalTareaSubtitle.textContent = 'Asigna una tarea operativa para tu cuadrilla con registro de tiempos';
+            btnGuardarTareaText.textContent = 'Guardar en Plan de Trabajo';
+
             document.getElementById('taskFecha').value = hoyISO;
             const selectC = document.getElementById('taskCuadrilla');
             if (selectC && currentCuadrilla) {
@@ -527,18 +662,22 @@ document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
         });
 
-        // Cerrar modal nueva tarea
-        const cerrarNuevaTarea = () => modalNuevaTarea.classList.remove('active');
+        // Cerrar modal nueva/editar tarea
+        const cerrarNuevaTarea = () => {
+            modalNuevaTarea.classList.remove('active');
+            editTaskId.value = '';
+        };
         btnCerrarModalTarea.addEventListener('click', cerrarNuevaTarea);
         btnCancelarTarea.addEventListener('click', cerrarNuevaTarea);
         modalNuevaTarea.addEventListener('click', (e) => {
             if (e.target === modalNuevaTarea) cerrarNuevaTarea();
         });
 
-        // Submit nueva tarea
+        // Submit nueva / editar tarea
         formNuevaTarea.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const isEdit = Boolean(editTaskId.value);
             const selectC = document.getElementById('taskCuadrilla');
             const cuadrillaId = (selectC && selectC.value) ? parseInt(selectC.value) : (currentCuadrilla ? currentCuadrilla.id : null);
 
@@ -561,24 +700,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const btnSubmit = document.getElementById('btnGuardarTarea');
             const origHtml = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<i data-lucide="loader" class="spinning"></i> Guardando...`;
+            btnSubmit.innerHTML = `<i data-lucide="loader" class="spinning"></i> ${isEdit ? 'Actualizando...' : 'Guardando...'}`;
             lucide.createIcons();
 
             try {
-                const res = await fetch(`${apiBase}/tareas/`, {
-                    method: 'POST',
+                const url = isEdit ? `${apiBase}/tareas/${editTaskId.value}/` : `${apiBase}/tareas/`;
+                const method = isEdit ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (!res.ok) throw new Error('Error al registrar la tarea en el servidor');
+                if (!res.ok) throw new Error(`Error al ${isEdit ? 'actualizar' : 'registrar'} la tarea en el servidor`);
 
                 cerrarNuevaTarea();
                 await loadTareas();
-                showToast('✅ Tarea programada exitosamente en el plan de la cuadrilla.');
+                showToast(`✅ Labor ${isEdit ? 'actualizada' : 'programada'} exitosamente en el plan de trabajo.`);
             } catch (err) {
                 console.error(err);
-                alert('Error al programar labor: ' + err.message);
+                alert(`Error al ${isEdit ? 'actualizar' : 'programar'} labor: ` + err.message);
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = origHtml;
@@ -586,7 +728,62 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Cerrar modal finalizar tarea
+        // ==========================================
+        // EVENTOS MODAL: INICIAR TAREA (HORA PERSONALIZADA)
+        // ==========================================
+        const cerrarIniciarModal = () => {
+            modalIniciarTarea.classList.remove('active');
+            tareaToStart = null;
+        };
+        btnCerrarModalIniciar.addEventListener('click', cerrarIniciarModal);
+        btnCancelarIniciar.addEventListener('click', cerrarIniciarModal);
+        modalIniciarTarea.addEventListener('click', (e) => {
+            if (e.target === modalIniciarTarea) cerrarIniciarModal();
+        });
+
+        btnSetNowIniciar.addEventListener('click', () => {
+            iniciarHora.value = getCurrentHhMm();
+        });
+
+        formIniciarTarea.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!tareaToStart) return;
+
+            const id = iniciarTareaId.value;
+            const horaVal = iniciarHora.value;
+            const fechaBase = tareaToStart.fecha_programada || hoyISO;
+            const isoInicio = buildDateTimeIso(fechaBase, horaVal);
+
+            const origHtml = btnConfirmarIniciar.innerHTML;
+            btnConfirmarIniciar.disabled = true;
+            btnConfirmarIniciar.innerHTML = `<i data-lucide="loader" class="spinning"></i> Iniciando...`;
+            lucide.createIcons();
+
+            try {
+                const res = await fetch(`${apiBase}/tareas/${id}/iniciar/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hora_inicio: isoInicio })
+                });
+
+                if (!res.ok) throw new Error('Error al iniciar labor');
+
+                cerrarIniciarModal();
+                await loadTareas();
+                showToast(`✅ Labor iniciada a las ${formatTime12(isoInicio)}. Cronómetro en marcha.`);
+            } catch (e) {
+                console.error(e);
+                alert('Error al iniciar labor: ' + e.message);
+            } finally {
+                btnConfirmarIniciar.disabled = false;
+                btnConfirmarIniciar.innerHTML = origHtml;
+                lucide.createIcons();
+            }
+        });
+
+        // ==========================================
+        // EVENTOS MODAL: FINALIZAR TAREA (HORA PERSONALIZADA)
+        // ==========================================
         const cerrarFinModal = () => {
             modalFinalizarTarea.classList.remove('active');
             tareaToFinish = null;
@@ -597,36 +794,92 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === modalFinalizarTarea) cerrarFinModal();
         });
 
-        // Submit finalizar tarea
+        btnSetNowFin.addEventListener('click', () => {
+            finHora.value = getCurrentHhMm();
+            updateCalculatedDuration();
+        });
+
+        finHoraInicio.addEventListener('input', updateCalculatedDuration);
+        finHora.addEventListener('input', updateCalculatedDuration);
+
         formFinalizarTarea.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!tareaToFinish) return;
+
             const id = finTareaId.value;
             const observaciones = finObservaciones.value.trim();
+            const fechaBase = tareaToFinish.fecha_programada || hoyISO;
+            const isoFin = buildDateTimeIso(fechaBase, finHora.value);
+            const isoInicio = finHoraInicio.value ? buildDateTimeIso(fechaBase, finHoraInicio.value) : null;
 
-            const btnConfirm = document.getElementById('btnConfirmarFin');
-            const origHtml = btnConfirm.innerHTML;
-            btnConfirm.disabled = true;
-            btnConfirm.innerHTML = `<i data-lucide="loader" class="spinning"></i> Finalizando...`;
+            const origHtml = btnConfirmarFin.innerHTML;
+            btnConfirmarFin.disabled = true;
+            btnConfirmarFin.innerHTML = `<i data-lucide="loader" class="spinning"></i> Finalizando...`;
             lucide.createIcons();
 
             try {
                 const res = await fetch(`${apiBase}/tareas/${id}/completar/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ observaciones })
+                    body: JSON.stringify({
+                        observaciones: observaciones,
+                        hora_fin: isoFin,
+                        hora_inicio: isoInicio
+                    })
                 });
 
                 if (!res.ok) throw new Error('Error al completar la labor');
 
                 cerrarFinModal();
                 await loadTareas();
-                showToast('✅ Labor finalizada. Horas efectivas calculadas y sincronizadas.');
+                showToast(`✅ Labor finalizada a las ${formatTime12(isoFin)}. Horas calculadas y sincronizadas.`);
             } catch (err) {
                 console.error(err);
                 alert('Error al finalizar labor: ' + err.message);
             } finally {
-                btnConfirm.disabled = false;
-                btnConfirm.innerHTML = origHtml;
+                btnConfirmarFin.disabled = false;
+                btnConfirmarFin.innerHTML = origHtml;
+                lucide.createIcons();
+            }
+        });
+
+        // ==========================================
+        // EVENTOS MODAL: ELIMINAR TAREA
+        // ==========================================
+        const cerrarEliminarModal = () => {
+            modalEliminarTarea.classList.remove('active');
+            tareaToDelete = null;
+        };
+        btnCerrarModalEliminar.addEventListener('click', cerrarEliminarModal);
+        btnCancelarEliminar.addEventListener('click', cerrarEliminarModal);
+        modalEliminarTarea.addEventListener('click', (e) => {
+            if (e.target === modalEliminarTarea) cerrarEliminarModal();
+        });
+
+        btnConfirmarEliminar.addEventListener('click', async () => {
+            if (!tareaToDelete) return;
+
+            const origHtml = btnConfirmarEliminar.innerHTML;
+            btnConfirmarEliminar.disabled = true;
+            btnConfirmarEliminar.innerHTML = `<i data-lucide="loader" class="spinning"></i> Eliminando...`;
+            lucide.createIcons();
+
+            try {
+                const res = await fetch(`${apiBase}/tareas/${tareaToDelete.id}/`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) throw new Error('Error al eliminar labor');
+
+                cerrarEliminarModal();
+                await loadTareas();
+                showToast('🗑️ Labor eliminada del plan de trabajo.');
+            } catch (e) {
+                console.error(e);
+                alert('Error al eliminar labor: ' + e.message);
+            } finally {
+                btnConfirmarEliminar.disabled = false;
+                btnConfirmarEliminar.innerHTML = origHtml;
                 lucide.createIcons();
             }
         });

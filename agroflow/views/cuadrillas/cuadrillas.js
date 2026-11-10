@@ -66,11 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre: `${t.nombres} ${t.apellidos}`,
                 esSupervisor: !!t.es_supervisor,
                 esJefeAlmacen: !!t.es_jefe_almacen,
+                activo: t.activo !== false, // Estado laboral (activo o receso)
                 img: t.foto_url || `https://ui-avatars.com/api/?name=${t.nombres}+${t.apellidos}&background=random`,
                 cuadrillaId: t.cuadrilla // FK integer o null
             }));
 
-            renderGlobalWorkerList(trabajadores);
+            updateStatusCounts();
+            applyWorkerFilters();
             populateTargetSelect();
             populateSectoresSelect();
             populateSupervisoresSelect();
@@ -81,6 +83,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     initApp();
+
+    // Filtro por Estado de Actividad (Todos, Activos, Inactivos)
+    let currentWorkerStatusFilter = 'TODOS';
+
+    function updateStatusCounts() {
+        const countTodos = document.getElementById('countTodos');
+        const countActivos = document.getElementById('countActivos');
+        const countInactivos = document.getElementById('countInactivos');
+        if (countTodos) countTodos.textContent = trabajadores.length;
+        if (countActivos) countActivos.textContent = trabajadores.filter(t => t.activo).length;
+        if (countInactivos) countInactivos.textContent = trabajadores.filter(t => !t.activo).length;
+    }
+
+    function applyWorkerFilters() {
+        const query = (searchInput.value || '').toLowerCase().trim();
+        let filtered = trabajadores;
+        if (currentWorkerStatusFilter === 'ACTIVO') {
+            filtered = filtered.filter(t => t.activo);
+        } else if (currentWorkerStatusFilter === 'INACTIVO') {
+            filtered = filtered.filter(t => !t.activo);
+        }
+        if (query) {
+            filtered = filtered.filter(t => t.nombre.toLowerCase().includes(query) || t.dni.includes(query));
+        }
+        renderGlobalWorkerList(filtered);
+    }
+
+    document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentWorkerStatusFilter = btn.dataset.filter;
+            applyWorkerFilters();
+        });
+    });
 
     function populateSectoresSelect() {
         const sectorSelect = document.getElementById('addCuadrillaSector');
@@ -110,10 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Buscador interactivo
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = trabajadores.filter(t => t.nombre.toLowerCase().includes(query) || t.dni.includes(query));
-        renderGlobalWorkerList(filtered);
+    searchInput.addEventListener('input', () => {
+        applyWorkerFilters();
     });
 
     /**
@@ -124,19 +159,35 @@ document.addEventListener('DOMContentLoaded', () => {
         data.forEach(worker => {
             const crew = cuadrillas.find(c => c.id == worker.cuadrillaId);
             const crewName = crew ? crew.nombre : 'Sin Cuadrilla';
+            const inactivoBadge = !worker.activo 
+                ? '<span class="badge-status-inactivo">INACTIVO (Receso)</span>' 
+                : '';
+            const crewText = !worker.activo 
+                ? `DNI: ${worker.dni} • ${crewName} (En receso de temporada)` 
+                : `DNI: ${worker.dni} • ${crewName}`;
+
+            const toggleIcon = worker.activo ? 'user-minus' : 'user-check';
+            const toggleTitle = worker.activo 
+                ? 'Poner en receso de temporada (Inactivar temporalmente)' 
+                : 'Reactivar trabajador en su cuadrilla previa';
+            const toggleColor = worker.activo ? '#94A3B8' : '#10B981';
 
             const li = document.createElement('li');
-            li.className = `worker-item ${selectedWorker?.id === worker.id ? 'active' : ''}`;
+            li.className = `worker-item ${worker.activo ? '' : 'worker-item--inactivo'} ${selectedWorker?.id === worker.id ? 'active' : ''}`;
             li.innerHTML = `
                 <img src="${worker.img}" alt="${worker.nombre}">
                 <div class="worker-item-info" style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                         <span class="worker-item-name">${worker.nombre}</span>
                         ${worker.esJefeAlmacen ? '<span style="background: rgba(59, 130, 246, 0.2); color: #60A5FA; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">JEFE DE ALMACÉN</span>' : (worker.esSupervisor ? '<span style="background: rgba(16, 185, 129, 0.2); color: #10B981; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">SUPERVISOR</span>' : '')}
+                        ${inactivoBadge}
                     </div>
-                    <span class="worker-item-crew">DNI: ${worker.dni} • ${crewName}</span>
+                    <span class="worker-item-crew">${crewText}</span>
                 </div>
                 <div class="worker-actions" style="display: flex; gap: 0.25rem; align-items: center;">
+                    <button class="icon-btn icon-btn--small btn-toggle-status" data-id="${worker.id}" title="${toggleTitle}" style="color: ${toggleColor}; width: 28px; height: 28px;">
+                        <i data-lucide="${toggleIcon}" style="width: 14px; height: 14px;"></i>
+                    </button>
                     <button class="icon-btn icon-btn--small btn-edit-worker" data-id="${worker.id}" title="Editar trabajador" style="color: var(--color-primary); width: 28px; height: 28px;">
                         <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
                     </button>
@@ -146,13 +197,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            li.addEventListener('click', (e) => {
+            li.addEventListener('click', async (e) => {
                 // Evitar seleccionar para traslado si se hizo click en los botones de acción
                 if(e.target.closest('.worker-actions')) return;
 
                 if (worker.esJefeAlmacen) {
                     alert("ℹ️ El Jefe de Almacén tiene un rol administrativo en Almacén Central y no puede ser asignado a cuadrillas operativas de campo.");
                     return;
+                }
+
+                if (!worker.activo) {
+                    const reactivar = confirm(`ℹ️ "${worker.nombre}" está actualmente INACTIVO (en receso de temporada).\n\n¿Deseas REACTIVARLO ahora para asignarlo o trasladarlo a una cuadrilla?`);
+                    if (!reactivar) return;
+
+                    try {
+                        await fetch(`${CONFIG.API_BASE_URL}/trabajadores/${worker.id}/toggle_activo/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ activo: true })
+                        });
+                        worker.activo = true;
+                        await initApp();
+                    } catch(err) {
+                        console.error(err);
+                        alert("❌ Error al reactivar trabajador.");
+                        return;
+                    }
                 }
 
                 selectWorkerForTransfer(worker, crew);
@@ -162,6 +232,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             globalList.appendChild(li);
+        });
+
+        // Event listener para alternar estado Activo / Inactivo directamente
+        globalList.querySelectorAll('.btn-toggle-status').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const workerId = btn.getAttribute('data-id');
+                const worker = trabajadores.find(t => t.id === workerId);
+                if (!worker) return;
+
+                const crew = cuadrillas.find(c => c.id == worker.cuadrillaId);
+                const crewName = crew ? crew.nombre : 'Sin Cuadrilla asignada';
+
+                const confirmMsg = worker.activo
+                    ? `¿Deseas poner a "${worker.nombre}" en estado INACTIVO (Receso de temporada)?\n\n• Conservará su cuadrilla asignada (${crewName}).\n• NO se borrará su historial ni su registro.\n• NO aparecerá en los partes de la cuadrilla activa hasta que sea reactivado.`
+                    : `¿Deseas REACTIVAR a "${worker.nombre}"?\n\n• Volverá a estar activo inmediatamente en su cuadrilla asignada (${crewName}).`;
+
+                if (!confirm(confirmMsg)) return;
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/trabajadores/${workerId}/toggle_activo/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (!res.ok) throw new Error('Error al cambiar estado');
+
+                    await initApp();
+                    alert(`✅ Trabajador "${worker.nombre}" ahora está ${worker.activo ? 'INACTIVO (en receso de temporada)' : 'REACTIVADO en ' + crewName}.`);
+                } catch(err) {
+                    console.error(err);
+                    alert("❌ Error al actualizar el estado del trabajador.");
+                }
+            });
         });
 
         // Event listeners para los botones de editar y eliminar trabajadores
@@ -284,8 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
             workers = [highlightWorker];
             sourceCrewCount.textContent = `1 persona nueva`;
         } else {
-            workers = trabajadores.filter(t => t.cuadrillaId == crewId);
-            sourceCrewCount.textContent = `${workers.length} personas`;
+            // Solo los trabajadores activos de la cuadrilla aparecen como miembros operativos
+            workers = trabajadores.filter(t => t.cuadrillaId == crewId && t.activo);
+            const inactivosCrew = trabajadores.filter(t => t.cuadrillaId == crewId && !t.activo).length;
+            sourceCrewCount.textContent = inactivosCrew > 0 
+                ? `${workers.length} activos (${inactivosCrew} en receso)`
+                : `${workers.length} personas`;
         }
         
         sourceWorkerList.innerHTML = '';
@@ -319,10 +426,20 @@ document.addEventListener('DOMContentLoaded', () => {
      * Dibuja la cuadrilla destino (solo lectura)
      */
     function renderTargetCrew(crewId) {
-        const workers = trabajadores.filter(t => t.cuadrillaId == crewId);
-        targetCrewCount.textContent = `${workers.length} personas`;
+        const workers = trabajadores.filter(t => t.cuadrillaId == crewId && t.activo);
+        const inactivosCrew = trabajadores.filter(t => t.cuadrillaId == crewId && !t.activo).length;
+        targetCrewCount.textContent = inactivosCrew > 0 
+            ? `${workers.length} activos (${inactivosCrew} en receso)`
+            : `${workers.length} personas`;
         
         targetWorkerList.innerHTML = '';
+        if (workers.length === 0) {
+            targetWorkerList.innerHTML = `
+                <div class="empty-state-small">${inactivosCrew > 0 ? `Todos los miembros (${inactivosCrew}) están en receso de temporada.` : 'Esta cuadrilla aún no tiene integrantes activos.'}</div>
+            `;
+            return;
+        }
+
         workers.forEach(w => {
             const div = document.createElement('div');
             div.className = 'worker-card-mini';
@@ -468,6 +585,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formAdd.reset();
         document.getElementById('addTrabajadorId').value = '';
         document.getElementById('addEsSupervisor').value = 'OBRERO';
+        const estadoSelect = document.getElementById('addEstadoLaboral');
+        if (estadoSelect) estadoSelect.value = 'true';
         btnEliminarTrabajador.style.display = 'none';
         modalAdd.classList.add('active');
         lucide.createIcons();
@@ -485,6 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('addEsSupervisor').value = worker.esJefeAlmacen 
             ? 'JEFE_ALMACEN' 
             : (worker.esSupervisor ? 'SUPERVISOR' : 'OBRERO');
+        const estadoSelect = document.getElementById('addEstadoLaboral');
+        if (estadoSelect) estadoSelect.value = worker.activo ? 'true' : 'false';
         btnEliminarTrabajador.style.display = 'inline-flex';
         modalAdd.classList.add('active');
         lucide.createIcons();
@@ -514,6 +635,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const rolVal = document.getElementById('addEsSupervisor').value;
             const esSupervisor = rolVal === 'SUPERVISOR';
             const esJefeAlmacen = rolVal === 'JEFE_ALMACEN';
+            const estadoLaboralVal = document.getElementById('addEstadoLaboral')?.value;
+            const activo = estadoLaboralVal === undefined ? true : (estadoLaboralVal === 'true');
             
             const submitBtn = formAdd.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -525,7 +648,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 apellidos: apellidos,
                 dni: dni,
                 es_supervisor: esSupervisor,
-                es_jefe_almacen: esJefeAlmacen
+                es_jefe_almacen: esJefeAlmacen,
+                activo: activo
             };
 
             const method = trabajadorId ? 'PUT' : 'POST';
